@@ -11,15 +11,23 @@
     "start": "node dist/index.js",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test:mocks": "cd tests/mocks && npm run start:all",
+    "test:mock:banner": "cd tests/mocks && npm run start:banner",
+    "test:mock:peoplesoft": "cd tests/mocks && npm run start:peoplesoft",
+    "test:mock:colleague": "cd tests/mocks && npm run start:colleague",
+    "test:mock:custom": "cd tests/mocks && npm run start:custom",
+    "test:mock:sftp": "cd tests/mocks && npm run start:sftp"
   },
   "dependencies": {
     "hono": "^3.11.0",
     "@hono/zod-validator": "^0.2.0",
+    "zod": "^3.22.0",
     "@aah/database": "workspace:*",
     "@aah/api-utils": "workspace:*"
   },
   "devDependencies": {
+    "@aah/config": "workspace:*",
     "@types/node": "^20.10.0",
     "typescript": "^5.3.3",
     "eslint": "^8.55.0"

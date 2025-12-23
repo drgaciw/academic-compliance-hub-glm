@@ -1,0 +1,72 @@
+{
+  "summary": {
+    "testDate": "2025-12-23T19:50:09.090Z",
+    "tool": "Tesseract.js v7.0.0",
+    "totalSamples": 10,
+    "overallAccuracy": "10.00%"
+  },
+  "performance": {
+    "totalTime": "1999ms",
+    "avgTimePerPage": "199.90ms",
+    "minTime": "123ms",
+    "maxTime": "294ms",
+    "correctExtractions": 4,
+    "totalExtractions": 40
+  },
+  "sampleResults": [
+    {
+      "sampleId": "transcript-001",
+      "accuracy": "100.00%",
+      "time": "235ms"
+    },
+    {
+      "sampleId": "transcript-002",
+      "accuracy": "0.00%",
+      "time": "171ms"
+    },
+    {
+      "sampleId": "transcript-003",
+      "accuracy": "0.00%",
+      "time": "217ms"
+    },
+    {
+      "sampleId": "transcript-004",
+      "accuracy": "0.00%",
+      "time": "142ms"
+    },
+    {
+      "sampleId": "transcript-005",
+      "accuracy": "0.00%",
+      "time": "294ms"
+    },
+    {
+      "sampleId": "transcript-006",
+      "accuracy": "0.00%",
+      "time": "199ms"
+    },
+    {
+      "sampleId": "transcript-007",
+      "accuracy": "0.00%",
+      "time": "123ms"
+    },
+    {
+      "sampleId": "transcript-008",
+      "accuracy": "0.00%",
+      "time": "125ms"
+    },
+    {
+      "sampleId": "transcript-009",
+      "accuracy": "0.00%",
+      "time": "262ms"
+    },
+    {
+      "sampleId": "transcript-010",
+      "accuracy": "0.00%",
+      "time": "231ms"
+    }
+  ],
+  "recommendations": [
+    "Tesseract.js accuracy is below optimal threshold",
+    "Consider alternative OCR engines or hybrid approach"
+  ]
+}

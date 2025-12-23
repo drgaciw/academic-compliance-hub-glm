@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NCAA Eligibility Report</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Times New Roman', Times, serif;
+    }
+
+    body {
+      font-size: 12pt;
+      line-height: 1.4;
+      color: #000;
+      background: #fff;
+      padding: 40px 50px;
+    }
+
+    .header {
+      text-align: center;
+      border-bottom: 3px double #000;
+      padding-bottom: 20px;
+      margin-bottom: 25px;
+    }
+
+    .institution-name {
+      font-size: 18pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 5px;
+    }
+
+    .report-title {
+      font-size: 14pt;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .ncaa-info {
+      font-size: 11pt;
+      font-style: italic;
+    }
+
+    .report-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 10pt;
+    }
+
+    .section {
+      margin-bottom: 25px;
+    }
+
+    .section-title {
+      font-size: 13pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      border-bottom: 1px solid #000;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .info-row {
+      display: flex;
+      margin-bottom: 8px;
+    }
+
+    .info-label {
+      font-weight: bold;
+      min-width: 140px;
+    }
+
+    .info-value {
+      flex: 1;
+      border-bottom: 1px dotted #999;
+    }
+
+    .institution-box {
+      border: 1px solid #000;
+      padding: 10px;
+      margin-bottom: 15px;
+      background: #f9f9f9;
+    }
+
+    .institution-box h4 {
+      font-size: 11pt;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #000;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+      font-size: 10pt;
+    }
+
+    th, td {
+      border: 1px solid #000;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #e0e0e0;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 9pt;
+    }
+
+    .status-box {
+      border: 3px solid #000;
+      padding: 20px;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .status-eligible {
+      border-color: #006400;
+      background: #e8f5e8;
+    }
+
+    .status-not-eligible {
+      border-color: #8b0000;
+      background: #fee;
+    }
+
+    .status-text {
+      font-size: 16pt;
+      font-weight: bold;
+      letter-spacing: 3px;
+    }
+
+    .status-eligible .status-text {
+      color: #006400;
+    }
+
+    .status-not-eligible .status-text {
+      color: #8b0000;
+    }
+
+    .violations-table {
+      margin-top: 15px;
+    }
+
+    .violations-table tr:nth-child(even) {
+      background: #f0f0f0;
+    }
+
+    .violation-critical {
+      background: #ffe0e0 !important;
+    }
+
+    .violation-warning {
+      background: #fff4e0 !important;
+    }
+
+    .compliance-box {
+      border: 1px solid #000;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .signature-section {
+      margin-top: 40px;
+      page-break-inside: avoid;
+    }
+
+    .signature-block {
+      margin: 30px 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .signature-line {
+      margin-top: 50px;
+      border-top: 1px solid #000;
+      padding-top: 5px;
+    }
+
+    .notes-box {
+      border: 1px solid #999;
+      padding: 10px;
+      min-height: 80px;
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    .certification {
+      border: 2px solid #000;
+      padding: 15px;
+      margin: 25px 0;
+      text-align: center;
+    }
+
+    .certification-text {
+      font-weight: bold;
+      font-size: 11pt;
+    }
+
+    .course-mapping-table th {
+      background: #d0d0d0;
+    }
+
+    .course-mapping-table tr.mapping-ACCEPTED {
+      background: #e8f5e8;
+    }
+
+    .course-mapping-table tr.mapping-REJECTED {
+      background: #ffe0e0;
+    }
+
+    .course-mapping-table tr.mapping-PENDING {
+      background: #fff4e0;
+    }
+
+    .signature-validation {
+      border: 2px solid #006400;
+      padding: 15px;
+      margin: 20px 0;
+      background: #f0fff0;
+    }
+
+    .signature-validation h4 {
+      color: #006400;
+      margin-bottom: 10px;
+    }
+
+    .signature-field-box {
+      border: 1px solid #000;
+      padding: 10px;
+      margin: 10px 0;
+      min-height: 80px;
+      background: #fafafa;
+    }
+
+    .timestamp-box {
+      background: #e8f4ff;
+      border: 1px solid #999;
+      padding: 8px;
+      margin: 10px 0;
+      font-size: 9pt;
+      font-family: monospace;
+    }
+
+    .summary-box {
+      background: #f0f0f0;
+      border: 1px solid #000;
+      padding: 10px;
+      margin: 15px 0;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .summary-item {
+      text-align: center;
+      padding: 8px;
+    }
+
+    .summary-value {
+      font-size: 14pt;
+      font-weight: bold;
+    }
+
+    .summary-label {
+      font-size: 9pt;
+      color: #666;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="institution-name">{{institution.name}}</div>
+    <div class="report-title">NCAA ELIGIBILITY REPORT</div>
+    <div class="ncaa-info">Division {{institution.division}} Compliance</div>
+    <div class="report-meta">
+      <span>Report Date: {{formatDate reportDate}}</span>
+      <span>Report ID: {{reportId}}</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">STUDENT INFORMATION</div>
+    <div class="info-grid">
+      <div>
+        <div class="info-row">
+          <span class="info-label">Student Name:</span>
+          <span class="info-value">{{student.firstName}} {{student.lastName}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Student ID:</span>
+          <span class="info-value">{{student.studentId}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Sport:</span>
+          <span class="info-value">{{student.sport}}</span>
+        </div>
+      </div>
+      <div>
+        <div class="info-row">
+          <span class="info-label">Academic Year:</span>
+          <span class="info-value">{{student.academicYear}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Enrollment Status:</span>
+          <span class="info-value">{{student.enrollmentStatus}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Degree Program:</span>
+          <span class="info-value">{{student.degreeProgram}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">INSTITUTIONAL INFORMATION</div>
+    <div class="institution-box">
+      <h4>SOURCE INSTITUTION (Transfer)</h4>
+      <div class="info-row">
+        <span class="info-label">Institution:</span>
+        <span class="info-value">{{transfer.sourceInstitution}}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Address:</span>
+        <span class="info-value">{{transfer.sourceAddress}}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Contact:</span>
+        <span class="info-value">{{transfer.sourceContact}}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Transfer Date:</span>
+        <span class="info-value">{{formatDate transfer.transferDate}}</span>
+      </div>
+    </div>
+    <div class="institution-box">
+      <h4>TARGET INSTITUTION (Current)</h4>
+      <div class="info-row">
+        <span class="info-label">Institution:</span>
+        <span class="info-value">{{institution.name}}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Department:</span>
+        <span class="info-value">{{institution.department}}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Registrar:</span>
+        <span class="info-value">{{institution.registrar}}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">TRANSCRIPT SUMMARY</div>
+    <div class="summary-box">
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-value">{{formatNumber transcript.creditsAttempted}}</div>
+          <div class="summary-label">Credits Attempted</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value">{{formatNumber transcript.creditsEarned}}</div>
+          <div class="summary-label">Credits Earned</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value">{{formatNumber transcript.gpa 3}}</div>
+          <div class="summary-label">Cumulative GPA</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value">{{formatNumber transcript.transferCredits}}</div>
+          <div class="summary-label">Transfer Credits</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value">{{formatNumber transcript.qualityPoints}}</div>
+          <div class="summary-label">Quality Points</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value">{{transcript.academicStanding}}</div>
+          <div class="summary-label">Academic Standing</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">COURSE MAPPING VISUALIZATION</div>
+
+    <div class="summary-box" style="margin-bottom: 15px;">
+      <h4 style="margin-bottom: 10px;">Mapping Summary</h4>
+      <div class="summary-grid" style="grid-template-columns: repeat(7, 1fr);">
+        <div class="summary-item">
+          <div class="summary-value">{{courseMappingSummary.sourceCoursesCount}}</div>
+          <div class="summary-label">Source Courses</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value">{{courseMappingSummary.targetCoursesCount}}</div>
+          <div class="summary-label">Target Courses</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value">{{formatNumber courseMappingSummary.totalCredits}}</div>
+          <div class="summary-label">Total Credits</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value" style="color: #006400;">{{courseMappingSummary.acceptedCourses}}</div>
+          <div class="summary-label">Accepted</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value" style="color: #8b0000;">{{courseMappingSummary.rejectedCourses}}</div>
+          <div class="summary-label">Rejected</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value" style="color: #ff8c00;">{{courseMappingSummary.pendingCourses}}</div>
+          <div class="summary-label">Pending</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value">{{formatNumber courseMappingSummary.averageConfidenceScore 1}}%</div>
+          <div class="summary-label">Avg Confidence</div>
+        </div>
+      </div>
+      <div style="margin-top: 10px; font-size: 9pt; font-style: italic; text-align: center;">
+        Subject Areas: {{courseMappingSummary.subjectAreas}}
+      </div>
+    </div>
+
+    <table class="course-mapping-table">
+      <thead>
+        <tr>
+          <th>Source Course</th>
+          <th>Source Title</th>
+          <th>Target Course</th>
+          <th>Target Title</th>
+          <th>Credits</th>
+          <th>Grade</th>
+          <th>Status</th>
+          <th>Subject Area</th>
+          <th>Confidence</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each courseMapping}}
+        <tr class="mapping-{{status}}">
+          <td><strong>{{sourceCourse}}</strong></td>
+          <td>{{sourceTitle}}</td>
+          <td><strong>{{targetCourse}}</strong></td>
+          <td>{{targetTitle}}</td>
+          <td style="text-align: center;">{{credits}}</td>
+          <td style="text-align: center;">{{grade}}</td>
+          <td style="text-align: center; font-weight: bold;">{{status}}</td>
+          <td style="text-align: center;">{{subjectArea}}</td>
+          <td style="text-align: center;">{{formatNumber confidenceScore 1}}%</td>
+          <td style="font-size: 9pt;">{{conversionNotes}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-break"></div>
+
+  <div class="section">
+    <div class="section-title">ELIGIBILITY DETERMINATION</div>
+    <div class="status-box {{#ifEquals eligibility.status 'ELIGIBLE'}}status-eligible{{else}}status-not-eligible{{/ifEquals}}">
+      <div class="status-text">{{eligibility.status}}</div>
+    </div>
+
+    {{#if eligibility.reasons}}
+    <div class="summary-box">
+      <h4>Determining Factors:</h4>
+      <ul style="margin-top: 10px; margin-left: 20px;">
+        {{#each eligibility.reasons}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+    </div>
+    {{/if}}
+
+    <div class="summary-box">
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-value">{{formatNumber eligibility.coreCourseGPA 3}}</div>
+          <div class="summary-label">Core Course GPA</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value">{{eligibility.testScore}}</div>
+          <div class="summary-label">Test Score (SAT/ACT)</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value">{{eligibility.coreCourses}}</div>
+          <div class="summary-label">Core Courses</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">VIOLATION DETAILS</div>
+    {{#if violations}}
+    <table class="violations-table">
+      <thead>
+        <tr>
+          <th>Severity</th>
+          <th>Bylaw Reference</th>
+          <th>Description</th>
+          <th>Remediation Required</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each violations}}
+        <tr class="violation-{{severity}}">
+          <td style="text-transform: uppercase; font-weight: bold;">{{severity}}</td>
+          <td>{{bylawReference}}</td>
+          <td>{{description}}</td>
+          <td>{{remediation}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    {{else}}
+    <div class="summary-box" style="text-align: center; color: #006400;">
+      <strong>✓ No violations detected</strong>
+    </div>
+    {{/if}}
+  </div>
+
+  <div class="section">
+    <div class="section-title">ACADEMIC PROGRESS TOWARD DEGREE</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Requirement</th>
+          <th>Required</th>
+          <th>Earned</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each academicProgress}}
+        <tr>
+          <td>{{name}}</td>
+          <td>{{formatNumber required}}</td>
+          <td>{{formatNumber earned}}</td>
+          <td>{{status}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-break"></div>
+
+  <div class="section">
+    <div class="section-title">DIGITAL SIGNATURE AND VALIDATION</div>
+
+    <div class="signature-validation">
+      <h4>🔒 Document Validation Status</h4>
+      <div class="info-grid">
+        <div>
+          <div class="info-row">
+            <span class="info-label">Document ID:</span>
+            <span class="info-value">{{documentId}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Hash:</span>
+            <span class="info-value" style="font-family: monospace; font-size: 8pt;">{{documentHash}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Locked:</span>
+            <span class="info-value">{{#if isLocked}}Yes (Read-only){{else}}No{{/if}}</span>
+          </div>
+        </div>
+        <div>
+          <div class="info-row">
+            <span class="info-label">Validation:</span>
+            <span class="info-value" style="color: #006400; font-weight: bold;">✓ Valid</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Certificate:</span>
+            <span class="info-value">{{signature.certificateInfo.serialNumber}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Issuer:</span>
+            <span class="info-value">{{signature.certificateInfo.issuer}}</span>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="margin-top: 15px;">Timestamp</h4>
+      <div class="timestamp-box">
+        <div><strong>Signed at:</strong> {{formatDate signature.timestamp}}</div>
+        <div><strong>ISO Format:</strong> {{signature.timestamp.toISOString}}</div>
+      </div>
+    </div>
+
+    <h4 style="margin-top: 20px;">Compliance Officer Signature</h4>
+    <div class="signature-field-box">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+          <div class="info-row">
+            <span class="info-label">Name:</span>
+            <span class="info-value">{{signature.signerName}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Title:</span>
+            <span class="info-value">{{signature.signerTitle}}</span>
+          </div>
+        </div>
+        <div>
+          <div class="info-row">
+            <span class="info-label">Signature Date:</span>
+            <span class="info-value">{{formatDate signature.signatureDate}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Certificate Valid:</span>
+            <span class="info-value">{{formatDate signature.certificateInfo.validFrom}} - {{formatDate signature.certificateInfo.validTo}}</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top: 15px; border-top: 1px solid #000; padding-top: 10px;">
+        <div style="text-align: center; font-style: italic; color: #666; font-size: 10pt;">
+          [ Digital Signature Embed Area - {{formatNumber signature.width}} x {{formatNumber signature.height}} at position ({{formatNumber signature.x}}, {{formatNumber signature.y}}) on page {{signature.pageNumber}} ]
+        </div>
+      </div>
+    </div>
+
+    <h4 style="margin-top: 20px;">Certificate Details</h4>
+    <table style="font-size: 9pt;">
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Serial Number</strong></td>
+          <td style="font-family: monospace;">{{signature.certificateInfo.serialNumber}}</td>
+        </tr>
+        <tr>
+          <td><strong>Issuer</strong></td>
+          <td>{{signature.certificateInfo.issuer}}</td>
+        </tr>
+        <tr>
+          <td><strong>Subject</strong></td>
+          <td>{{signature.certificateInfo.subject}}</td>
+        </tr>
+        <tr>
+          <td><strong>Valid From</strong></td>
+          <td>{{formatDate signature.certificateInfo.validFrom}}</td>
+        </tr>
+        <tr>
+          <td><strong>Valid To</strong></td>
+          <td>{{formatDate signature.certificateInfo.validTo}}</td>
+        </tr>
+        <tr>
+          <td><strong>Certificate Hash</strong></td>
+          <td style="font-family: monospace; font-size: 8pt;">{{signature.certificateInfo.certificateHash}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-break"></div>
+
+  <div class="section">
+    <div class="section-title">COMPLIANCE OFFICER REVIEW</div>
+    <div class="compliance-box">
+      <div class="info-grid">
+        <div>
+          <div class="info-row">
+            <span class="info-label">Reviewer Name:</span>
+            <span class="info-value">{{reviewer.name}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Title:</span>
+            <span class="info-value">{{reviewer.title}}</span>
+          </div>
+        </div>
+        <div>
+          <div class="info-row">
+            <span class="info-label">Review Date:</span>
+            <span class="info-value">{{formatDate reviewer.reviewDate}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Contact:</span>
+            <span class="info-value">{{reviewer.contact}}</span>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="margin-top: 15px;">Reviewer Notes:</h4>
+      <div class="notes-box">
+        {{reviewer.notes}}
+      </div>
+
+      <h4 style="margin-top: 15px;">Recommendations:</h4>
+      <div class="notes-box">
+        {{reviewer.recommendations}}
+      </div>
+    </div>
+  </div>
+
+  <div class="signature-section">
+    <div class="section-title">CERTIFICATION AND SIGNATURE</div>
+
+    <div class="certification">
+      <p class="certification-text">
+        I hereby certify that the information contained in this report is accurate and complete
+        to the best of my knowledge. This evaluation has been conducted in accordance with
+        NCAA Bylaws and Division {{institution.division}} eligibility requirements.
+      </p>
+    </div>
+
+    <div class="signature-block">
+      <div>
+        <div class="info-row">
+          <span class="info-label">Compliance Officer:</span>
+          <span class="info-value">{{reviewer.name}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Signature:</span>
+          <div class="signature-line"></div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Date:</span>
+          <div class="signature-line"></div>
+        </div>
+      </div>
+      <div>
+        <div class="info-row">
+          <span class="info-label">Athletic Director:</span>
+          <span class="info-value">{{athleticDirector.name}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Signature:</span>
+          <div class="signature-line"></div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Date:</span>
+          <div class="signature-line"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="certification" style="margin-top: 30px;">
+      <p style="font-size: 10pt; font-style: italic;">
+        This report is confidential and intended for use by authorized personnel only.
+        Unauthorized disclosure is prohibited. For questions regarding this report,
+        contact the Compliance Office at {{institution.compliancePhone}} or {{institution.complianceEmail}}.
+      </p>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+# MOCK PDF TRANSCRIPT FIXTURE
+# This is a placeholder for a sample PDF transcript
+# In a real scenario, this would be an actual PDF file
+
+OFFICIAL TRANSCRIPT
+===================
+
+Student Name: John A. Smith
+Student ID: 123456789
+Date of Birth: 01/15/2003
+
+Cumulative GPA: 3.75
+Total Credits Earned: 120
+Attempted Credits: 128
+
+Term: Fall 2024
+--------------
+Code    Course Title                            Grade  Credits  Quality Pts
+CS 1010 Introduction to Programming           A      4.0      4.0
+MATH 1200 Calculus I                           B+     4.0      3.7
+ENGL 1010 Composition                          A-     3.0      3.7
+PHYS 1010 Physics I                            A-     4.0      3.7
+
+Term GPA: 3.78
+Term Credits: 15.0
+
+Term: Spring 2024
+----------------
+Code    Course Title                            Grade  Credits  Quality Pts
+CS 2010 Data Structures                        A      4.0      4.0
+MATH 2300 Linear Algebra                       B      3.0      3.0
+PHYS 1020 Physics II                           B+     4.0      3.7
+HIST 1010 World History                        A      3.0      3.0
+
+Term GPA: 3.43
+Term Credits: 14.0
+
+End of Transcript

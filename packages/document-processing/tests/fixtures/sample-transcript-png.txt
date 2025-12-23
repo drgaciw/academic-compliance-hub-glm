@@ -1,0 +1,12 @@
+# MOCK PNG TRANSCRIPT FIXTURE
+# This is a placeholder for a sample PNG transcript
+# In a real scenario, this would be an actual PNG image file
+
+Note: This file represents a PNG image of a transcript.
+PNG is the preferred format for OCR due to lossless compression.
+
+Image specifications:
+- Format: PNG (lossless)
+- Resolution: 300 DPI
+- Size: 2480 x 3508 pixels (A4 at 300 DPI)
+- Color: Grayscale or color with high contrast

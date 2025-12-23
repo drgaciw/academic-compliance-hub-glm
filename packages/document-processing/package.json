@@ -1,0 +1,29 @@
+{
+  "name": "document-processing",
+  "version": "1.0.0",
+  "description": "OCR document processing service using Tesseract.js for Academic Compliance Hub",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage --coverageReporters=text --coverageReporters=html",
+    "test:ocr": "node src/test-ocr.js"
+  },
+  "keywords": [
+    "ocr",
+    "tesseract",
+    "document-processing",
+    "transcript"
+  ],
+  "author": "Academic Compliance Hub",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "sharp": "^0.34.5",
+    "tesseract.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-node": "^29.7.0"
+  }
+}

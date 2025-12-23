@@ -10,6 +10,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model DocumentEmbedding {
+  id                String    @id @default(cuid())
+  transcriptDocumentId    String
+  transcriptDocument      TranscriptDocument @relation(fields: [transcriptDocumentId], references: [id], onDelete: Cascade)
+  embedding        Unsupported("vector(1536)")?
+  content          String    @db.Text
+  metadata         Json?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([transcriptDocumentId])
+  @@map("document_embeddings")
+}
+
 // User model
 model User {
   id            String    @id @default(cuid())
@@ -53,7 +67,14 @@ model StudentProfile {
   courses         CourseEnrollment[]
   tutoringSessions TutoringSession[]
   complianceRecords ComplianceRecord[]
+  transcriptDocuments TranscriptDocument[]
+  transferEvaluations TransferEvaluation[]
+  advisor         AdvisorProfile? @relation("AdvisorStudents", fields: [advisorId], references: [id], onDelete: SetNull)
+  advisorId       String?
 
+  @@index([studentId])
+  @@index([advisorId])
+  @@index([eligibility])
   @@map("student_profiles")
 }
 
@@ -63,7 +84,7 @@ model AdvisorProfile {
   userId          String   @unique
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   department      String
-  students        StudentProfile[]
+  students        StudentProfile[] @relation("AdvisorStudents")
 
   @@map("advisor_profiles")
 }
@@ -163,4 +184,266 @@ enum ComplianceStatus {
   COMPLETED
   FAILED
   EXEMPTED
+}
+
+// A1-004: Institution and related enums
+enum InstitutionType {
+  UNIVERSITY
+  COLLEGE
+  COMMUNITY_COLLEGE
+  JUNIOR_COLLEGE
+  TECHNICAL_SCHOOL
+}
+
+enum NCAADivision {
+  DIVISION_I
+  DIVISION_II
+  DIVISION_III
+  NAIA
+  NJCAA
+}
+
+enum SISType {
+  FULL_SIS
+  PARTIAL_SIS
+  MANUAL_TRANSCRIPT
+  PDF_TRANSCRIPT
+}
+
+enum SubjectArea {
+  ENGLISH
+  MATH
+  NATURAL_SCIENCE
+  SOCIAL_SCIENCE
+  HUMANITIES
+  FINE_ARTS
+  PHYSICAL_EDUCATION
+  FOREIGN_LANGUAGE
+  COMPOSITION
+  SPEECH
+  PHILOSOPHY
+  PSYCHOLOGY
+  SOCIOLOGY
+  POLITICAL_SCIENCE
+  ECONOMICS
+  HISTORY
+  GEOGRAPHY
+  COMPUTER_SCIENCE
+  INFORMATION_TECHNOLOGY
+  BUSINESS
+  ACCOUNTING
+  MARKETING
+  MANAGEMENT
+  FINANCE
+}
+
+enum EligibilityStatus {
+  PENDING_REVIEW
+  ELIGIBLE
+  INELIGIBLE
+  CONDITIONAL
+  NEEDS_DOCUMENTATION
+  UNDER_EVALUATION
+  APPEALED
+}
+
+enum ExtractionStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  PARTIAL
+  REQUIRES_REVIEW
+}
+
+enum AgentType {
+  EVALUATION_AGENT
+  COMPLIANCE_AGENT
+  DOCUMENT_AGENT
+  RULE_ENGINE
+  NOTIFICATION_AGENT
+  ADVISOR_AGENT
+}
+
+// A1-004: Institution model
+model Institution {
+  id                String       @id @default(cuid())
+  name              String
+  code              String       @unique
+  type              InstitutionType
+  ncaaDivision      NCAADivision?
+  ncaaCertified     Boolean      @default(false)
+  sisType           SISType?
+  region            String?
+  country           String       @default("US")
+  state             String?
+  website           String?
+  email             String?
+  phone             String?
+  address           String?
+  isActive          Boolean      @default(true)
+  metadata          Json?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  transferEvaluationsAsSource TransferEvaluation[] @relation("SourceInstitution")
+  transferEvaluationsAsTarget TransferEvaluation[] @relation("TargetInstitution")
+  transcriptDocuments         TranscriptDocument[]
+  courseMappingsAsSource     CourseMapping[] @relation("SourceInstitution")
+  courseMappingsAsTarget     CourseMapping[] @relation("TargetInstitution")
+
+  @@index([code])
+  @@index([type])
+  @@index([ncaaDivision])
+  @@index([isActive])
+  @@map("institutions")
+}
+
+// A1-002: TranscriptDocument model
+model TranscriptDocument {
+  id                    String           @id @default(cuid())
+  studentProfileId      String
+  studentProfile        StudentProfile   @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  institutionId         String?
+  institution           Institution?     @relation(fields: [institutionId], references: [id], onDelete: SetNull)
+  transferEvaluation    TransferEvaluation? @relation("TransferEvaluationDocument")
+  fileName              String
+  fileType              String
+  fileSize              Int
+  fileUrl               String
+  extractionStatus      ExtractionStatus @default(NOT_STARTED)
+  extractionStartedAt   DateTime?
+  extractionCompletedAt  DateTime?
+  extractionMetadata    Json?
+  uploadedAt            DateTime         @default(now())
+  processedAt           DateTime?
+  embeddings           DocumentEmbedding[]
+
+  @@index([studentProfileId])
+  @@index([institutionId])
+  @@index([extractionStatus])
+  @@index([uploadedAt])
+  @@map("transcript_documents")
+}
+
+// A1-001: TransferEvaluation model
+model TransferEvaluation {
+  id                    String           @id @default(cuid())
+  studentProfileId      String
+  studentProfile        StudentProfile   @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  sourceInstitutionId   String
+  sourceInstitution     Institution      @relation("SourceInstitution", fields: [sourceInstitutionId], references: [id])
+  targetInstitutionId   String?
+  targetInstitution     Institution?     @relation("TargetInstitution", fields: [targetInstitutionId], references: [id])
+  transcriptDocumentId  String?           @unique
+  transcriptDocument    TranscriptDocument? @relation("TransferEvaluationDocument", fields: [transcriptDocumentId], references: [id], onDelete: SetNull)
+  eligibilityStatus     EligibilityStatus @default(PENDING_REVIEW)
+  totalCredits          Int              @default(0)
+  transferableCredits   Int              @default(0)
+  gpa                   Float?
+  confidenceScore       Float            @default(0.0)
+  evaluationNotes       String?
+  evaluationMetadata    Json?
+  evaluatedAt           DateTime?
+  evaluatedBy           String?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  courseMappings        CourseMapping[]
+  auditLogs             AuditLog[]
+
+  @@index([studentProfileId])
+  @@index([sourceInstitutionId])
+  @@index([targetInstitutionId])
+  @@index([eligibilityStatus])
+  @@index([createdAt])
+  @@index([studentProfileId, eligibilityStatus])
+  @@map("transfer_evaluations")
+}
+
+// A1-003: CourseMapping model
+model CourseMapping {
+  id                    String            @id @default(cuid())
+  transferEvaluationId  String
+  transferEvaluation    TransferEvaluation @relation(fields: [transferEvaluationId], references: [id], onDelete: Cascade)
+  sourceInstitutionId   String
+  sourceInstitution     Institution       @relation("SourceInstitution", fields: [sourceInstitutionId], references: [id])
+  targetInstitutionId   String?
+  targetInstitution     Institution?      @relation("TargetInstitution", fields: [targetInstitutionId], references: [id])
+  sourceCourseCode      String
+  sourceCourseTitle     String
+  sourceCredits         Int
+  sourceSubjectArea     SubjectArea
+  targetCourseCode      String?
+  targetCourseTitle     String?
+  targetCredits         Int?
+  targetSubjectArea     SubjectArea?
+  isEquivalent          Boolean           @default(false)
+  confidenceScore       Float             @default(0.0)
+  verificationStatus    VerificationStatus @default(PENDING)
+  verificationNotes     String?
+  ruleApplied           String?
+  exceptionReason       String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@index([transferEvaluationId])
+  @@index([sourceInstitutionId])
+  @@index([targetInstitutionId])
+  @@index([sourceCourseCode])
+  @@index([sourceSubjectArea])
+  @@index([targetSubjectArea])
+  @@index([isEquivalent])
+  @@index([verificationStatus])
+  @@map("course_mappings")
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  MANUAL_REVIEW
+  AUTO_APPROVED
+  EXEMPTION_GRANTED
+}
+
+// A1-005: NCAARule model
+model NCAARule {
+  id              String      @id @default(cuid())
+  bylawNumber     String      @unique
+  title           String
+  description     String      @db.Text
+  division        NCAADivision?
+  category        String
+  subCategory     String?
+  agentType       AgentType?
+  isActive        Boolean     @default(true)
+  version         Int         @default(1)
+  effectiveDate   DateTime?
+  expirationDate  DateTime?
+  metadata        Json?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("ncaa_rules")
+}
+
+// A1-006: AuditLog model
+model AuditLog {
+  id                    String      @id @default(cuid())
+  transferEvaluationId  String
+  transferEvaluation    TransferEvaluation @relation(fields: [transferEvaluationId], references: [id], onDelete: Cascade)
+  agentType             AgentType
+  action                String
+  inputData             Json?
+  outputData            Json?
+  errorMessage          String?
+  duration              Int?
+  timestamp             DateTime    @default(now())
+
+  @@index([transferEvaluationId])
+  @@index([agentType])
+  @@index([timestamp])
+  @@index([transferEvaluationId, timestamp])
+  @@map("audit_logs")
 }

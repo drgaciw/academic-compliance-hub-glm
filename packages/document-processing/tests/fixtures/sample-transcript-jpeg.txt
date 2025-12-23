@@ -1,0 +1,12 @@
+# MOCK JPEG TRANSCRIPT FIXTURE
+# This is a placeholder for a sample JPEG transcript
+# In a real scenario, this would be an actual JPEG image file
+
+Note: This file represents a JPEG image of a transcript.
+For OCR testing, use the sharp library to create actual test images.
+
+Image specifications:
+- Format: JPEG
+- Resolution: 300 DPI
+- Size: 2480 x 3508 pixels (A4 at 300 DPI)
+- Color: Grayscale for OCR optimization

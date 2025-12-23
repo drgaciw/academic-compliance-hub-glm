@@ -1,0 +1,44 @@
+{
+  "name": "@academic-compliance/report-generation",
+  "version": "1.0.0",
+  "description": "PDF report generation service using jsPDF and Handlebars",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:tests": "tsc -p tsconfig.tests.json",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:features": "ts-node tests/feature-tests.ts"
+  },
+  "keywords": [
+    "pdf",
+    "report",
+    "generation",
+    "jsPDF",
+    "handlebars",
+    "ncaa",
+    "compliance"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@aah/database": "workspace:*",
+    "@prisma/client": "^5.7.0",
+    "handlebars": "^4.7.8",
+    "jspdf": "^3.0.4",
+    "jspdf-autotable": "^5.0.2",
+    "node-signpdf": "^1.5.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.0.3",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

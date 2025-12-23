@@ -1,0 +1,26 @@
+# MOCK EDI TRANSCRIPT FIXTURE
+# This is a sample EDI (Electronic Data Interchange) transcript
+
+HDR*123456789*OFFICIAL TRANSCRIPT**20241220*20250515~
+ST*2024*FALL*20240901*20241215~
+ELMT*CS 1010**Introduction to Programming*A*4.0*4.0~
+ELMT*MATH 1200**Calculus I*B+*3.7*4.0~
+ELMT*ENGL 1010**Composition*A-*3.7*3.0~
+ELMT*PHYS 1010**Physics I*A-*3.7*4.0~
+STC*4*15.0*15.1*3.78~
+ST*2024*SPRING*20240115*20240501~
+ELMT*CS 2010**Data Structures*A*4.0*4.0~
+ELMT*MATH 2300**Linear Algebra*B*3.0*3.0~
+ELMT*PHYS 1020**Physics II*B+*3.7*4.0~
+ELMT*HIST 1010**World History*A*4.0*4.0~
+STC*4*14.0*14.7*3.43~
+BAT*2024*8*29.0*29.8*3.75~
+TRR*120.0*128.0*3.75*20241220~
+
+EDI Segment Definitions:
+HDR = Header (Student ID, Type, **, Issue Date, End Date)
+ST = Term (Year, Semester, Start Date, End Date)
+ELMT = Element (Course Code, **, Course Name, Grade, Quality Points, Credits)
+STC = Term Summary (Count, Credits, Quality Points, GPA)
+BAT = Batch/Term Summary (Year, Term Count, Total Credits, Total Quality Pts, GPA)
+TRR = Transcript Record Summary (Earned Credits, Attempted Credits, Cumulative GPA, Date)

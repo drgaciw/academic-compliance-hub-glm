@@ -27,6 +27,7 @@
     "build:admin": "turbo run build --filter=admin-app"
   },
   "devDependencies": {
+    "@types/next": "^9.0.0",
     "@types/node": "^20.10.0",
     "prettier": "^3.1.0",
     "shadcn": "^3.6.2",
@@ -37,5 +38,26 @@
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
   },
-  "packageManager": "pnpm@8.15.0"
+  "packageManager": "pnpm@8.15.0",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "dependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.0.4",
+    "eslint-import-resolver-node": "^0.3.9",
+    "eslint-import-resolver-typescript": "^3.10.1",
+    "eslint-module-utils": "^2.12.1",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.0.0-canary-7118f5dd7-20230705",
+    "eslint-scope": "^7.2.2",
+    "eslint-visitor-keys": "^3.4.3"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
 }

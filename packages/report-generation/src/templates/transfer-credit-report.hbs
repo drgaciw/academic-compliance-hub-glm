@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transfer Credit Evaluation Report</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Times New Roman', Times, serif;
+    }
+
+    body {
+      font-size: 12pt;
+      line-height: 1.4;
+      color: #000;
+      background: #fff;
+      padding: 40px 50px;
+    }
+
+    .header {
+      text-align: center;
+      border-bottom: 3px double #000;
+      padding-bottom: 20px;
+      margin-bottom: 25px;
+    }
+
+    .institution-name {
+      font-size: 18pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 5px;
+    }
+
+    .report-title {
+      font-size: 14pt;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .report-subtitle {
+      font-size: 11pt;
+      font-style: italic;
+    }
+
+    .report-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 10pt;
+    }
+
+    .section {
+      margin-bottom: 25px;
+    }
+
+    .section-title {
+      font-size: 13pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      border-bottom: 1px solid #000;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .info-row {
+      display: flex;
+      margin-bottom: 8px;
+    }
+
+    .info-label {
+      font-weight: bold;
+      min-width: 140px;
+    }
+
+    .info-value {
+      flex: 1;
+      border-bottom: 1px dotted #999;
+    }
+
+    .institution-box {
+      border: 1px solid #000;
+      padding: 12px;
+      margin-bottom: 15px;
+    }
+
+    .institution-box.primary {
+      background: #e8f4e8;
+      border: 2px solid #2d6a4f;
+    }
+
+    .institution-box.secondary {
+      background: #f4e8e8;
+      border: 2px solid #6a4f4f;
+    }
+
+    .institution-box h4 {
+      font-size: 11pt;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #000;
+      padding-bottom: 5px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+      font-size: 10pt;
+    }
+
+    th, td {
+      border: 1px solid #000;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #e0e0e0;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 9pt;
+    }
+
+    .credit-accepted {
+      background: #e8f5e8 !important;
+    }
+
+    .credit-partial {
+      background: #fff4e0 !important;
+    }
+
+    .credit-rejected {
+      background: #ffe0e0 !important;
+    }
+
+    .transfer-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .summary-card {
+      border: 2px solid #000;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .summary-card.accepted {
+      border-color: #006400;
+      background: #e8f5e8;
+    }
+
+    .summary-card.rejected {
+      border-color: #8b0000;
+      background: #fee;
+    }
+
+    .summary-card.pending {
+      border-color: #b8860b;
+      background: #fff8dc;
+    }
+
+    .summary-value {
+      font-size: 18pt;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .summary-label {
+      font-size: 9pt;
+      text-transform: uppercase;
+      color: #666;
+    }
+
+    .rule-box {
+      border: 1px solid #999;
+      padding: 12px;
+      margin: 15px 0;
+      background: #f9f9f9;
+    }
+
+    .rule-title {
+      font-weight: bold;
+      font-size: 11pt;
+      margin-bottom: 8px;
+    }
+
+    .rule-text {
+      font-size: 10pt;
+      font-style: italic;
+    }
+
+    .rule-status {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #ccc;
+    }
+
+    .rule-compliant {
+      color: #006400;
+      font-weight: bold;
+    }
+
+    .rule-noncompliant {
+      color: #8b0000;
+      font-weight: bold;
+    }
+
+    .gpa-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 15px;
+      margin: 15px 0;
+    }
+
+    .gpa-item {
+      border: 1px solid #000;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .gpa-value {
+      font-size: 16pt;
+      font-weight: bold;
+    }
+
+    .gpa-label {
+      font-size: 9pt;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .course-mapping-table th {
+      background: #d0d0d0;
+    }
+
+    .course-mapping-table tr:nth-child(even) {
+      background: #f0f0f0;
+    }
+
+    .signature-section {
+      margin-top: 40px;
+      page-break-inside: avoid;
+    }
+
+    .signature-block {
+      margin: 30px 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    .signature-line {
+      margin-top: 50px;
+      border-top: 1px solid #000;
+      padding-top: 5px;
+    }
+
+    .certification {
+      border: 2px solid #000;
+      padding: 15px;
+      margin: 25px 0;
+      text-align: center;
+    }
+
+    .certification-text {
+      font-weight: bold;
+      font-size: 11pt;
+    }
+
+    .notes-box {
+      border: 1px solid #999;
+      padding: 10px;
+      min-height: 100px;
+      margin-top: 10px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 9pt;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .status-badge.accepted {
+      background: #006400;
+      color: white;
+    }
+
+    .status-badge.partial {
+      background: #b8860b;
+      color: white;
+    }
+
+    .status-badge.rejected {
+      background: #8b0000;
+      color: white;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+
+    .disclaimer-box {
+      background: #fff8dc;
+      border: 1px solid #b8860b;
+      padding: 12px;
+      margin: 15px 0;
+      font-size: 10pt;
+    }
+
+    .disclaimer-box h5 {
+      color: #b8860b;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="institution-name">{{institution.name}}</div>
+    <div class="report-title">TRANSFER CREDIT EVALUATION REPORT</div>
+    <div class="report-subtitle">NCAA Division {{institution.division}} Compliance Evaluation</div>
+    <div class="report-meta">
+      <span>Report Date: {{formatDate reportDate}}</span>
+      <span>Report ID: {{reportId}}</span>
+      <span>Evaluation Type: {{evaluationType}}</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">STUDENT INFORMATION</div>
+    <div class="info-grid">
+      <div>
+        <div class="info-row">
+          <span class="info-label">Student Name:</span>
+          <span class="info-value">{{student.firstName}} {{student.lastName}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Student ID:</span>
+          <span class="info-value">{{student.studentId}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Sport:</span>
+          <span class="info-value">{{student.sport}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Academic Year:</span>
+          <span class="info-value">{{student.academicYear}}</span>
+        </div>
+      </div>
+      <div>
+        <div class="info-row">
+          <span class="info-label">Degree Program:</span>
+          <span class="info-value">{{student.degreeProgram}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Enrollment Status:</span>
+          <span class="info-value">{{student.enrollmentStatus}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Initial Eligibility:</span>
+          <span class="info-value">{{student.initialEligibility}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Transfer Type:</span>
+          <span class="info-value">{{transfer.transferType}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">INSTITUTIONAL INFORMATION</div>
+    <div class="institution-box secondary">
+      <h4>SOURCE INSTITUTION (Transfer From)</h4>
+      <div class="info-grid">
+        <div>
+          <div class="info-row">
+            <span class="info-label">Institution:</span>
+            <span class="info-value">{{transfer.sourceInstitution}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Address:</span>
+            <span class="info-value">{{transfer.sourceAddress}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">City/State/ZIP:</span>
+            <span class="info-value">{{transfer.sourceLocation}}</span>
+          </div>
+        </div>
+        <div>
+          <div class="info-row">
+            <span class="info-label">Contact Person:</span>
+            <span class="info-value">{{transfer.sourceContact}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Phone:</span>
+            <span class="info-value">{{transfer.sourcePhone}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email:</span>
+            <span class="info-value">{{transfer.sourceEmail}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="info-row" style="margin-top: 10px;">
+        <span class="info-label">Transfer Date:</span>
+        <span class="info-value">{{formatDate transfer.transferDate}}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Transcript Received:</span>
+        <span class="info-value">{{formatDate transfer.transcriptReceived}}</span>
+      </div>
+    </div>
+
+    <div class="institution-box primary">
+      <h4>TARGET INSTITUTION (Transfer To)</h4>
+      <div class="info-grid">
+        <div>
+          <div class="info-row">
+            <span class="info-label">Institution:</span>
+            <span class="info-value">{{institution.name}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Address:</span>
+            <span class="info-value">{{institution.address}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">City/State/ZIP:</span>
+            <span class="info-value">{{institution.location}}</span>
+          </div>
+        </div>
+        <div>
+          <div class="info-row">
+            <span class="info-label">Department:</span>
+            <span class="info-value">{{institution.department}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Registrar:</span>
+            <span class="info-value">{{institution.registrar}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Compliance Officer:</span>
+            <span class="info-value">{{institution.complianceOfficer}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">TRANSFER CREDIT SUMMARY</div>
+    <div class="transfer-summary">
+      <div class="summary-card accepted">
+        <div class="summary-value">{{formatNumber credits.accepted}}</div>
+        <div class="summary-label">Credits Accepted</div>
+      </div>
+      <div class="summary-card pending">
+        <div class="summary-value">{{formatNumber credits.partial}}</div>
+        <div class="summary-label">Partial Credits</div>
+      </div>
+      <div class="summary-card rejected">
+        <div class="summary-value">{{formatNumber credits.rejected}}</div>
+        <div class="summary-label">Credits Rejected</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-value">{{formatNumber credits.total}}</div>
+        <div class="summary-label">Total Credits Evaluated</div>
+      </div>
+    </div>
+
+    <div class="gpa-box">
+      <div class="gpa-item">
+        <div class="gpa-value">{{formatNumber gpa.transfer 3}}</div>
+        <div class="gpa-label">Transfer GPA</div>
+      </div>
+      <div class="gpa-item">
+        <div class="gpa-value">{{formatNumber gpa.institutional 3}}</div>
+        <div class="gpa-label">Institutional GPA</div>
+      </div>
+      <div class="gpa-item">
+        <div class="gpa-value">{{formatNumber gpa.combined 3}}</div>
+        <div class="gpa-label">Combined GPA</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">COURSE MAPPING & EVALUATION</div>
+    <table class="course-mapping-table">
+      <thead>
+        <tr>
+          <th style="width: 12%;">Source Course</th>
+          <th style="width: 22%;">Source Title</th>
+          <th style="width: 12%;">Target Course</th>
+          <th style="width: 22%;">Target Title</th>
+          <th style="width: 8%;">Credits</th>
+          <th style="width: 6%;">Grade</th>
+          <th style="width: 10%;">Status</th>
+          <th style="width: 8%;">Core</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each courseMapping}}
+        <tr class="credit-{{status}}">
+          <td>{{sourceCourse}}</td>
+          <td>{{sourceTitle}}</td>
+          <td>{{targetCourse}}</td>
+          <td>{{targetTitle}}</td>
+          <td>{{credits}}</td>
+          <td>{{grade}}</td>
+          <td><span class="status-badge {{status}}">{{status}}</span></td>
+          <td style="text-align: center;">{{#if isCore}}✓{{/if}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <div class="disclaimer-box">
+      <h5>Course Evaluation Notes</h5>
+      <p style="font-style: italic; margin-top: 5px;">
+        {{evaluationNotes}}
+      </p>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <div class="section">
+    <div class="section-title">NCAA TRANSFER RULES COMPLIANCE</div>
+    
+    {{#each ncaaRules}}
+    <div class="rule-box">
+      <div class="rule-title">Bylaw {{bylaw}}: {{title}}</div>
+      <div class="rule-text">{{description}}</div>
+      <div class="rule-status">
+        {{#if compliant}}
+        <span class="rule-compliant">✓ COMPLIANT</span>
+        {{else}}
+        <span class="rule-noncompliant">✗ NON-COMPLIANT - {{issue}}</span>
+        {{/if}}
+      </div>
+      {{#if notes}}
+      <div style="margin-top: 8px; font-size: 9pt; color: #666;">
+        Notes: {{notes}}
+      </div>
+      {{/if}}
+    </div>
+    {{/each}}
+  </div>
+
+  <div class="section">
+    <div class="section-title">ACADEMIC PROGRESS TOWARD DEGREE</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Progress Metric</th>
+          <th>Required</th>
+          <th>Earned</th>
+          <th>Transfer</th>
+          <th>Total</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each academicProgress}}
+        <tr>
+          <td>{{metric}}</td>
+          <td>{{formatNumber required}}</td>
+          <td>{{formatNumber earned}}</td>
+          <td>{{formatNumber transfer}}</td>
+          <td><strong>{{formatNumber total}}</strong></td>
+          <td>{{status}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <div class="summary-box" style="margin-top: 15px; padding: 15px; border: 1px solid #000;">
+      <div class="info-grid">
+        <div>
+          <div class="info-row">
+            <span class="info-label">Degree Completion:</span>
+            <span class="info-value">{{formatNumber degreeProgress}}%</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Expected Graduation:</span>
+            <span class="info-value">{{expectedGraduation}}</span>
+          </div>
+        </div>
+        <div>
+          <div class="info-row">
+            <span class="info-label">Full-Time Enrollment:</span>
+            <span class="info-value">{{enrollmentStatus}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Good Standing:</span>
+            <span class="info-value">{{academicStanding}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ELIGIBILITY DETERMINATION</div>
+    
+    <div class="rule-box" style="border: 3px solid {{#ifEquals eligibility.status 'ELIGIBLE'}}#006400{{else}}#8b0000{{/ifEquals}}; background: {{#ifEquals eligibility.status 'ELIGIBLE'}}#e8f5e8{{else}}#fee{{/ifEquals}};">
+      <div style="text-align: center; margin: 15px 0;">
+        <div style="font-size: 10pt; text-transform: uppercase; margin-bottom: 5px;">Transfer Eligibility Status</div>
+        <div style="font-size: 20pt; font-weight: bold; color: {{#ifEquals eligibility.status 'ELIGIBLE'}}#006400{{else}}#8b0000{{/ifEquals}};">
+          {{eligibility.status}}
+        </div>
+      </div>
+      {{#if eligibility.reason}}
+      <p style="text-align: center; margin-top: 10px; font-style: italic;">
+        {{eligibility.reason}}
+      </p>
+      {{/if}}
+    </div>
+
+    {{#if eligibility.conditions}}
+    <div style="margin-top: 15px;">
+      <h4 style="margin-bottom: 10px;">Conditions for Participation:</h4>
+      <ul style="margin-left: 20px;">
+        {{#each eligibility.conditions}}
+        <li style="margin-bottom: 5px;">{{this}}</li>
+        {{/each}}
+      </ul>
+    </div>
+    {{/if}}
+  </div>
+
+  <div class="page-break"></div>
+
+  <div class="section">
+    <div class="section-title">COMPLIANCE OFFICER REVIEW</div>
+    <div class="compliance-box">
+      <div class="info-grid">
+        <div>
+          <div class="info-row">
+            <span class="info-label">Reviewer Name:</span>
+            <span class="info-value">{{reviewer.name}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Title:</span>
+            <span class="info-value">{{reviewer.title}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Department:</span>
+            <span class="info-value">{{reviewer.department}}</span>
+          </div>
+        </div>
+        <div>
+          <div class="info-row">
+            <span class="info-label">Review Date:</span>
+            <span class="info-value">{{formatDate reviewer.reviewDate}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Phone:</span>
+            <span class="info-value">{{reviewer.phone}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email:</span>
+            <span class="info-value">{{reviewer.email}}</span>
+          </div>
+        </div>
+      </div>
+
+      <h4 style="margin-top: 20px; margin-bottom: 10px;">Evaluation Summary:</h4>
+      <div class="notes-box">
+        {{reviewer.summary}}
+      </div>
+
+      <h4 style="margin-top: 20px; margin-bottom: 10px;">Recommendations:</h4>
+      <div class="notes-box">
+        {{#each reviewer.recommendations}}
+        <div style="margin-bottom: 8px;">
+          <strong>{{@index}}.</strong> {{this}}
+        </div>
+        {{/each}}
+      </div>
+
+      <h4 style="margin-top: 20px; margin-bottom: 10px;">Additional Notes:</h4>
+      <div class="notes-box">
+        {{reviewer.notes}}
+      </div>
+    </div>
+  </div>
+
+  <div class="signature-section">
+    <div class="section-title">CERTIFICATION AND SIGNATURE</div>
+
+    <div class="certification">
+      <p class="certification-text">
+        I hereby certify that this transfer credit evaluation has been conducted in accordance with
+        NCAA Bylaws and institutional policies. The course mapping and eligibility determination
+        reflect accurate assessment of the student's academic record.
+      </p>
+    </div>
+
+    <div class="signature-block">
+      <div>
+        <div class="info-row">
+          <span class="info-label">Compliance Officer:</span>
+          <span class="info-value">{{reviewer.name}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Title:</span>
+          <span class="info-value">{{reviewer.title}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Signature:</span>
+          <div class="signature-line"></div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Date:</span>
+          <div class="signature-line"></div>
+        </div>
+      </div>
+      <div>
+        <div class="info-row">
+          <span class="info-label">Registrar:</span>
+          <span class="info-value">{{institution.registrar}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Title:</span>
+          <span class="info-value">Registrar of Records</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Signature:</span>
+          <div class="signature-line"></div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Date:</span>
+          <div class="signature-line"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 30px; padding: 15px; background: #f0f0f0; border: 1px solid #999; font-size: 9pt;">
+      <strong>Important Notice:</strong> This report is confidential and intended for authorized personnel only.
+      This evaluation is based on official transcripts received as of {{formatDate transfer.transcriptReceived}}.
+      Any subsequent changes to the student's academic record may affect this evaluation.
+      For questions, contact the Compliance Office at {{institution.compliancePhone}} or {{institution.complianceEmail}}.
+    </div>
+  </div>
+
+</body>
+</html>

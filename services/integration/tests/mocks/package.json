@@ -1,0 +1,27 @@
+{
+  "name": "@aah/integration-mocks",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mock servers for integration testing",
+  "scripts": {
+    "build": "tsc",
+    "start:banner": "node mock-banner.js",
+    "start:peoplesoft": "node mock-peoplesoft.js",
+    "start:colleague": "node mock-colleague.js",
+    "start:custom": "node mock-custom-rest.js",
+    "start:sftp": "node mock-sftp.js",
+    "start:all": "concurrently \"npm:start:banner\" \"npm:start:peoplesoft\" \"npm:start:colleague\" \"npm:start:custom\" \"npm:start:sftp\"",
+    "clean": "rm -rf dist mock-sftp-uploads *.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "concurrently": "^8.2.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3"
+  }
+}
