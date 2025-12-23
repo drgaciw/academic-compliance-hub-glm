@@ -103,9 +103,9 @@ describe("Subject-Area GPA Calculator", () => {
         SubjectAreaGPACalculator.calculateAllSubjects(sampleCourses);
 
       expect(results.length).toBe(3);
-      expect(results[0].subjectCode).toBe("ENGL");
-      expect(results[1].subjectCode).toBe("MATH");
-      expect(results[2].subjectCode).toBe("PHYS");
+      if (results[0]) expect(results[0].subjectCode).toBe("ENGL");
+      if (results[1]) expect(results[1].subjectCode).toBe("MATH");
+      if (results[2]) expect(results[2].subjectCode).toBe("PHYS");
     });
 
     it("should apply minimum requirements", () => {
@@ -178,9 +178,9 @@ describe("Subject-Area GPA Calculator", () => {
       );
 
       expect(results.length).toBe(3);
-      expect(results[0]?.passes).toBe(true);
-      expect(results[1]?.passes).toBe(true);
-      expect(results[2]?.passes).toBe(false);
+      if (results[0]) expect(results[0].passes).toBe(true);
+      if (results[1]) expect(results[1].passes).toBe(true);
+      if (results[2]) expect(results[2].passes).toBe(false);
     });
   });
 

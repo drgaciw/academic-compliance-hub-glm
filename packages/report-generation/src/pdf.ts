@@ -14,8 +14,6 @@ import {
 import { compileTemplate } from "./templates";
 import { signpdf } from "node-signpdf";
 
-autoTable(jsPDF);
-
 declare module "jspdf" {
   interface jsPDF {
     lastAutoTable: {
@@ -26,10 +24,18 @@ declare module "jspdf" {
 }
 
 export class PDFGenerator {
-  private doc: jsPDF;
+  private doc: any;
+  private pluginInitialized: boolean = false;
 
   constructor(options: PDFOptions = {}) {
     this.doc = new jsPDF(options);
+  }
+
+  private initPlugin(): void {
+    if (!this.pluginInitialized) {
+      autoTable(this.doc, {});
+      this.pluginInitialized = true;
+    }
   }
 
   async generatePDF(
