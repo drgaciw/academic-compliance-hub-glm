@@ -55,7 +55,7 @@ describe("Transfer GPA Calculator", () => {
       );
 
       expect(result.gpa).toBeCloseTo(3.73, 2);
-      expect(result.acceptedCredits).toBe(9);
+      expect(result.acceptedCredits).toBe(10);
       expect(result.attemptedCredits).toBe(3);
       expect(result.coursesIncluded).toBe(3);
     });

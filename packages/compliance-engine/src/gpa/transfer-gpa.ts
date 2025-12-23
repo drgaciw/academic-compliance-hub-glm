@@ -45,29 +45,42 @@ export class TransferGPACalculator {
     const includeUnaccepted = options?.includeUnaccepted ?? false;
     const useTransferCredits = options?.useTransferCredits ?? false;
 
-    let filteredCourses = transferCourses.filter((course) => {
-      if (!includeUnaccepted && !course.accepted) return false;
-      return true;
-    });
-
     let totalCredits = 0;
     let acceptedCredits = 0;
     let attemptedCredits = 0;
     let qualityPoints = 0;
+    let coursesIncluded = 0;
 
-    for (const course of filteredCourses) {
-      const creditsToUse =
-        useTransferCredits && course.transferCredits
-          ? course.transferCredits
-          : course.credits;
+    for (const course of transferCourses) {
+      const creditsToUse = useTransferCredits && course.transferCredits
+        ? course.transferCredits
+        : course.credits;
 
-      if (course.accepted) {
-        totalCredits += creditsToUse;
-        acceptedCredits += creditsToUse;
-        qualityPoints += course.grade * creditsToUse;
-      } else {
+      if (!course.accepted) {
         attemptedCredits += creditsToUse;
+        if (includeUnaccepted) {
+          coursesIncluded++;
+        }
+        continue;
       }
+
+      totalCredits += creditsToUse;
+      acceptedCredits += creditsToUse;
+      qualityPoints += course.grade * creditsToUse;
+      coursesIncluded++;
+    }
+
+    const gpa = totalCredits > 0 ? qualityPoints / totalCredits : 0.0;
+
+    return {
+      gpa: parseFloat(gpa.toFixed(2)),
+      totalCredits,
+      acceptedCredits,
+      attemptedCredits,
+      coursesIncluded,
+      qualityPoints: parseFloat(qualityPoints.toFixed(2)),
+    };
+  }
     }
 
     const gpa = totalCredits > 0 ? qualityPoints / totalCredits : 0.0;

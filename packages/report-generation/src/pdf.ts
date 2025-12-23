@@ -34,6 +34,7 @@ export class PDFGenerator {
   private initPlugin(): void {
     if (!this.pluginInitialized) {
       autoTable(this.doc, {});
+      this.doc.autoTable = this.doc.autoTable;
       this.pluginInitialized = true;
     }
   }
@@ -78,6 +79,8 @@ export class PDFGenerator {
     rows: TableRow[];
     title?: string;
   }): void {
+    this.initPlugin();
+
     if (table.title) {
       this.doc.setFontSize(14);
       this.doc.setFont("helvetica", "bold");
@@ -133,6 +136,7 @@ export class PDFGenerator {
   }
 
   addNCAAComplianceSection(data: any): void {
+    this.initPlugin();
     this.doc.setFontSize(14);
     this.doc.setFont("helvetica", "bold");
     const lastY = this.doc.lastAutoTable?.finalY || 45;
@@ -174,6 +178,7 @@ export class PDFGenerator {
     courseMappings: CourseMapping[],
     summary: CourseMappingSummary,
   ): void {
+    this.initPlugin();
     const lastY = this.doc.lastAutoTable?.finalY || 45;
 
     this.doc.setFontSize(14);
