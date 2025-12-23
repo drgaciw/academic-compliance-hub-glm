@@ -1,0 +1,166 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id            String    @id @default(cuid())
+  clerkId       String    @unique
+  email         String    @unique
+  firstName     String?
+  lastName      String?
+  role          Role      @default(STUDENT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  studentProfile StudentProfile?
+  advisorProfile AdvisorProfile?
+  adminProfile   AdminProfile?
+
+  @@map("users")
+}
+
+// Role enum
+enum Role {
+  STUDENT
+  ADVISOR
+  ADMIN
+  COMPLIANCE_OFFICER
+}
+
+// Student profile
+model StudentProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentId       String   @unique
+  sport           String
+  year            Int
+  gpa             Float?
+  credits         Int      @default(0)
+  eligibility     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  courses         CourseEnrollment[]
+  tutoringSessions TutoringSession[]
+  complianceRecords ComplianceRecord[]
+
+  @@map("student_profiles")
+}
+
+// Advisor profile
+model AdvisorProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department      String
+  students        StudentProfile[]
+
+  @@map("advisor_profiles")
+}
+
+// Admin profile
+model AdminProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permissions     String[]
+
+  @@map("admin_profiles")
+}
+
+// Course model
+model Course {
+  id              String   @id @default(cuid())
+  code            String
+  name            String
+  credits         Int
+  department      String
+  semester        String
+  year            Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  enrollments     CourseEnrollment[]
+
+  @@unique([code, semester, year])
+  @@map("courses")
+}
+
+// Course enrollment
+model CourseEnrollment {
+  id              String   @id @default(cuid())
+  studentId       String
+  student         StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId        String
+  course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  grade           String?
+  status          EnrollmentStatus @default(IN_PROGRESS)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([studentId, courseId])
+  @@map("course_enrollments")
+}
+
+enum EnrollmentStatus {
+  IN_PROGRESS
+  COMPLETED
+  DROPPED
+  WITHDRAWN
+}
+
+// Tutoring session
+model TutoringSession {
+  id              String   @id @default(cuid())
+  studentId       String
+  student         StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject         String
+  date            DateTime
+  duration        Int      // minutes
+  notes           String?
+  status          SessionStatus @default(SCHEDULED)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("tutoring_sessions")
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+// Compliance record
+model ComplianceRecord {
+  id              String   @id @default(cuid())
+  studentId       String
+  student         StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  category        String
+  requirement     String
+  status          ComplianceStatus @default(PENDING)
+  notes           String?
+  dueDate         DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("compliance_records")
+}
+
+enum ComplianceStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  EXEMPTED
+}

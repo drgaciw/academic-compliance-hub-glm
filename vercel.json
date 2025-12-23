@@ -1,0 +1,38 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm build",
+  "devCommand": "pnpm dev",
+  "installCommand": "pnpm install",
+  "framework": null,
+  "regions": ["iad1"],
+  "rewrites": [
+    {
+      "source": "/api/user/:path*",
+      "destination": "/services/user/:path*"
+    },
+    {
+      "source": "/api/advising/:path*",
+      "destination": "/services/advising/:path*"
+    },
+    {
+      "source": "/api/compliance/:path*",
+      "destination": "/services/compliance/:path*"
+    },
+    {
+      "source": "/api/monitoring/:path*",
+      "destination": "/services/monitoring/:path*"
+    },
+    {
+      "source": "/api/support/:path*",
+      "destination": "/services/support/:path*"
+    },
+    {
+      "source": "/api/integration/:path*",
+      "destination": "/services/integration/:path*"
+    },
+    {
+      "source": "/api/ai/:path*",
+      "destination": "/services/ai/:path*"
+    }
+  ]
+}

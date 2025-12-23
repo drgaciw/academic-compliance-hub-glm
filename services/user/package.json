@@ -1,0 +1,28 @@
+{
+  "name": "@aah/service-user",
+  "version": "2.0.0",
+  "private": true,
+  "description": "User management microservice",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "dev": "hono dev",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "^3.11.0",
+    "@hono/zod-validator": "^0.2.0",
+    "@aah/database": "workspace:*",
+    "@aah/api-utils": "workspace:*",
+    "@aah/auth": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "eslint": "^8.55.0"
+  }
+}

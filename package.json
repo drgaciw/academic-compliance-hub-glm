@@ -1,0 +1,41 @@
+{
+  "name": "athletic-academics-hub",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Athletic Academics Hub (AAH) - A SaaS platform for university athletic academic support with AI capabilities",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:unit": "turbo run test:unit",
+    "test:integration": "turbo run test:integration",
+    "test:e2e": "turbo run test:e2e",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "db:generate": "pnpm --filter @aah/database db:generate",
+    "db:push": "pnpm --filter @aah/database db:push",
+    "db:migrate": "pnpm --filter @aah/database db:migrate",
+    "db:studio": "pnpm --filter @aah/database db:studio",
+    "dev:main": "turbo run dev --filter=main-app",
+    "dev:student": "turbo run dev --filter=student-app",
+    "dev:admin": "turbo run dev --filter=admin-app",
+    "build:main": "turbo run build --filter=main-app",
+    "build:student": "turbo run build --filter=student-app",
+    "build:admin": "turbo run build --filter=admin-app"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "prettier": "^3.1.0",
+    "shadcn": "^3.6.2",
+    "turbo": "^1.11.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}
