@@ -161,22 +161,32 @@ export class SFTPAdapter extends BaseSISAdapter {
       });
 
       return (Array.isArray(enrollments) ? enrollments : []).map(
-        (item: any) => ({
-          courseId: String(item.courseId ?? item.course_id ?? ""),
-          courseName: String(item.courseName ?? item.course_title ?? ""),
-          termCode: String(item.termCode ?? item.term_code ?? ""),
-          termName: String(item.termName ?? item.term_description ?? ""),
-          status:
-            (item.status as
+        (item: any) => {
+          const statusRaw = item.status || item.status;
+          const status =
+            statusRaw === "ENROLLED" ||
+            statusRaw === "DROPPED" ||
+            statusRaw === "WITHDRAWN" ||
+            statusRaw === "COMPLETED"
+              ? statusRaw
+              : "ENROLLED";
+
+          return {
+            courseId: String(item.courseId ?? item.course_id ?? ""),
+            courseName: String(item.courseName ?? item.course_title ?? ""),
+            termCode: String(item.termCode ?? item.term_code ?? ""),
+            termName: String(item.termName ?? item.term_description ?? ""),
+            status: enrollmentStatus as
               | "ENROLLED"
               | "DROPPED"
               | "WITHDRAWN"
-              | "COMPLETED") || "ENROLLED",
-          creditHours: Number(item.creditHours ?? item.credits ?? 0),
-          enrollmentDate: new Date(
-            (item.enrollmentDate as string | number | Date) ?? Date.now(),
-          ),
-        }),
+              | "COMPLETED",
+            creditHours: Number(item.creditHours ?? item.credits ?? 0),
+            enrollmentDate: new Date(
+              (item.enrollmentDate as string | number | Date) ?? Date.now(),
+            ),
+          };
+        },
       );
     }, `getCurrentEnrollments(${studentId})`);
   }

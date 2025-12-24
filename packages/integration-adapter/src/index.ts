@@ -139,3 +139,5 @@ export type {
   SFTPAdapterConfig,
 } from "./sftp-adapter";
 export { SFTPAdapter } from "./sftp-adapter";
+
+export { AdapterFactory, getAdapter } from "./factory";

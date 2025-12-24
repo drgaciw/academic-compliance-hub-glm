@@ -186,3 +186,13 @@ export interface CourseMappingTableData {
   rows: CourseMapping[];
   summary: CourseMappingSummary;
 }
+
+export interface AuditLog {
+  id: string;
+  transferEvaluationId: string;
+  agentType: string;
+  action: string;
+  timestamp: Date;
+  duration?: number;
+  errorMessage?: string;
+}

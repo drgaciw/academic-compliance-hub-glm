@@ -71,6 +71,8 @@ model StudentProfile {
   transferEvaluations TransferEvaluation[]
   advisor         AdvisorProfile? @relation("AdvisorStudents", fields: [advisorId], references: [id], onDelete: SetNull)
   advisorId       String?
+  waiverRequests  WaiverRequest[]
+  reportMetadata   ReportMetadata[] @relation("ReportMetadataStudent")
 
   @@index([studentId])
   @@index([advisorId])
@@ -446,4 +448,238 @@ model AuditLog {
   @@index([timestamp])
   @@index([transferEvaluationId, timestamp])
   @@map("audit_logs")
+}
+
+// F2-003: AuditLogArchive model for 7-year retention
+model AuditLogArchive {
+  id                    String      @id @default(cuid())
+  originalLogId         String      @unique
+  transferEvaluationId  String
+  agentType             AgentType
+  action                String
+  inputData             Json?
+  outputData            Json?
+  errorMessage          String?
+  duration              Int?
+  originalTimestamp     DateTime
+  archivedAt            DateTime    @default(now())
+  archivedBy            String      @default("SYSTEM")
+  compressionType       String      @default("NONE")
+  archiveMetadata       Json?
+
+  @@index([originalTimestamp])
+  @@index([archivedAt])
+  @@index([transferEvaluationId])
+  @@index([agentType])
+  @@index([originalTimestamp, archivedAt])
+  @@map("audit_log_archives")
+}
+
+// Report Service Models
+
+enum ReportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ReportType {
+  ELIGIBILITY
+  TRANSFER_CREDIT
+  COMPLIANCE
+  PROGRESS
+  CUSTOM
+}
+
+enum ReportFormat {
+  PDF
+  CSV
+  JSON
+}
+
+model ReportMetadata {
+  id                String        @id @default(cuid())
+  type              ReportType
+  format            ReportFormat  @default(PDF)
+  status            ReportStatus  @default(PENDING)
+  userId            String?
+  studentProfileId   String?
+  studentProfile     StudentProfile? @relation("ReportMetadataStudent", fields: [studentProfileId], references: [id], onDelete: SetNull)
+  templateId        String?
+  template          ReportTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  filePath          String?
+  fileName          String?
+  fileSize          Int?
+  progress          Int           @default(0)
+  signatureFields   Json?
+  signatureData     String?
+  signedAt          DateTime?
+  error             String?
+  expiresAt         DateTime?
+  completedAt       DateTime?
+  metadata          Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([status])
+  @@index([userId])
+  @@index([studentProfileId])
+  @@index([templateId])
+  @@index([expiresAt])
+  @@index([type, status])
+  @@map("report_metadata")
+}
+
+model ReportTemplate {
+  id                String          @id @default(cuid())
+  name              String
+  description       String?
+  type              ReportType
+  customTemplate    String?
+  signatureFields   Json?
+  createdBy         String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  reports           ReportMetadata[]
+
+  @@index([type])
+  @@map("report_templates")
+}
+
+// Eligibility Engine - Waiver Models
+
+enum WaiverType {
+  INITIAL_ELIGIBILITY
+  PROGRESS_TOWARD_DEGREE
+  CREDIT_HOUR_REQUIREMENTS
+  GPA_REQUIREMENTS
+}
+
+enum WaiverStatus {
+  DRAFT
+  PENDING_DOCUMENTATION
+  PENDING_SUBMISSION
+  SUBMITTED
+  UNDER_REVIEW
+  NCAA_REVIEW
+  APPROVED
+  DENIED
+  EXPIRED
+  WITHDRAWN
+}
+
+enum WaiverScenario {
+  MEDICAL_HARDSHIP
+  MILITARY_SERVICE
+  RELIGIOUS_ACCOMMODATION
+  LEARNING_DISABILITY
+  NATURAL_DISASTER
+  NCAA_EXTENUATING_CIRCUMSTANCES
+  FAMILY_EMERGENCY
+  FINANCIAL_HARDSHIP
+}
+
+enum DocumentStatus {
+  REQUIRED
+  PENDING_UPLOAD
+  UPLOADED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+model WaiverRequest {
+  id                    String         @id @default(cuid())
+  studentProfileId      String
+  studentProfile        StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  waiverType            WaiverType
+  scenario              WaiverScenario
+  status                WaiverStatus    @default(DRAFT)
+  ruleId                String?
+  ruleName              String?
+  bylawReference        String?
+  violationId           String?
+  justification         String         @db.Text
+  expirationDate        DateTime?
+  submittedAt           DateTime?
+  submittedBy           String?
+  ncaaSubmittedAt       DateTime?
+  ncaaReferenceNumber   String?        @unique
+  reviewedAt            DateTime?
+  reviewedBy            String?
+  reviewDecision        String?
+  reviewJustification   String?        @db.Text
+  ncaaResponseDate      DateTime?
+  ncaaResponse          String?
+  ncaaResponseNotes     String?        @db.Text
+  effectiveDate         DateTime?
+  createdDate           DateTime       @default(now())
+  updatedDate           DateTime       @updatedAt
+  createdBy             String
+  metadata              Json?
+
+  waiverDocuments       WaiverDocument[]
+  auditLogs             WaiverAuditLog[]
+
+  @@index([studentProfileId])
+  @@index([waiverType])
+  @@index([status])
+  @@index([ruleId])
+  @@index([submittedAt])
+  @@index([ncaaReferenceNumber])
+  @@index([createdDate])
+  @@map("waiver_requests")
+}
+
+model WaiverDocument {
+  id                    String         @id @default(cuid())
+  waiverRequestId       String
+  waiverRequest         WaiverRequest  @relation(fields: [waiverRequestId], references: [id], onDelete: Cascade)
+  documentType          String
+  description           String?
+  fileName              String
+  fileUrl               String
+  fileSize              Int
+  status                DocumentStatus @default(PENDING_UPLOAD)
+  uploadedAt            DateTime?
+  reviewedAt            DateTime?
+  reviewedBy            String?
+  reviewNotes           String?
+  expirationDate        DateTime?
+  uploadedBy            String?
+  metadata              Json?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  @@index([waiverRequestId])
+  @@index([documentType])
+  @@index([status])
+  @@index([expirationDate])
+  @@map("waiver_documents")
+}
+
+model WaiverAuditLog {
+  id                    String         @id @default(cuid())
+  waiverRequestId      String
+  waiverRequest         WaiverRequest  @relation(fields: [waiverRequestId], references: [id], onDelete: Cascade)
+  action                String
+  actorId               String
+  actorName             String
+  previousStatus        WaiverStatus?
+  newStatus             WaiverStatus?
+  inputData             Json?
+  outputData            Json?
+  notes                 String?        @db.Text
+  timestamp             DateTime       @default(now())
+  ipAddress             String?
+  userAgent             String?
+
+  @@index([waiverRequestId])
+  @@index([action])
+  @@index([actorId])
+  @@index([timestamp])
+  @@map("waiver_audit_logs")
 }

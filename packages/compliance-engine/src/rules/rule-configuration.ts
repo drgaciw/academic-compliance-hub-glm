@@ -111,6 +111,19 @@ export class RuleConfigurationSystem {
     return Array.from(RULE_REGISTRY.values());
   }
 
+  getAllConfigs(): Record<string, RuleConfig> {
+    const configs: Record<string, RuleConfig> = {};
+    for (const [ruleId, rule] of RULE_REGISTRY.entries()) {
+      configs[ruleId] = {
+        ruleId,
+        version: rule.defaultConfig.version || "1.0.0",
+        enabled: rule.defaultConfig.enabled ?? true,
+        parameters: rule.defaultConfig.parameters,
+      };
+    }
+    return configs;
+  }
+
   getRuleConfig(ruleId: string, institutionId?: string): RuleConfig {
     const rule = RULE_REGISTRY.get(ruleId);
     if (!rule) {

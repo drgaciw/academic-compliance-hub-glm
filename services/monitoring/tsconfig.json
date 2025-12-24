@@ -1,10 +1,55 @@
 {
-  "extends": "@aah/config/base.json",
   "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "incremental": true,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "moduleResolution": "bundler"
+    "rootDir": "./src"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": [
+    // Dependency directories - exclude to improve compilation performance
+    "node_modules",
+    
+    // Build output directories - prevent circular compilation
+    "dist",
+    "build",
+    
+    // Test files - exclude if using separate test configuration
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/__tests__/**",
+    
+    // Cache and temporary directories
+    ".cache",
+    ".next",
+    ".turbo",
+    "coverage",
+    
+    // Configuration and documentation files
+    "*.config.js",
+    "*.config.ts",
+    "*.md",
+    
+    // Environment and secret files
+    ".env*",
+    "*.local",
+    
+    // Version control and IDE directories
+    ".git",
+    ".vscode",
+    ".idea"
+  ]
 }

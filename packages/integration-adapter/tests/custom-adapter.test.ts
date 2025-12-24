@@ -1,39 +1,53 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { CustomRestAdapter } from "../src/custom-rest-adapter";
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import { SISType } from "../src/index";
 
 vi.mock("axios");
 
 describe("H2-003-004: Custom REST Adapter Integration Tests", () => {
   let adapter: CustomRestAdapter;
-  let mockAxiosInstance: any;
+  let mockAxiosInstance: AxiosInstance & {
+    request: ReturnType<typeof vi.fn>;
+    get: ReturnType<typeof vi.fn>;
+    post: ReturnType<typeof vi.fn>;
+  };
 
   const config = {
     baseUrl: "https://custom-sis.example.com/api",
     endpoints: {
-      student: "/students/{id}",
-      transcript: "/students/{id}/transcript",
-      enrollments: "/students/{id}/enrollments",
-      course: "/courses/{id}",
+      getStudentInfo: "/students/{id}",
+      getTranscript: "/students/{id}/transcript",
+      getCurrentEnrollments: "/students/{id}/enrollments",
+      getCourseInfo: "/courses/{id}",
     },
-    fieldMapping: {
-      studentId: "id",
-      firstName: "first_name",
-      lastName: "last_name",
-      email: "email_address",
-      program: "program_code",
-      major: "major_code",
+    fieldMappings: {
+      studentInfo: [
+        { source: "id", target: "studentId" },
+        { source: "first_name", target: "firstName" },
+        { source: "last_name", target: "lastName" },
+        { source: "email_address", target: "email" },
+        { source: "program_code", target: "program" },
+        { source: "major_code", target: "major" },
+      ],
     },
   };
 
   beforeEach(() => {
-    adapter = new CustomRestAdapter(config, {
+    mockAxiosInstance = {
+      request: vi.fn(),
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn(),
+    } as any;
+
+    vi.mocked(axios.create).mockReturnValue(mockAxiosInstance);
+    adapter = new CustomRestAdapter({
+      ...config,
       maxRetries: 2,
       timeout: 5000,
     });
-    mockAxiosInstance = axios.create();
-    vi.mocked(axios.create).mockReturnValue(mockAxiosInstance);
   });
 
   afterEach(() => {

@@ -1,0 +1,34 @@
+{
+  "name": "@aah/service-course-mapping",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Course mapping microservice for transfer credit evaluation",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "dev": "hono dev",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "type-check": "tsc --noEmit",
+    "test": "jest"
+  },
+  "dependencies": {
+    "hono": "^3.11.0",
+    "@hono/zod-validator": "^0.2.0",
+    "zod": "^3.22.0",
+    "@aah/database": "workspace:*",
+    "@aah/api-utils": "workspace:*",
+    "@aah/course-mapping": "workspace:*"
+  },
+  "devDependencies": {
+    "@aah/config": "workspace:*",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "eslint": "^8.55.0",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6"
+  }
+}

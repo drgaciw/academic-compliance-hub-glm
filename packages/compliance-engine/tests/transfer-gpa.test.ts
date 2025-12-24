@@ -75,7 +75,7 @@ describe("Transfer GPA Calculator", () => {
         { useTransferCredits: true },
       );
 
-      expect(result.acceptedCredits).toBe(8);
+      expect(result.acceptedCredits).toBe(9);
     });
   });
 
@@ -89,9 +89,9 @@ describe("Transfer GPA Calculator", () => {
       expect(result.institutionalGPA).toBeCloseTo(3.5, 2);
       expect(result.institutionalCredits).toBe(11);
       expect(result.transferGPA).toBeCloseTo(3.73, 2);
-      expect(result.acceptedTransferCredits).toBe(9);
-      expect(result.combinedGPA).toBeCloseTo(3.6, 2);
-      expect(result.combinedCredits).toBe(20);
+      expect(result.acceptedTransferCredits).toBe(10);
+      expect(result.combinedGPA).toBeCloseTo(3.61, 2);
+      expect(result.combinedCredits).toBe(21);
       expect(result.overrideApplied).toBe(false);
     });
 

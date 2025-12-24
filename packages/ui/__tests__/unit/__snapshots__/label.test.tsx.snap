@@ -1,0 +1,35 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Label Component > Snapshots > should match snapshot with custom className 1`] = `
+<label
+  class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 custom-label"
+>
+  Label
+</label>
+`;
+
+exports[`Label Component > Snapshots > should match snapshot with default props 1`] = `
+<label
+  class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+>
+  Label
+</label>
+`;
+
+exports[`Label Component > Snapshots > should match snapshot with disabled state 1`] = `
+<label
+  class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+  disabled=""
+>
+  Disabled Label
+</label>
+`;
+
+exports[`Label Component > Snapshots > should match snapshot with htmlFor 1`] = `
+<label
+  class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+  for="test-input"
+>
+  Label
+</label>
+`;

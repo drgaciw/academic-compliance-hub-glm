@@ -1,0 +1,5 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Dialog Component > Snapshots > should match snapshot with full dialog 1`] = `null`;
+
+exports[`Dialog Component > Snapshots > should match snapshot with minimal dialog 1`] = `null`;

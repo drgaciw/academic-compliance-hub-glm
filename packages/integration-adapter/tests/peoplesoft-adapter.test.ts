@@ -1,21 +1,32 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { PeopleSoftAdapter } from "../src/peoplesoft-adapter";
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import { SISType } from "../src/index";
 
 vi.mock("axios");
 
 describe("H2-003-002: PeopleSoft Adapter Integration Tests", () => {
   let adapter: PeopleSoftAdapter;
-  let mockAxiosInstance: any;
+  let mockAxiosInstance: AxiosInstance & {
+    request: ReturnType<typeof vi.fn>;
+    get: ReturnType<typeof vi.fn>;
+    post: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
+    mockAxiosInstance = {
+      request: vi.fn(),
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn(),
+    } as any;
+
+    vi.mocked(axios.create).mockReturnValue(mockAxiosInstance);
     adapter = new PeopleSoftAdapter({
       maxRetries: 2,
       timeout: 5000,
     });
-    mockAxiosInstance = axios.create();
-    vi.mocked(axios.create).mockReturnValue(mockAxiosInstance);
   });
 
   afterEach(() => {

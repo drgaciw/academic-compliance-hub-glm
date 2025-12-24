@@ -1,0 +1,27 @@
+{
+  "name": "@aah/performance-tests",
+  "version": "1.0.0",
+  "description": "Performance and load testing for Academic Compliance Hub",
+  "scripts": {
+    "test:generate-data": "node generate-test-data.js",
+    "test:h3-001": "k6 run H3-001-document-processing-load.js",
+    "test:h3-001:soak": "k6 run --duration 1h --vus 50 H3-001-document-processing-load.js",
+    "test:h3-002": "k6 run H3-002-eligibility-engine-load.js",
+    "test:h3-002:soak": "k6 run --duration 1h --vus 100 H3-002-eligibility-engine-load.js",
+    "test:h3-003": "k6 run H3-003-api-response-time.js",
+    "test:h3-003:soak": "k6 run --duration 1h --vus 250 H3-003-api-response-time.js",
+    "test:h3-004": "k6 run H3-004-vector-search-performance.js",
+    "test:h3-004:soak": "k6 run --duration 1h --vus 100 H3-004-vector-search-performance.js",
+    "test:all": "npm run test:h3-001 && npm run test:h3-002 && npm run test:h3-003 && npm run test:h3-004",
+    "test:soak": "npm run test:h3-001:soak && npm run test:h3-002:soak && npm run test:h3-003:soak && npm run test:h3-004:soak",
+    "report": "node generate-reports.js"
+  },
+  "devDependencies": {
+    "k6": "^0.49.0"
+  },
+  "keywords": [
+    "performance",
+    "load-testing",
+    "k6"
+  ]
+}

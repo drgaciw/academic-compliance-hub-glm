@@ -1,0 +1,256 @@
+{
+  "projectName": "athletic-academics-hub",
+  "projectType": "monorepo",
+  "packageManager": "pnpm",
+  "buildTool": "turbo",
+  "techStack": {
+    "backend": {
+      "framework": "Hono",
+      "language": "TypeScript",
+      "runtime": "Node.js",
+      "validation": "Zod",
+      "database": "Prisma",
+      "queue": "Bull",
+      "cache": "Redis (ioredis)",
+      "websocket": "ws",
+      "testing": "Jest"
+    },
+    "services": [
+      {
+        "name": "eligibility-engine",
+        "description": "Eligibility evaluation microservice for academic compliance",
+        "path": "services/eligibility-engine",
+        "mainFile": "src/index.ts",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/api/eligibility/evaluate",
+            "description": "Evaluate student eligibility"
+          },
+          {
+            "method": "GET",
+            "path": "/api/eligibility/:studentId",
+            "description": "Get current eligibility for a student"
+          },
+          {
+            "method": "POST",
+            "path": "/api/eligibility/gpa",
+            "description": "Calculate GPA"
+          },
+          {
+            "method": "POST",
+            "path": "/api/eligibility/progress-toward-degree",
+            "description": "Calculate progress toward degree"
+          },
+          {
+            "method": "POST",
+            "path": "/api/eligibility/what-if",
+            "description": "Run what-if scenario"
+          },
+          {
+            "method": "GET",
+            "path": "/api/eligibility/rules",
+            "description": "List eligibility rules"
+          },
+          {
+            "method": "POST",
+            "path": "/api/eligibility/override",
+            "description": "Create eligibility override"
+          },
+          {
+            "method": "GET",
+            "path": "/api/eligibility/violations/:studentId",
+            "description": "Get violations for a student"
+          }
+        ],
+        "services": [
+          "EvaluationService",
+          "GPAService",
+          "PTDService",
+          "WhatIfService",
+          "TransferService",
+          "OverrideService"
+        ]
+      },
+      {
+        "name": "document-ingestion",
+        "description": "Document ingestion and processing microservice",
+        "path": "services/document-ingestion",
+        "mainFile": "src/index.ts",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/upload",
+            "description": "Upload and process documents"
+          }
+        ],
+        "features": [
+          "File validation",
+          "Virus scanning",
+          "Blob storage",
+          "Document classification"
+        ]
+      },
+      {
+        "name": "report-service",
+        "description": "Report generation microservice with PDF and digital signatures",
+        "path": "services/report-service",
+        "mainFile": "src/index.ts",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/api/reports/eligibility",
+            "description": "Generate eligibility report"
+          },
+          {
+            "method": "POST",
+            "path": "/api/reports/transfer-credit",
+            "description": "Generate transfer credit report"
+          },
+          {
+            "method": "POST",
+            "path": "/api/reports/batch",
+            "description": "Generate batch reports"
+          },
+          {
+            "method": "GET",
+            "path": "/api/reports/templates",
+            "description": "List report templates"
+          },
+          {
+            "method": "POST",
+            "path": "/api/reports/templates",
+            "description": "Create report template"
+          },
+          {
+            "method": "GET",
+            "path": "/api/reports/:id",
+            "description": "Get report details"
+          },
+          {
+            "method": "GET",
+            "path": "/api/reports/:id/download",
+            "description": "Download report file"
+          },
+          {
+            "method": "POST",
+            "path": "/api/reports/:id/sign",
+            "description": "Apply digital signature to report"
+          },
+          {
+            "method": "DELETE",
+            "path": "/api/reports/:id",
+            "description": "Delete report"
+          },
+          {
+            "method": "GET",
+            "path": "/api/reports/export/csv",
+            "description": "Export reports as CSV"
+          },
+          {
+            "method": "GET",
+            "path": "/api/reports/export/json",
+            "description": "Export reports as JSON"
+          },
+          {
+            "method": "GET",
+            "path": "/api/reports/stats/queue",
+            "description": "Get queue statistics"
+          },
+          {
+            "method": "POST",
+            "path": "/api/reports/worker/start",
+            "description": "Start report worker"
+          }
+        ],
+        "features": [
+          "PDF generation",
+          "Digital signatures",
+          "Batch processing",
+          "WebSocket notifications",
+          "CSV/JSON export"
+        ]
+      },
+      {
+        "name": "advising",
+        "description": "Advising microservice",
+        "path": "services/advising",
+        "mainFile": "src/index.ts"
+      },
+      {
+        "name": "compliance",
+        "description": "Compliance microservice",
+        "path": "services/compliance",
+        "mainFile": "src/index.ts"
+      },
+      {
+        "name": "course-mapping",
+        "description": "Course mapping microservice",
+        "path": "services/course-mapping",
+        "mainFile": "src/index.ts"
+      },
+      {
+        "name": "integration",
+        "description": "Integration microservice",
+        "path": "services/integration",
+        "mainFile": "src/index.ts"
+      },
+      {
+        "name": "monitoring",
+        "description": "Monitoring microservice",
+        "path": "services/monitoring",
+        "mainFile": "src/index.ts"
+      },
+      {
+        "name": "support",
+        "description": "Support microservice",
+        "path": "services/support",
+        "mainFile": "src/index.ts"
+      },
+      {
+        "name": "user",
+        "description": "User microservice",
+        "path": "services/user",
+        "mainFile": "src/index.ts"
+      }
+    ],
+    "packages": [
+      {
+        "name": "@aah/database",
+        "description": "Database package with Prisma ORM"
+      },
+      {
+        "name": "@aah/api-utils",
+        "description": "API utility functions"
+      },
+      {
+        "name": "@aah/compliance-engine",
+        "description": "Compliance engine logic"
+      },
+      {
+        "name": "@aah/config",
+        "description": "Shared TypeScript configuration"
+      },
+      {
+        "name": "@academic-compliance/report-generation",
+        "description": "Report generation package"
+      }
+    ]
+  },
+  "features": {
+    "authentication": "JWT-based",
+    "authorization": "Role-based access control",
+    "fileUpload": "Multer with Vercel Blob storage",
+    "virusScanning": "Integrated virus scanner",
+    "documentClassification": "AI-powered document classification",
+    "reportGeneration": "PDF generation with digital signatures",
+    "realtimeUpdates": "WebSocket support",
+    "jobQueue": "Bull with Redis",
+    "dataExport": "CSV and JSON export"
+  },
+  "testing": {
+    "framework": "Jest",
+    "testTypes": ["unit", "integration", "e2e"],
+    "coverage": "Available"
+  }
+}

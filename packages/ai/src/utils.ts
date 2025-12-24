@@ -2,7 +2,7 @@
  * AI utility functions
  */
 
-import { generateText, streamText } from 'ai';
+import { generateText, streamText } from "ai";
 
 export interface AIConfig {
   model?: string;
@@ -11,7 +11,7 @@ export interface AIConfig {
 }
 
 export const defaultAIConfig: AIConfig = {
-  model: 'gpt-4',
+  model: "gpt-4",
   temperature: 0.7,
   maxTokens: 1000,
 };
@@ -21,11 +21,11 @@ export const defaultAIConfig: AIConfig = {
  */
 export async function generateAIResponse(
   prompt: string,
-  config: Partial<AIConfig> = {}
+  config: Partial<AIConfig> = {},
 ): Promise<string> {
   const finalConfig = { ...defaultAIConfig, ...config };
   const result = await generateText({
-    model: finalConfig.model || 'gpt-4',
+    model: (finalConfig.model || "gpt-4") as any,
     prompt,
   });
   return result.text;
@@ -37,11 +37,11 @@ export async function generateAIResponse(
 export async function streamAIResponse(
   prompt: string,
   onChunk: (chunk: string) => void,
-  config: Partial<AIConfig> = {}
+  config: Partial<AIConfig> = {},
 ) {
   const finalConfig = { ...defaultAIConfig, ...config };
   const result = await streamText({
-    model: finalConfig.model || 'gpt-4',
+    model: (finalConfig.model || "gpt-4") as any,
     prompt,
   });
 
@@ -58,7 +58,7 @@ export async function analyzeAcademicPerformance(data: {
   credits: number;
   courses: Array<{ grade: string; credits: number }>;
 }): Promise<{
-  status: 'excellent' | 'good' | 'needs-improvement' | 'at-risk';
+  status: "excellent" | "good" | "needs-improvement" | "at-risk";
   insights: string[];
   recommendations: string[];
 }> {
@@ -73,13 +73,13 @@ export async function analyzeAcademicPerformance(data: {
   3. Specific recommendations for improvement`;
 
   const result = await generateText({
-    model: 'gpt-4',
+    model: "gpt-4" as any,
     prompt,
   });
 
   // Parse the AI response (in production, this would be more robust)
   return {
-    status: 'good',
+    status: "good",
     insights: [],
     recommendations: [],
   };

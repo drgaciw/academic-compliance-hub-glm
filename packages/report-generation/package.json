@@ -11,7 +11,16 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:features": "ts-node tests/feature-tests.ts"
+    "test:features": "ts-node tests/feature-tests.ts",
+    "test:retention": "jest tests/retention-policy.test.ts",
+    "test:integrity": "jest tests/archive-integrity.test.ts",
+    "test:active": "jest tests/active-logs.test.ts",
+    "test:search": "jest tests/archive-search.test.ts",
+    "test:compliance": "jest tests/retention-compliance.test.ts",
+    "test:all-retention": "jest tests/retention-*.test.ts tests/archive-*.test.ts tests/active-logs.test.ts",
+    "archive:logs": "node scripts/archive-logs.js archive",
+    "archive:cleanup": "node scripts/archive-logs.js cleanup",
+    "archive:report": "node scripts/archive-logs.js report"
   },
   "keywords": [
     "pdf",
@@ -31,11 +40,13 @@
     "handlebars": "^4.7.8",
     "jspdf": "^3.0.4",
     "jspdf-autotable": "^5.0.2",
-    "node-signpdf": "^1.5.1"
+    "node-signpdf": "^1.5.1",
+    "papaparse": "^5.5.3"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/node": "^25.0.3",
+    "@types/papaparse": "^5.5.2",
     "jest": "^30.2.0",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",

@@ -15,6 +15,12 @@ export interface DocumentMetadata {
   isTranscript: boolean;
   transcriptStructure?: TranscriptStructure;
   uploadedAt: Date;
+  ocrData?: {
+    text: string;
+    confidence: number;
+    fields?: any;
+    processingTime: number;
+  };
 }
 
 export interface TranscriptStructure {

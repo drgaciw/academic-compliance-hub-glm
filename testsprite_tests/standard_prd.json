@@ -1,0 +1,236 @@
+{
+  "project_name": "Academic Compliance Hub - Admin App",
+  "version": "2.0.0",
+  "description": "Admin dashboard for Athletic Academics Hub - A SaaS platform for university athletic academic support with AI capabilities",
+  "critical_user_flows": [
+    {
+      "id": "FLOW-001",
+      "name": "Transcript Upload & Document Ingestion",
+      "priority": "P0",
+      "description": "Single and batch transcript upload with drag-drop support, file validation, progress tracking, and metadata entry",
+      "entry_point": "/compliance/upload",
+      "components": [
+        "File upload component with drag-drop",
+        "File type validation (PDF, JPEG, PNG, DOCX)",
+        "File size validation (10MB limit)",
+        "Progress tracking for uploads",
+        "Institution selection (source/target)",
+        "Student metadata entry",
+        "Error handling and display"
+      ],
+      "api_endpoints": [
+        "POST /api/transcripts/upload",
+        "POST /api/transcripts/batch-upload"
+      ],
+      "test_scenarios": [
+        "Upload single valid PDF file",
+        "Upload multiple files via drag-drop",
+        "Validate file type rejection",
+        "Validate file size limit",
+        "Track upload progress",
+        "Handle upload errors",
+        "Remove files from queue",
+        "Submit with all required fields",
+        "Submit with missing required fields"
+      ]
+    },
+    {
+      "id": "FLOW-002",
+      "name": "Eligibility Review & Approval",
+      "priority": "P0",
+      "description": "Review queue with filtering, sorting, approve/reject actions, and detailed student evaluation views",
+      "entry_point": "/compliance/eligibility-review",
+      "components": [
+        "Evaluation queue table",
+        "Status filtering (all, pending, in_review, approved, rejected)",
+        "Institution filtering",
+        "Search by student name/ID",
+        "Sorting by date, priority, student, credits",
+        "Expandable row details",
+        "Quick approve/reject actions",
+        "Navigation to detailed review page"
+      ],
+      "api_endpoints": [
+        "GET /api/eligibility",
+        "PUT /api/eligibility/:id",
+        "POST /api/eligibility/what-if"
+      ],
+      "test_scenarios": [
+        "Filter by status",
+        "Filter by institution",
+        "Search by student name",
+        "Sort by date ascending/descending",
+        "Sort by priority",
+        "Expand row to view details",
+        "Quick approve pending evaluation",
+        "Quick reject pending evaluation",
+        "Return in_review to pending",
+        "Navigate to detailed review page"
+      ]
+    },
+    {
+      "id": "FLOW-003",
+      "name": "Compliance Dashboard Monitoring",
+      "priority": "P0",
+      "description": "Dashboard with metrics cards, recent activity feed, navigation sidebar, and responsive layout",
+      "entry_point": "/compliance/dashboard",
+      "components": [
+        "Sidebar navigation",
+        "Mobile menu toggle",
+        "Stat cards (pending, completed, at-risk)",
+        "Recent activity table",
+        "User profile display",
+        "Responsive layout"
+      ],
+      "api_endpoints": [
+        "GET /api/dashboard/metrics",
+        "GET /api/dashboard/activity"
+      ],
+      "test_scenarios": [
+        "View dashboard metrics",
+        "Navigate via sidebar",
+        "Toggle mobile menu",
+        "View recent activity",
+        "Navigate to audit trail",
+        "View stat card trends",
+        "Responsive layout on mobile",
+        "Responsive layout on tablet",
+        "Responsive layout on desktop"
+      ]
+    },
+    {
+      "id": "FLOW-004",
+      "name": "Course Mapping",
+      "priority": "P1",
+      "description": "Course catalog browsing, transfer course mapping interface, and bulk mapping capabilities",
+      "entry_point": "/compliance/course-mapping",
+      "components": [
+        "Course catalog search",
+        "Transfer course list",
+        "Institution course list",
+        "Mapping interface",
+        "Bulk mapping selection",
+        "Manual review request"
+      ],
+      "api_endpoints": [
+        "GET /api/course-mapping/transfer/:studentId",
+        "GET /api/course-mapping/institution",
+        "POST /api/course-mapping/map",
+        "POST /api/course-mapping/bulk-map",
+        "POST /api/course-mapping/request-review"
+      ],
+      "test_scenarios": [
+        "Search course catalog",
+        "View transfer courses",
+        "Map single course",
+        "Bulk map multiple courses",
+        "Request manual review",
+        "View mapping details",
+        "Filter by department",
+        "Search by course code"
+      ]
+    },
+    {
+      "id": "FLOW-005",
+      "name": "Audit Trail Review",
+      "priority": "P1",
+      "description": "Audit log viewing with filtering by action type, date range, and export functionality",
+      "entry_point": "/compliance/audit-trail",
+      "components": [
+        "Audit log table",
+        "Action type filter",
+        "Date range filter",
+        "User filter",
+        "Export to CSV",
+        "Export to PDF",
+        "Pagination"
+      ],
+      "api_endpoints": [
+        "GET /api/audit-trail",
+        "GET /api/audit-trail/export"
+      ],
+      "test_scenarios": [
+        "View audit log entries",
+        "Filter by action type",
+        "Filter by date range",
+        "Filter by user",
+        "Export to CSV",
+        "Export to PDF",
+        "Paginate through results",
+        "View entry details"
+      ]
+    },
+    {
+      "id": "FLOW-006",
+      "name": "Batch Upload",
+      "priority": "P0",
+      "description": "Multiple file handling with progress tracking, batch status, and error handling",
+      "entry_point": "/compliance/upload/batch",
+      "components": [
+        "Multi-file selection",
+        "Batch progress tracking",
+        "Individual file status",
+        "Batch summary",
+        "Cancel batch operation",
+        "Retry failed uploads"
+      ],
+      "api_endpoints": [
+        "POST /api/transcripts/batch-upload",
+        "GET /api/transcripts/batch/:id"
+      ],
+      "test_scenarios": [
+        "Select multiple files",
+        "Start batch upload",
+        "Track individual file progress",
+        "View batch summary",
+        "Handle partial failures",
+        "Cancel batch upload",
+        "Retry failed uploads",
+        "View completed batch"
+      ]
+    }
+  ],
+  "testing_requirements": {
+    "framework": "Vitest",
+    "testing_library": "React Testing Library",
+    "api_mocking": "MSW (Mock Service Worker)",
+    "coverage_target": "85%+",
+    "accessibility": "WCAG 2.1 Level AA",
+    "compliance": "FERPA",
+    "test_structure": "apps/admin/__tests__/integration/"
+  },
+  "shared_components": [
+    {
+      "name": "Button",
+      "path": "packages/ui/src/components/button.tsx"
+    },
+    {
+      "name": "Card",
+      "path": "packages/ui/src/components/card.tsx"
+    },
+    {
+      "name": "Dialog",
+      "path": "packages/ui/src/components/dialog.tsx"
+    },
+    {
+      "name": "Input",
+      "path": "packages/ui/src/components/input.tsx"
+    },
+    {
+      "name": "Label",
+      "path": "packages/ui/src/components/label.tsx"
+    },
+    {
+      "name": "Select",
+      "path": "packages/ui/src/components/select.tsx"
+    },
+    {
+      "name": "Tabs",
+      "path": "packages/ui/src/components/tabs.tsx"
+    },
+    {
+      "name": "DropdownMenu",
+      "path": "packages/ui/src/components/dropdown-menu.tsx"
+    }
+  ]
+}

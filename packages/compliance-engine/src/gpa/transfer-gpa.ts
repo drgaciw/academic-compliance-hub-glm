@@ -52,9 +52,10 @@ export class TransferGPACalculator {
     let coursesIncluded = 0;
 
     for (const course of transferCourses) {
-      const creditsToUse = useTransferCredits && course.transferCredits
-        ? course.transferCredits
-        : course.credits;
+      const creditsToUse =
+        useTransferCredits && course.transferCredits
+          ? course.transferCredits
+          : course.credits;
 
       if (!course.accepted) {
         attemptedCredits += creditsToUse;
@@ -78,19 +79,6 @@ export class TransferGPACalculator {
       acceptedCredits,
       attemptedCredits,
       coursesIncluded,
-      qualityPoints: parseFloat(qualityPoints.toFixed(2)),
-    };
-  }
-    }
-
-    const gpa = totalCredits > 0 ? qualityPoints / totalCredits : 0.0;
-
-    return {
-      gpa: parseFloat(gpa.toFixed(2)),
-      totalCredits,
-      acceptedCredits,
-      attemptedCredits,
-      coursesIncluded: filteredCourses.length,
       qualityPoints: parseFloat(qualityPoints.toFixed(2)),
     };
   }

@@ -1,0 +1,1153 @@
+{
+  "projectName": "athletic-academics-hub",
+  "testType": "backend",
+  "testPlan": [
+    {
+      "id": "eligibility-engine-001",
+      "name": "Eligibility Engine - POST /api/eligibility/evaluate",
+      "description": "Test student eligibility evaluation endpoint",
+      "service": "eligibility-engine",
+      "endpoint": "/api/eligibility/evaluate",
+      "method": "POST",
+      "testCases": [
+        {
+          "id": "TC-001",
+          "name": "Valid eligibility evaluation request",
+          "description": "Test successful eligibility evaluation with valid student data",
+          "request": {
+            "body": {
+              "studentId": "STU001",
+              "season": "FALL",
+              "sport": "Basketball",
+              "term": "2024"
+            }
+          },
+          "expectedResponse": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data": {
+                "studentId": "STU001",
+                "isEligible": true,
+                "gpa": 3.5,
+                "credits": 30,
+                "violations": []
+              }
+            }
+          }
+        },
+        {
+          "id": "TC-002",
+          "name": "Missing required studentId",
+          "description": "Test validation error when studentId is missing",
+          "request": {
+            "body": {
+              "season": "FALL",
+              "sport": "Basketball"
+            }
+          },
+          "expectedResponse": {
+            "status": 400,
+            "body": {
+              "success": false,
+              "error": "VALIDATION_ERROR"
+            }
+          }
+        },
+        {
+          "id": "TC-003",
+          "name": "Student not found",
+          "description": "Test error handling when student does not exist",
+          "request": {
+            "body": {
+              "studentId": "NONEXISTENT"
+            }
+          },
+          "expectedResponse": {
+            "status": 404,
+            "body": {
+              "success": false,
+              "error": "STUDENT_NOT_FOUND"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "eligibility-engine-002",
+      "name": "Eligibility Engine - GET /api/eligibility/:studentId",
+      "description": "Test get current eligibility endpoint",
+      "service": "eligibility-engine",
+      "endpoint": "/api/eligibility/:studentId",
+      "method": "GET",
+      "testCases": [
+        {
+          "id": "TC-004",
+          "name": "Get eligibility for existing student",
+          "description": "Test successful retrieval of eligibility data",
+          "request": {
+            "params": {
+              "studentId": "STU001"
+            }
+          },
+          "expectedResponse": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data": {
+                "studentId": "STU001",
+                "isEligible": true,
+                "gpa": 3.5,
+                "credits": 30
+              }
+            }
+          }
+        },
+        {
+          "id": "TC-005",
+          "name": "Get eligibility for non-existent student",
+          "description": "Test error handling when student does not exist",
+          "request": {
+            "params": {
+              "studentId": "NONEXISTENT"
+            }
+          },
+          "expectedResponse": {
+            "status": 404,
+            "body": {
+              "success": false,
+              "error": "STUDENT_NOT_FOUND"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "eligibility-engine-003",
+      "name": "Eligibility Engine - POST /api/eligibility/gpa",
+      "description": "Test GPA calculation endpoint",
+      "service": "eligibility-engine",
+      "endpoint": "/api/eligibility/gpa",
+      "method": "POST",
+      "testCases": [
+        {
+          "id": "TC-006",
+          "name": "Calculate GPA with valid courses",
+          "description": "Test successful GPA calculation",
+          "request": {
+            "body": {
+              "studentId": "STU001",
+              "courses": [
+                {
+                  "courseId": "MATH101",
+                  "credits": 3,
+                  "grade": "A"
+                },
+                {
+                  "courseId": "ENG101",
+                  "credits": 3,
+                  "grade": "B"
+                }
+              ]
+            }
+          },
+          "expectedResponse": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data": {
+                "studentId": "STU001",
+                "gpa": 3.5,
+                "totalCredits": 6,
+                "gradePoints": 21
+              }
+            }
+          }
+        },
+        {
+          "id": "TC-007",
+          "name": "Calculate GPA with pass/fail courses",
+          "description": "Test GPA calculation excluding pass/fail courses",
+          "request": {
+            "body": {
+              "studentId": "STU001",
+              "courses": [
+                {
+                  "courseId": "MATH101",
+                  "credits": 3,
+                  "grade": "A"
+                },
+                {
+                  "courseId": "PE101",
+                  "credits": 1,
+                  "grade": "P",
+                  "isPassFail": true
+                }
+              ],
+              "includePassFail": false
+            }
+          },
+          "expectedResponse": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data": {
+                "studentId": "STU001",
+                "gpa": 4.0,
+                "totalCredits": 3,
+                "gradePoints": 12
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "eligibility-engine-004",
+      "name": "Eligibility Engine - POST /api/eligibility/progress-toward-degree",
+      "description": "Test progress toward degree calculation endpoint",
+      "service": "eligibility-engine",
+      "endpoint": "/api/eligibility/progress-toward-degree",
+      "method": "POST",
+      "testCases": [
+        {
+          "id": "TC-008",
+          "name": "Calculate PTD for existing student",
+          "description": "Test successful PTD calculation",
+          "request": {
+            "body": {
+              "studentId": "STU001",
+              "degreeProgram": "Computer Science"
+            }
+          },
+          "expectedResponse": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data": {
+                "studentId": "STU001",
+                "degreeProgram": "Computer Science",
+                "completedCredits": 60,
+                "requiredCredits": 120,
+                "progressPercentage": 50,
+                "remainingCredits": 60
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "eligibility-engine-005",
+      "name": "Eligibility Engine - POST /api/eligibility/what-if",
+      "description": "Test what-if scenario endpoint",
+      "service": "eligibility-engine",
+      "endpoint": "/api/eligibility/what-if",
+      "method": "POST",
+      "testCases": [
+        {
+          "id": "TC-009",
+          "name": "Run what-if scenario with projected grades",
+          "description": "Test successful what-if scenario calculation",
+          "request": {
+            "body": {
+              "studentId": "STU001",
+              "scenarioName": "Best Case Scenario",
+              "assumptions": {
+                "projectedGrades": [
+                  {
+                    "courseId": "MATH201",
+                    "credits": 3,
+                    "grade": "A"
+                  }
+                ],
+                "targetGPA": 3.8
+              }
+            }
+          },
+          "expectedResponse": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data": {
+                "studentId": "STU001",
+                "scenarioName": "Best Case Scenario",
+                "projectedGPA": 3.8,
+                "isTargetAchievable": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "eligibility-engine-006",
+      "name": "Eligibility Engine - GET /api/eligibility/rules",
+      "description": "Test list eligibility rules endpoint",
+      "service": "eligibility-engine",
+      "endpoint": "/api/eligibility/rules",
+      "method": "GET",
+      "testCases": [
+        {
+          "id": "TC-010",
+          "name": "List all eligibility rules",
+          "description": "Test successful retrieval of eligibility rules",
+          "request": {},
+          "expectedResponse": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data": [
+                {
+                  "ruleId": "RULE001",
+                  "name": "Minimum GPA Requirement",
+                  "description": "Student must maintain minimum GPA of 2.0",
+                  "threshold": 2.0
+                },
+                {
+                  "ruleId": "RULE002",
+                  "name": "Credit Progression",
+                  "description": "Student must complete 24 credits per academic year",
+                  "threshold": 24
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "eligibility-engine-007",
+      "name": "Eligibility Engine - POST /api/eligibility/override",
+      "description": "Test create eligibility override endpoint",
+      "service": "eligibility-engine",
+      "endpoint": "/api/eligibility/override",
+      "method": "POST",
+      "testCases": [
+        {
+          "id": "TC-011",
+          "name": "Create eligibility override",
+          "description": "Test successful creation of eligibility override",
+          "request": {
+            "body": {
+              "studentId": "STU001",
+              "ruleId": "RULE001",
+              "override": true,
+              "justification": "Medical exemption",
+              "approvedBy": "ADMIN001",
+              "effectiveUntil": "2024-12-31"
+            }
+          },
+          "expectedResponse": {
+            "status": 201,
+            "body": {
+              "success": true,
+              "data": {
+                "overrideId": "OVR001",
+                "studentId": "STU001",
+                "ruleId": "RULE001",
+                "isActive": true
+              }
+            }
+          }
+        },
+        {
+          "id": "TC-012",
+          "name": "Missing required justification",
+          "description": "Test validation error when justification is missing",
+          "request": {
+            "body": {
+              "studentId": "STU001",
+              "ruleId": "RULE001",
+              "override": true
+            }
+          },
+          "expectedResponse": {
+            "status": 400,
+            "body": {
+              "success": false,
+              "error": "VALIDATION_ERROR"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "eligibility-engine-008",
+      "name": "Eligibility Engine - GET /api/eligibility/violations/:studentId",
+      "description": "Test get violations endpoint",
+      "service": "eligibility-engine",
+      "endpoint": "/api/eligibility/violations/:studentId",
+      "method": "GET",
+      "testCases": [
+        {
+          "id": "TC-013",
+          "name": "Get violations for student with violations",
+          "description": "Test successful retrieval of violations",
+          "request": {
+            "params": {
+              "studentId": "STU002"
+            }
+          },
+          "expectedResponse": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data": {
+                "studentId": "STU002",
+                "violations": [
+                  {
+                    "ruleId": "RULE001",
+                    "ruleName": "Minimum GPA Requirement",
+                    "severity": "HIGH",
+                    "description": "GPA below minimum threshold"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": "TC-014",
+          "name": "Get violations for student with no violations",
+          "description": "Test retrieval when student has no violations",
+          "request": {
+            "params": {
+              "studentId": "STU001"
+            }
+          },
+          "expectedResponse": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data": {
+                "studentId": "STU001",
+                "violations": []
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "document-ingestion-001",
+      "name": "Document Ingestion - POST /upload",
+      "description": "Test document upload endpoint",
+      "service": "document-ingestion",
+      "endpoint": "/upload",
+      "method": "POST",
+      "testCases": [
+        {
+          "id": "TC-015",
+          "name": "Upload valid PDF document",
+          "description": "Test successful document upload with valid PDF",
+          "request": {
+            "body": {
+              "file": {
+                "name": "transcript.pdf",
+                "type": "application/pdf",
+                "size": 102400
+              }
+            }
+          },
+          "expectedResponse": {
+            "status": 201,
+            "body": {
+              "success": true,
+              "documentId": "doc_1234567890_abc123",
+              "metadata": {
+                "fileName": "transcript.pdf",
+                "fileType": "application/pdf",
+                "fileSize": 102400,
+                "category": "TRANSCRIPT",
+                "pageCount": 5,
+                "isTranscript": true
+              },
+              "storageUrl": "https://blob.example.com/transcript.pdf"
+            }
+          }
+        },
+        {
+          "id": "TC-016",
+          "name": "Upload without file",
+          "description": "Test error handling when no file is provided",
+          "request": {
+            "body": {}
+          },
+          "expectedResponse": {
+            "status": 400,
+            "body": {
+              "success": false,
+              "error": "No file provided"
+            }
+          }
+        },
+        {
+          "id": "TC-017",
+          "name": "Upload invalid file type",
+          "description": "Test validation error for unsupported file type",
+          "request": {
+            "body": {
+              "file": {
+                "name": "malicious.exe",
+                "type": "application/x-msdownload",
+                "size": 1024
+              }
+            }
+          },
+          "expectedResponse": {
+            "status": 400,
+            "body": {
+              "success": false,
+              "error": "Invalid file type"
+            }
+          }
+        },
+        {
+          "id": "TC-018",
+          "name": "Upload file exceeding size limit",
+          "description": "Test validation error for file size exceeding limit",
+          "request": {
+            "body": {
+              "file": {
+                "name": "large.pdf",
+                "type": "application/pdf",
+                "size": 104857600
+              }
+            }
+          },
+          "expectedResponse": {
+            "status": 400,
+            "body": {
+              "success": false,
+              "error": "File size exceeds maximum limit"
+            }
+          }
+        },
+        {
+          "id": "TC-019",
+          "name": "Upload file with virus detected",
+          "description": "Test error handling when virus is detected",
+          "request": {
+            "body": {
+              "file": {
+                "name": "infected.pdf",
+                "type": "application/pdf",
+                "size": 1024
+              }
+            }
+          },
+          "expectedResponse": {
+            "status": 403,
+            "body": {
+              "success": false,
+              "error": "File contains threats and cannot be uploaded",
+              "threats": ["EICAR-Test-File"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "report-service-001",
+      "name": "Report Service - POST /api/reports/eligibility",
+      "description": "Test eligibility report generation endpoint",
+      "service": "report-service",
+      "endpoint": "/api/reports/eligibility",
+      "method": "POST",
+      "testCases": [
+        {
+          "id": "TC-020",
+          "name": "Generate eligibility report",
+          "description": "Test successful eligibility report generation",
+          "request": {
+            "headers": {
+              "x-user-id": "USER001"
+            },
+            "body": {
+              "studentId": "STU001",
+              "season": "FALL",
+              "sport": "Basketball"
+            }
+          },
+          "expectedResponse": {
+            "status": 202,
+            "body": {
+              "success": true,
+              "data": {
+                "reportId": "report-uuid-123",
+                "status": "pending",
+                "message": "Report generation started"
+              }
+            }
+          }
+        },
+        {
+          "id": "TC-021",
+          "name": "Generate report without studentId",
+          "description": "Test validation error when studentId is missing",
+          "request": {
+            "headers": {
+              "x-user-id": "USER001"
+            },
+            "body": {}
+          },
+          "expectedResponse": {
+            "status": 400,
+            "body": {
+              "success": false,
+              "error": "VALIDATION_ERROR"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "report-service-002",
+      "name": "Report Service - POST /api/reports/transfer-credit",
+      "description": "Test transfer credit report generation endpoint",
+      "service": "report-service",
+      "endpoint": "/api/reports/transfer-credit",
+      "method": "POST",
+      "testCases": [
+        {
+          "id": "TC-022",
+          "name": "Generate transfer credit report",
+          "description": "Test successful transfer credit report generation",
+          "request": {
+            "headers": {
+              "x-user-id": "USER001"
+            },
+            "body": {
+              "studentId": "STU001",
+              "includeTransferCredits": true
+            }
+          },
+          "expectedResponse": {
+            "status": 202,
+            "body": {
+              "success": true,
+              "data": {
+                "reportId": "report-uuid-456",
+                "status": "pending",
+                "message": "Transfer credit report generation started"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "report-service-003",
+      "name": "Report Service - POST /api/reports/batch",
+      "description": "Test batch report generation endpoint",
+      "service": "report-service",
+      "endpoint": "/api/reports/batch",
+      "method": "POST",
+      "testCases": [
+        {
+          "id": "TC-023",
+          "name": "Generate batch reports",
+          "description": "Test successful batch report generation",
+          "request": {
+            "headers": {
+              "x-user-id": "USER001"
+            },
+            "body": {
+              "reportType": "ELIGIBILITY",
+              "studentIds": ["STU001", "STU002", "STU003"],
+              "format": "PDF"
+            }
+          },
+          "expectedResponse": {
+            "status": 202,
+            "body": {
+              "success": true,
+              "data": {
+                "batchId": "batch-uuid-789",
+                "reports": [
+                  {
+                    "reportId": "report-uuid-001",
+                    "studentId": "STU001",
+                    "status": "pending"
+                  },
+                  {
+                    "reportId": "report-uuid-002",
+                    "studentId": "STU002",
+                    "status": "pending"
+                  },
+                  {
+                    "reportId": "report-uuid-003",
+                    "studentId": "STU003",
+                    "status": "pending"
+                  }
+                ],
+                "total": 3,
+                "message": "Batch report generation started"
+              }
+            }
+          }
+        },
+        {
+          "id": "TC-024",
+          "name": "Generate batch reports with empty student list",
+          "description": "Test validation error when studentIds is empty",
+          "request": {
+            "headers": {
+              "x-user-id": "USER001"
+            },
+            "body": {
+              "reportType": "ELIGIBILITY",
+              "studentIds": []
+            }
+          },
+          "expectedResponse": {
+            "status": 400,
+            "body": {
+              "success": false,
+              "error": "VALIDATION_ERROR"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "report-service-004",
+      "name": "Report Service - GET /api/reports/templates",
+      "description": "Test list report templates endpoint",
+      "service": "report-service",
+      "endpoint": "/api/reports/templates",
+      "method": "GET",
+      "testCases": [
+        {
+          "id": "TC-025",
+          "name": "List all report templates",
+          "description": "Test successful retrieval of report templates",
+          "request": {},
+          "expectedResponse": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data": [
+                {
+                  "id": "TPL001",
+                  "name": "Standard Eligibility Report",
+                  "type": "ELIGIBILITY",
+                  "format": "PDF"
+                },
+                {
+                  "id": "TPL002",
+                  "name": "Transfer Credit Report",
+                  "type": "TRANSFER_CREDIT",
+                  "format": "PDF"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "report-service-005",
+      "name": "Report Service - POST /api/reports/templates",
+      "description": "Test create report template endpoint",
+      "service": "report-service",
+      "endpoint": "/api/reports/templates",
+      "method": "POST",
+      "testCases": [
+        {
+          "id": "TC-026",
+          "name": "Create report template",
+          "description": "Test successful creation of report template",
+          "request": {
+            "headers": {
+              "x-user-id": "USER001"
+            },
+            "body": {
+              "name": "Custom Eligibility Report",
+              "type": "ELIGIBILITY",
+              "format": "PDF",
+              "content": "<html>...</html>"
+            }
+          },
+          "expectedResponse": {
+            "status": 201,
+            "body": {
+              "success": true,
+              "data": {
+                "id": "TPL003",
+                "name": "Custom Eligibility Report",
+                "type": "ELIGIBILITY",
+                "format": "PDF",
+                "createdBy": "USER001"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "report-service-006",
+      "name": "Report Service - GET /api/reports/:id",
+      "description": "Test get report details endpoint",
+      "service": "report-service",
+      "endpoint": "/api/reports/:id",
+      "method": "GET",
+      "testCases": [
+        {
+          "id": "TC-027",
+          "name": "Get report details for existing report",
+          "description": "Test successful retrieval of report details",
+          "request": {
+            "params": {
+              "id": "report-uuid-123"
+            }
+          },
+          "expectedResponse": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data": {
+                "id": "report-uuid-123",
+                "type": "ELIGIBILITY",
+                "format": "PDF",
+                "status": "COMPLETED",
+                "studentId": "STU001",
+                "progress": 100,
+                "fileName": "eligibility-report.pdf",
+                "fileSize": 102400
+              }
+            }
+          }
+        },
+        {
+          "id": "TC-028",
+          "name": "Get report details for non-existent report",
+          "description": "Test error handling when report does not exist",
+          "request": {
+            "params": {
+              "id": "non-existent-report"
+            }
+          },
+          "expectedResponse": {
+            "status": 404,
+            "body": {
+              "success": false,
+              "error": "NOT_FOUND"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "report-service-007",
+      "name": "Report Service - GET /api/reports/:id/download",
+      "description": "Test download report endpoint",
+      "service": "report-service",
+      "endpoint": "/api/reports/:id/download",
+      "method": "GET",
+      "testCases": [
+        {
+          "id": "TC-029",
+          "name": "Download completed report",
+          "description": "Test successful download of completed report",
+          "request": {
+            "params": {
+              "id": "report-uuid-123"
+            }
+          },
+          "expectedResponse": {
+            "status": 200,
+            "headers": {
+              "Content-Type": "application/pdf",
+              "Content-Disposition": "attachment; filename=\"eligibility-report.pdf\""
+            }
+          }
+        },
+        {
+          "id": "TC-030",
+          "name": "Download pending report",
+          "description": "Test error when trying to download pending report",
+          "request": {
+            "params": {
+              "id": "report-uuid-pending"
+            }
+          },
+          "expectedResponse": {
+            "status": 400,
+            "body": {
+              "success": false,
+              "error": "REPORT_NOT_READY"
+            }
+          }
+        },
+        {
+          "id": "TC-031",
+          "name": "Download non-existent report",
+          "description": "Test error when report does not exist",
+          "request": {
+            "params": {
+              "id": "non-existent-report"
+            }
+          },
+          "expectedResponse": {
+            "status": 404,
+            "body": {
+              "success": false,
+              "error": "NOT_FOUND"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "report-service-008",
+      "name": "Report Service - POST /api/reports/:id/sign",
+      "description": "Test sign report endpoint",
+      "service": "report-service",
+      "endpoint": "/api/reports/:id/sign",
+      "method": "POST",
+      "testCases": [
+        {
+          "id": "TC-032",
+          "name": "Sign completed report",
+          "description": "Test successful digital signature application",
+          "request": {
+            "params": {
+              "id": "report-uuid-123"
+            },
+            "body": {
+              "signatureData": {
+                "signerName": "John Doe",
+                "signerTitle": "Athletic Director",
+                "signatureImage": "base64-encoded-image"
+              }
+            }
+          },
+          "expectedResponse": {
+            "status": 202,
+            "body": {
+              "success": true,
+              "data": {
+                "reportId": "report-uuid-123",
+                "signatureJobId": "sig-job-uuid",
+                "status": "signing",
+                "message": "Digital signature process started"
+              }
+            }
+          }
+        },
+        {
+          "id": "TC-033",
+          "name": "Sign already signed report",
+          "description": "Test error when trying to sign already signed report",
+          "request": {
+            "params": {
+              "id": "report-uuid-signed"
+            },
+            "body": {
+              "signatureData": {
+                "signerName": "John Doe",
+                "signerTitle": "Athletic Director"
+              }
+            }
+          },
+          "expectedResponse": {
+            "status": 400,
+            "body": {
+              "success": false,
+              "error": "ALREADY_SIGNED"
+            }
+          }
+        },
+        {
+          "id": "TC-034",
+          "name": "Sign pending report",
+          "description": "Test error when trying to sign pending report",
+          "request": {
+            "params": {
+              "id": "report-uuid-pending"
+            },
+            "body": {
+              "signatureData": {
+                "signerName": "John Doe",
+                "signerTitle": "Athletic Director"
+              }
+            }
+          },
+          "expectedResponse": {
+            "status": 400,
+            "body": {
+              "success": false,
+              "error": "REPORT_NOT_READY"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "report-service-009",
+      "name": "Report Service - DELETE /api/reports/:id",
+      "description": "Test delete report endpoint",
+      "service": "report-service",
+      "endpoint": "/api/reports/:id",
+      "method": "DELETE",
+      "testCases": [
+        {
+          "id": "TC-035",
+          "name": "Delete existing report",
+          "description": "Test successful deletion of report",
+          "request": {
+            "params": {
+              "id": "report-uuid-123"
+            }
+          },
+          "expectedResponse": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data": {
+                "message": "Report deleted successfully"
+              }
+            }
+          }
+        },
+        {
+          "id": "TC-036",
+          "name": "Delete non-existent report",
+          "description": "Test error when trying to delete non-existent report",
+          "request": {
+            "params": {
+              "id": "non-existent-report"
+            }
+          },
+          "expectedResponse": {
+            "status": 404,
+            "body": {
+              "success": false,
+              "error": "NOT_FOUND"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "report-service-010",
+      "name": "Report Service - GET /api/reports/export/csv",
+      "description": "Test CSV export endpoint",
+      "service": "report-service",
+      "endpoint": "/api/reports/export/csv",
+      "method": "GET",
+      "testCases": [
+        {
+          "id": "TC-037",
+          "name": "Export reports as CSV",
+          "description": "Test successful CSV export",
+          "request": {
+            "query": {
+              "type": "ELIGIBILITY",
+              "status": "COMPLETED"
+            }
+          },
+          "expectedResponse": {
+            "status": 200,
+            "headers": {
+              "Content-Type": "text/csv",
+              "Content-Disposition": "attachment; filename=\"reports-export.csv\""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "report-service-011",
+      "name": "Report Service - GET /api/reports/export/json",
+      "description": "Test JSON export endpoint",
+      "service": "report-service",
+      "endpoint": "/api/reports/export/json",
+      "method": "GET",
+      "testCases": [
+        {
+          "id": "TC-038",
+          "name": "Export reports as JSON",
+          "description": "Test successful JSON export with pagination",
+          "request": {
+            "query": {
+              "type": "ELIGIBILITY",
+              "limit": 10,
+              "offset": 0
+            }
+          },
+          "expectedResponse": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data": {
+                "items": [],
+                "pagination": {
+                  "total": 0,
+                  "limit": 10,
+                  "offset": 0,
+                  "hasMore": false
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "report-service-012",
+      "name": "Report Service - GET /api/reports/stats/queue",
+      "description": "Test queue statistics endpoint",
+      "service": "report-service",
+      "endpoint": "/api/reports/stats/queue",
+      "method": "GET",
+      "testCases": [
+        {
+          "id": "TC-039",
+          "name": "Get queue statistics",
+          "description": "Test successful retrieval of queue statistics",
+          "request": {},
+          "expectedResponse": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data": {
+                "pending": 5,
+                "processing": 2,
+                "completed": 100,
+                "failed": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "report-service-013",
+      "name": "Report Service - POST /api/reports/worker/start",
+      "description": "Test start worker endpoint",
+      "service": "report-service",
+      "endpoint": "/api/reports/worker/start",
+      "method": "POST",
+      "testCases": [
+        {
+          "id": "TC-040",
+          "name": "Start report worker",
+          "description": "Test successful worker start",
+          "request": {},
+          "expectedResponse": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data": {
+                "message": "Worker started"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -2,6 +2,7 @@ export * from "./pdf";
 export * from "./templates";
 export * from "./types";
 export * from "./audit-logger";
+export * from "./audit-log-archive";
 
 import { PDFGenerator } from "./pdf";
 import {

@@ -1,21 +1,32 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { ColleagueAdapter } from "../src/colleague-adapter";
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import { SISType } from "../src/index";
 
 vi.mock("axios");
 
 describe("H2-003-003: Colleague Adapter Integration Tests", () => {
   let adapter: ColleagueAdapter;
-  let mockAxiosInstance: any;
+  let mockAxiosInstance: AxiosInstance & {
+    request: ReturnType<typeof vi.fn>;
+    get: ReturnType<typeof vi.fn>;
+    post: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
+    mockAxiosInstance = {
+      request: vi.fn(),
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn(),
+    } as any;
+
+    vi.mocked(axios.create).mockReturnValue(mockAxiosInstance);
     adapter = new ColleagueAdapter({
       maxRetries: 2,
       timeout: 5000,
     });
-    mockAxiosInstance = axios.create();
-    vi.mocked(axios.create).mockReturnValue(mockAxiosInstance);
   });
 
   afterEach(() => {

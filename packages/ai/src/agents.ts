@@ -2,7 +2,18 @@
  * AI Agent utilities
  */
 
-import { generateText, generateObject } from 'ai';
+import { generateText, generateObject } from "ai";
+export {
+  TransferEvaluationOrchestrator,
+  type WorkflowConfig,
+  type WorkflowContext,
+  type AgentResult,
+} from "./orchestrator";
+export {
+  VerificationAgent,
+  type VerificationInput,
+  type VerificationOutput,
+} from "./agents/verification";
 
 export interface ComplianceAgentConfig {
   studentId: string;
@@ -22,7 +33,7 @@ export interface AdvisingAgentConfig {
  */
 export async function checkNCAACompliance(config: ComplianceAgentConfig) {
   const result = await generateText({
-    model: 'gpt-4',
+    model: "gpt-4" as any,
     prompt: `Analyze NCAA Division I compliance for a student athlete with the following details:
     - Sport: ${config.sport}
     - Academic Year: ${config.academicYear}
@@ -42,7 +53,7 @@ export async function checkNCAACompliance(config: ComplianceAgentConfig) {
  */
 export async function getCourseRecommendations(config: AdvisingAgentConfig) {
   const result = await generateText({
-    model: 'gpt-4',
+    model: "gpt-4" as any,
     prompt: `Provide course recommendations for a student athlete with:
     - Current GPA: ${config.currentGPA}
     - Completed Credits: ${config.completedCredits}

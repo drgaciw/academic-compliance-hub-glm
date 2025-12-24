@@ -10,3 +10,10 @@ export {
   GPACalculator as RulesGPACalculator,
   RuleConfigurationSystem,
 } from "./rules/index.js";
+
+export type {
+  StudentRecord,
+  EligibilityResult,
+  RuleEvaluationContext,
+  ProgressTowardDegree,
+} from "./rules/index.js";

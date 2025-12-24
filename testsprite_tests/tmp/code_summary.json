@@ -1,0 +1,122 @@
+{
+  "tech_stack": [
+    "TypeScript",
+    "React",
+    "Next.js",
+    "Vitest",
+    "Playwright",
+    "Tailwind CSS",
+    "Radix UI",
+    "Shadcn/UI",
+    "Turbo",
+    "pnpm"
+  ],
+  "features": [
+    {
+      "name": "Button Component",
+      "description": "Reusable button component with multiple variants (default, destructive, outline, secondary, ghost, link) and sizes (default, sm, lg, icon, icon-sm, icon-lg)",
+      "files": [
+        "packages/ui/src/components/button.tsx",
+        "packages/ui/__tests__/unit/button.test.tsx"
+      ]
+    },
+    {
+      "name": "Card Component",
+      "description": "Card container component with header, title, description, content, and footer subcomponents",
+      "files": [
+        "packages/ui/src/components/card.tsx",
+        "packages/ui/__tests__/unit/card.test.tsx"
+      ]
+    },
+    {
+      "name": "Dialog Component",
+      "description": "Modal dialog component with trigger, content, header, title, description, footer, and close functionality",
+      "files": [
+        "packages/ui/src/components/dialog.tsx",
+        "packages/ui/__tests__/unit/dialog.test.tsx"
+      ]
+    },
+    {
+      "name": "Dropdown Menu Component",
+      "description": "Dropdown menu with trigger, content, label, separator, item, checkbox item, and radio group functionality",
+      "files": [
+        "packages/ui/src/components/dropdown-menu.tsx",
+        "packages/ui/__tests__/unit/dropdown-menu.test.tsx"
+      ]
+    },
+    {
+      "name": "Input Component",
+      "description": "Text input component with support for various input types and validation states",
+      "files": [
+        "packages/ui/src/components/input.tsx",
+        "packages/ui/__tests__/unit/input.test.tsx"
+      ]
+    },
+    {
+      "name": "Label Component",
+      "description": "Form label component with proper accessibility attributes",
+      "files": [
+        "packages/ui/src/components/label.tsx",
+        "packages/ui/__tests__/unit/label.test.tsx"
+      ]
+    },
+    {
+      "name": "Select Component",
+      "description": "Select dropdown component with trigger, value, content, group, label, item, and separator",
+      "files": [
+        "packages/ui/src/components/select.tsx",
+        "packages/ui/__tests__/unit/select.test.tsx"
+      ]
+    },
+    {
+      "name": "Tabs Component",
+      "description": "Tab navigation component with list, trigger, and content subcomponents",
+      "files": [
+        "packages/ui/src/components/tabs.tsx",
+        "packages/ui/__tests__/unit/tabs.test.tsx"
+      ]
+    },
+    {
+      "name": "Transcript Upload Flow",
+      "description": "Integration flow for uploading student transcripts with file validation, drag and drop, progress tracking, and error handling",
+      "files": [
+        "apps/admin/__tests__/integration/flows/transcript-upload-flow.test.tsx"
+      ]
+    },
+    {
+      "name": "Eligibility Review Flow",
+      "description": "Integration flow for reviewing student eligibility with filtering, sorting, approve/reject actions, and what-if scenarios",
+      "files": [
+        "apps/admin/__tests__/integration/flows/eligibility-review-flow.test.tsx"
+      ]
+    },
+    {
+      "name": "Compliance Dashboard Flow",
+      "description": "Integration flow for compliance dashboard monitoring with metrics display, activity feed, and filtering",
+      "files": [
+        "apps/admin/__tests__/integration/flows/compliance-dashboard-flow.test.tsx"
+      ]
+    },
+    {
+      "name": "Course Mapping Flow",
+      "description": "Integration flow for mapping transfer courses with course catalog browsing, single and bulk mapping, and manual review requests",
+      "files": [
+        "apps/admin/__tests__/integration/flows/course-mapping-flow.test.tsx"
+      ]
+    },
+    {
+      "name": "Audit Trail Flow",
+      "description": "Integration flow for reviewing audit logs with filtering, export functionality (CSV/PDF), detailed log viewing, and pagination",
+      "files": [
+        "apps/admin/__tests__/integration/flows/audit-trail-flow.test.tsx"
+      ]
+    },
+    {
+      "name": "Batch Upload Flow",
+      "description": "Integration flow for batch uploading multiple files with progress tracking, error handling, and results summary",
+      "files": [
+        "apps/admin/__tests__/integration/flows/batch-upload-flow.test.tsx"
+      ]
+    }
+  ]
+}
