@@ -586,7 +586,14 @@ describe("Card Component", () => {
           </CardHeader>
         </Card>,
       );
-      const card = screen.getByRole("article");
+      const { container } = render(
+        <Card aria-labelledby="card-title">
+          <CardHeader>
+            <CardTitle id="card-title">Title</CardTitle>
+          </CardHeader>
+        </Card>,
+      );
+      const card = container.querySelector('[data-slot="card"]');
       expect(card).toHaveAttribute("aria-labelledby", "card-title");
     });
 
@@ -598,13 +605,21 @@ describe("Card Component", () => {
           </CardHeader>
         </Card>,
       );
-      const card = screen.getByRole("article");
+      const { container } = render(
+        <Card aria-describedby="card-desc">
+          <CardHeader>
+            <CardDescription id="card-desc">Description</CardDescription>
+          </CardHeader>
+        </Card>,
+      );
+      const card = container.querySelector('[data-slot="card"]');
       expect(card).toHaveAttribute("aria-describedby", "card-desc");
     });
 
     it("should support role attribute", () => {
       render(<Card role="article">Content</Card>);
-      const card = screen.getByRole("article");
+      const { container } = render(<Card role="article">Content</Card>);
+      const card = container.querySelector('[role="article"]');
       expect(card).toBeInTheDocument();
     });
   });
@@ -615,14 +630,14 @@ describe("Card Component", () => {
 
   describe("Edge Cases", () => {
     it("should render with empty content", () => {
-      render(<Card></Card>);
-      const card = screen.getByRole("article");
+      const { container } = render(<Card></Card>);
+      const card = container.querySelector('[data-slot="card"]');
       expect(card).toBeInTheDocument();
     });
 
     it("should render with whitespace content", () => {
-      render(<Card> </Card>);
-      const card = screen.getByRole("article");
+      const { container } = render(<Card> </Card>);
+      const card = container.querySelector('[data-slot="card"]');
       expect(card).toBeInTheDocument();
     });
 

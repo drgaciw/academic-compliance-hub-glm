@@ -61,15 +61,28 @@ export async function processReportJob(job: Job<ReportJob>): Promise<void> {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
 
+    const prismaType =
+      type === "compliance"
+        ? "COMPLIANCE"
+        : type === "eligibility"
+          ? "ELIGIBILITY"
+          : type === "transfer-credit"
+            ? "TRANSFER_CREDIT"
+            : type === "progress"
+              ? "PROGRESS"
+              : "CUSTOM";
+    const prismaFormat =
+      format === "pdf" ? "PDF" : format === "csv" ? "CSV" : "JSON";
+
     await prisma.$transaction(async (tx) => {
       const report = await tx.reportMetadata.create({
         data: {
           id,
-          type,
-          format,
-          status: ReportStatus.COMPLETED,
+          type: prismaType as any,
+          format: prismaFormat as any,
+          status: "COMPLETED",
           userId: job.data.userId,
-          studentId: job.data.studentId,
+          studentProfileId: job.data.studentId,
           templateId: job.data.templateId,
           filePath: outputPath,
           fileName,
@@ -106,7 +119,7 @@ export async function processReportJob(job: Job<ReportJob>): Promise<void> {
       .update({
         where: { id },
         data: {
-          status: ReportStatus.FAILED,
+          status: "FAILED",
           error: errorMessage,
           metadata: JSON.stringify({
             error: errorMessage,
@@ -132,19 +145,26 @@ export async function processSignatureJob(
       where: { id: reportId },
     });
 
-    if (!report || report.status !== ReportStatus.COMPLETED) {
+    if (!report || report.status !== "COMPLETED") {
       throw new Error("Report not found or not completed");
     }
 
     await job.progress(30);
 
+    if (!report.filePath) {
+      throw new Error("Report file path not found");
+    }
+
     const pdfBuffer = await fs.readFile(report.filePath);
 
     await job.progress(50);
 
-    const signatureField =
-      report.signatureFields && report.signatureFields.length > 0
-        ? report.signatureFields[0]
+    const signatureFields = report.signatureFields;
+    const signatureField: any =
+      signatureFields &&
+      Array.isArray(signatureFields) &&
+      signatureFields.length > 0
+        ? signatureFields[0]
         : {
             name: "signature",
             label: "Signature",
@@ -182,7 +202,9 @@ export async function processSignatureJob(
         signatureData: JSON.stringify(signatureData),
         signedAt: new Date(),
         metadata: JSON.stringify({
-          ...JSON.parse(report.metadata || "{}"),
+          ...(typeof report.metadata === "string"
+            ? JSON.parse(report.metadata)
+            : report.metadata),
           signedAt: new Date().toISOString(),
         }),
       },
@@ -239,10 +261,10 @@ export async function processBatchReportsJob(
         await prisma.reportMetadata.create({
           data: {
             id: reportId,
-            type: ReportType.COMPLIANCE,
-            format: ReportFormat.PDF,
-            status: ReportStatus.COMPLETED,
-            studentId: request.studentId,
+            type: "COMPLIANCE",
+            format: "PDF",
+            status: "COMPLETED",
+            studentProfileId: request.studentId,
             filePath: outputPath,
             fileName,
             fileSize: Buffer.byteLength(pdfBuffer),

@@ -1,5 +1,5 @@
 import Queue from "bull";
-import { ReportJob, ReportStatus } from "../types";
+import { ReportJob, ReportStatus } from "./types";
 
 const REPORT_QUEUE_NAME = "report-generation";
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
@@ -36,7 +36,7 @@ export async function addReportJob(
   });
 
   return {
-    id: job.id!,
+    id: String(job.id),
     ...jobData,
     progress: 0,
     createdAt: new Date(),
@@ -75,7 +75,7 @@ export async function getReportJob(jobId: string): Promise<ReportJob | null> {
   const progress = job.progress();
 
   return {
-    id: job.id!,
+    id: String(job.id),
     type: job.data.type,
     format: job.data.format,
     status,
@@ -114,8 +114,6 @@ export async function markJobCompleted(
 
   if (job) {
     await job.progress(100);
-    job.data.outputPath = outputPath;
-    await job.updateData(job.data);
   }
 }
 

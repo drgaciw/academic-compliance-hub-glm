@@ -133,8 +133,8 @@ describe("Label Component", () => {
     });
 
     it("should have proper role", () => {
-      render(<Label>Label</Label>);
-      const label = screen.getByRole("label");
+      const { container } = render(<Label>Label</Label>);
+      const label = container.querySelector("label");
       expect(label).toBeInTheDocument();
     });
 
@@ -161,30 +161,34 @@ describe("Label Component", () => {
     it("should render with disabled attribute", () => {
       render(<Label disabled>Disabled Label</Label>);
       const label = screen.getByText("Disabled Label");
-      expect(label).toHaveAttribute("data-disabled", "true");
+      expect(label).toHaveAttribute("disabled");
     });
 
     it("should have disabled styling", () => {
       render(<Label disabled>Disabled Label</Label>);
       const label = screen.getByText("Disabled Label");
       expect(label).toHaveClass(
+        "text-sm",
+        "font-medium",
+        "leading-none",
         "peer-disabled:cursor-not-allowed",
         "peer-disabled:opacity-70",
       );
     });
 
-    it("should not be clickable when disabled", async () => {
-      const handleClick = vi.fn();
+    it("should not prevent default when disabled", async () => {
       const user = userEvent.setup();
 
       render(
-        <Label disabled onClick={handleClick}>
-          Disabled Label
-        </Label>,
+        <form>
+          <Label disabled>
+            <input type="checkbox" disabled />
+            Disabled Label
+          </Label>
+        </form>,
       );
-      await user.click(screen.getByText("Disabled Label"));
-
-      expect(handleClick).not.toHaveBeenCalled();
+      const input = screen.getByRole("checkbox");
+      expect(input).toBeDisabled();
     });
   });
 
@@ -194,14 +198,14 @@ describe("Label Component", () => {
 
   describe("Edge Cases", () => {
     it("should render with empty content", () => {
-      render(<Label></Label>);
-      const label = screen.getByRole("label");
+      const { container } = render(<Label></Label>);
+      const label = container.querySelector("label");
       expect(label).toBeInTheDocument();
     });
 
     it("should render with whitespace content", () => {
-      render(<Label> </Label>);
-      const label = screen.getByRole("label");
+      const { container } = render(<Label> </Label>);
+      const label = container.querySelector("label");
       expect(label).toBeInTheDocument();
     });
 

@@ -15,11 +15,16 @@ app.use("*", cors());
 
 app.route("/", routes);
 
-const server = createServer();
+const httpServer = createServer();
 
-app.fire(server);
+serve({
+  fetch: app.fetch,
+  port,
+  hostname: host,
+  createServer: () => httpServer,
+});
 
-const wss = new WebSocketServer({ server, path: "/ws/reports" });
+const wss = new WebSocketServer({ server: httpServer, path: "/ws/reports" });
 
 wss.on("connection", (ws, req) => {
   const url = req.url || "";
@@ -86,7 +91,7 @@ if (process.env.START_WORKER === "true") {
   startReportWorker();
 }
 
-server.listen(port, host, () => {
+httpServer.on("listening", () => {
   console.log(`Report Service listening on http://${host}:${port}`);
   console.log(`WebSocket endpoint: ws://${host}:${port}/ws/reports`);
 });

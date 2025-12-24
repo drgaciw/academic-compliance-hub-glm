@@ -12,14 +12,14 @@ import {
   ReportType,
   ReportFormat,
   ReportJob,
-} from "../types";
+} from "./types";
 import {
   addReportJob,
   getReportJob,
   deleteReportJob,
   getQueueStats,
-} from "../queue";
-import { startReportWorker } from "../worker";
+} from "./queue";
+import { startReportWorker } from "./worker";
 import { prisma } from "@aah/database";
 import * as fs from "fs/promises";
 import * as path from "path";
@@ -40,6 +40,36 @@ function broadcastToClient(clientId: string, message: any): void {
   }
 }
 
+function toPrismaReportType(type: ReportType): string {
+  const map: Record<ReportType, string> = {
+    eligibility: "ELIGIBILITY",
+    "transfer-credit": "TRANSFER_CREDIT",
+    compliance: "COMPLIANCE",
+    progress: "PROGRESS",
+    custom: "CUSTOM",
+  };
+  return map[type];
+}
+
+function toPrismaReportFormat(format: ReportFormat): string {
+  const map: Record<ReportFormat, string> = {
+    pdf: "PDF",
+    csv: "CSV",
+    json: "JSON",
+  };
+  return map[format];
+}
+
+function toPrismaReportStatus(status: ReportStatus): string {
+  const map: Record<ReportStatus, string> = {
+    PENDING: "PENDING",
+    PROCESSING: "PROCESSING",
+    COMPLETED: "COMPLETED",
+    FAILED: "FAILED",
+  };
+  return map[status];
+}
+
 app.get("/health", (c) => {
   return c.json(successResponse({ status: "ok", service: "report-service" }));
 });
@@ -56,11 +86,11 @@ app.post(
       await prisma.reportMetadata.create({
         data: {
           id: reportId,
-          type: ReportType.ELIGIBILITY,
-          format: ReportFormat.PDF,
-          status: ReportStatus.PENDING,
+          type: "ELIGIBILITY",
+          format: "PDF",
+          status: "PENDING",
           userId: c.req.header("x-user-id"),
-          studentId: data.studentId,
+          studentProfileId: data.studentId,
           progress: 0,
           metadata: JSON.stringify(data),
         },
@@ -113,11 +143,11 @@ app.post(
       await prisma.reportMetadata.create({
         data: {
           id: reportId,
-          type: ReportType.TRANSFER_CREDIT,
-          format: ReportFormat.PDF,
-          status: ReportStatus.PENDING,
+          type: "TRANSFER_CREDIT",
+          format: "PDF",
+          status: "PENDING",
           userId: c.req.header("x-user-id"),
-          studentId: data.studentId,
+          studentProfileId: data.studentId,
           progress: 0,
           metadata: JSON.stringify(data),
         },
@@ -176,11 +206,11 @@ app.post(
         await prisma.reportMetadata.create({
           data: {
             id: reportId,
-            type: reportType,
-            format,
-            status: ReportStatus.PENDING,
+            type: toPrismaReportType(reportType) as any,
+            format: toPrismaReportFormat(format) as any,
+            status: "PENDING",
             userId,
-            studentId,
+            studentProfileId: studentId,
             templateId,
             progress: 0,
             metadata: JSON.stringify({ batchId }),
@@ -189,13 +219,13 @@ app.post(
 
         const job = await addReportJob({
           type: reportType,
-          format,
+          format: format,
           status: ReportStatus.PENDING,
           data: { studentId, reportType },
           userId,
           studentId,
           templateId,
-        });
+        } as any);
 
         reports.push({
           reportId: job.id,
@@ -255,7 +285,11 @@ app.post(
 
       const template = await prisma.reportTemplate.create({
         data: {
-          ...data,
+          name: data.name,
+          description: data.description,
+          type: toPrismaReportType(data.type) as any,
+          customTemplate: data.customTemplate,
+          signatureFields: data.signatureFields as any,
           createdBy: userId,
         },
       });
@@ -292,7 +326,7 @@ app.get("/api/reports/:id", async (c) => {
       type: report.type,
       format: report.format,
       status: job?.status || report.status,
-      studentId: report.studentId,
+      studentId: report.studentProfileId,
       templateId: report.templateId,
       fileName: report.fileName,
       fileSize: report.fileSize,
@@ -328,7 +362,7 @@ app.get("/api/reports/:id/download", async (c) => {
       return c.json(errorResponse("NOT_FOUND", "Report not found"), 404);
     }
 
-    if (report.status !== ReportStatus.COMPLETED) {
+    if (report.status !== "COMPLETED") {
       return c.json(
         errorResponse("REPORT_NOT_READY", "Report is not ready for download"),
         400,
@@ -338,7 +372,7 @@ app.get("/api/reports/:id/download", async (c) => {
     if (report.filePath) {
       try {
         const fileBuffer = await fs.readFile(report.filePath);
-        return c.newResponse(fileBuffer, 200, {
+        return c.newResponse(fileBuffer.buffer as ArrayBuffer, 200, {
           "Content-Type": "application/pdf",
           "Content-Disposition": `attachment; filename="${report.fileName}"`,
           "Content-Length": fileBuffer.length.toString(),
@@ -382,7 +416,7 @@ app.post(
         return c.json(errorResponse("NOT_FOUND", "Report not found"), 404);
       }
 
-      if (report.status !== ReportStatus.COMPLETED) {
+      if (report.status !== "COMPLETED") {
         return c.json(
           errorResponse(
             "REPORT_NOT_READY",
@@ -399,24 +433,24 @@ app.post(
         );
       }
 
-      const queue = (await import("../queue")).getReportQueue();
+      const queue = (await import("./queue")).getReportQueue();
 
       const signatureJob = await queue.add("sign-report", {
         reportId,
         signatureData,
-      });
+      } as any);
 
       await prisma.reportMetadata.update({
         where: { id: reportId },
         data: {
-          status: ReportStatus.PROCESSING,
+          status: "PROCESSING",
         },
       });
 
       return c.json(
         successResponse({
           reportId,
-          signatureJobId: signatureJob.id,
+          signatureJobId: String(signatureJob.id),
           status: "signing",
           message: "Digital signature process started",
         }),
@@ -492,7 +526,7 @@ app.get("/api/reports/export/csv", async (c) => {
       type: report.type,
       format: report.format,
       status: report.status,
-      studentId: report.studentId,
+      studentId: report.studentProfileId,
       templateId: report.templateId,
       fileName: report.fileName,
       fileSize: report.fileSize,
@@ -557,7 +591,7 @@ app.get("/api/reports/export/json", async (c) => {
       type: report.type,
       format: report.format,
       status: report.status,
-      studentId: report.studentId,
+      studentId: report.studentProfileId,
       templateId: report.templateId,
       fileName: report.fileName,
       fileSize: report.fileSize,
