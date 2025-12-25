@@ -56,3 +56,6 @@ Thumbs.db
 
 # Prisma
 packages/database/prisma/migrations/**/*_migration.sql
+
+*storybook.log
+storybook-static

@@ -1,0 +1,178 @@
+name: Deployment Notifications
+
+on:
+  deployment:
+  deployment_status:
+  workflow_run:
+    workflows: ["Production Deployment", "Canary Deployment"]
+    types:
+      - completed
+
+env:
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  EMAIL_RECIPIENTS: ${{ secrets.DEPLOYMENT_EMAIL_RECIPIENTS }}
+
+jobs:
+  notify-slack:
+    name: Notify Slack
+    runs-on: ubuntu-latest
+    if: env.SLACK_WEBHOOK_URL != ''
+
+    steps:
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Deployment Notification",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "${{ github.event.action == 'deployment_status' ? 'Deployment Status' : 'Deployment Event' }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Environment:*\n${{ github.event.deployment.environment || github.event.workflow_run.name }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Status:*\n${{ github.event.deployment_status.state || 'In Progress' }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n${{ github.ref_name || github.event.workflow_run.head_branch }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Actor:*\n<@${{ github.actor }}>"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Commit:*\n<${{ github.event.repository.html_url }}/commit/${{ github.sha }}|${{ github.sha }}>"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Deployment"
+                      },
+                      "url": "${{ github.event.deployment_status.target_url || github.event.repository.html_url }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+  notify-email:
+    name: Notify Email
+    runs-on: ubuntu-latest
+    if: env.EMAIL_RECIPIENTS != ''
+
+    steps:
+      - name: Send email notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "[AAH] Deployment ${{ github.event.deployment_status.state || 'Notification' }}"
+          to: ${{ env.EMAIL_RECIPIENTS }}
+          from: "AAH Deployment Bot <noreply@athleticacademicshub.com>"
+          body: |
+            Deployment Event Notification
+
+            Environment: ${{ github.event.deployment.environment || github.event.workflow_run.name }}
+            Status: ${{ github.event.deployment_status.state || 'In Progress' }}
+            Branch: ${{ github.ref_name || github.event.workflow_run.head_branch }}
+            Actor: ${{ github.actor }}
+            Commit: ${{ github.sha }}
+
+            Repository: ${{ github.repository }}
+
+            ---
+            View more details: ${{ github.event.repository.html_url }}
+          priority: high
+
+  rollback-alert:
+    name: Rollback Alert
+    runs-on: ubuntu-latest
+    if: github.event.deployment_status.state == 'failure' || github.event.deployment_status.state == 'error'
+
+    steps:
+      - name: Send critical alert
+        run: |
+          echo "CRITICAL: Deployment failed - immediate attention required"
+          echo "Environment: ${{ github.event.deployment.environment }}"
+          echo "Status: ${{ github.event.deployment_status.state }}"
+
+      - name: Send Slack critical alert
+        if: env.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "🚨 DEPLOYMENT FAILED",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚨 Deployment Failed"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Deployment failed in *${{ github.event.deployment.environment }}* environment"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Status:*\n${{ github.event.deployment_status.state }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Actor:*\n<@${{ github.actor }}>"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "Initiate Rollback"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/workflows/rollback.yml"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

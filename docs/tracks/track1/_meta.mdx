@@ -1,0 +1,74 @@
+# Track 1: Core Infrastructure & Shared Packages
+
+Documentation for core infrastructure packages and shared configurations.
+
+## Overview
+
+Track 1 establishes the foundational infrastructure for the entire monorepo, including build systems, shared packages, and developer tooling.
+
+## Packages
+
+### Auth Package (`@aah/auth`)
+
+Authentication and authorization package built on Clerk.
+
+- [Setup Guide](./auth-setup)
+- [Role-Based Access Control](./rbac)
+- [Middleware Configuration](./middleware)
+
+### Database Package (`@aah/database`)
+
+Prisma schema and database client with pgvector extension.
+
+- [Schema Overview](./database-schema)
+- [Migration Guide](./migrations)
+- [Seed Data](./seed-data)
+
+### UI Package (`@aah/ui`)
+
+Shared React components and design tokens.
+
+- [Component Library](../track3/components)
+- [Design Tokens](./design-tokens)
+- [Theming Guide](./theming)
+
+### API Utils Package (`@aah/api-utils`)
+
+Shared utilities for API development.
+
+- [Request Handling](./request-utils)
+- [Error Handling](./error-handling)
+- [Type Safety](./type-safety)
+
+### AI Package (`@aah/ai`)
+
+AI utilities and agent frameworks.
+
+- [LLM Integration](./llm-integration)
+- [RAG Pipeline](./rag-pipeline)
+- [Agent Framework](./agents)
+
+### Config Package (`@aah/config`)
+
+Shared ESLint, TypeScript, and Prettier configurations.
+
+- [ESLint Rules](./eslint-config)
+- [TypeScript Config](./ts-config)
+- [Prettier Config](./prettier-config)
+
+## Build System
+
+### Turborepo Configuration
+
+Monorepo build system with task orchestration and caching.
+
+- [Pipeline Setup](./turborepo-pipeline)
+- [Task Dependencies](./task-dependencies)
+- [Remote Caching](./remote-caching)
+- [Build Performance](./build-performance)
+
+## Related Tasks
+
+- [App Shell Setup](../track2/multi-zone)
+- [Design System](../track3/components)
+- [Testing Setup](../track8/testing-framework)

@@ -1,0 +1,146 @@
+# Track 8: Testing & Quality Assurance
+
+Documentation for testing frameworks, strategies, and quality assurance.
+
+## Overview
+
+Track 8 establishes comprehensive testing infrastructure including unit tests, component tests, E2E tests, accessibility tests, and performance tests.
+
+## Unit Testing
+
+### Vitest Setup
+
+Fast unit testing framework with TypeScript support.
+
+- [Vitest Configuration](./vitest-config)
+- [Test Organization](./test-organization)
+- [Test Writing Guide](./test-writing)
+- [Mocking Strategies](./mocking-strategies)
+
+### Coverage
+
+Code coverage measurement and targets.
+
+- [Coverage Configuration](./coverage-config)
+- [Coverage Reports](./coverage-reports)
+- [Coverage Targets](./coverage-targets)
+- [Coverage Gates](./coverage-gates)
+
+## Component Testing
+
+### React Testing Library
+
+Component testing with user-centric approach.
+
+- [Testing Library Setup](./rtl-setup)
+- [Component Test Guide](./component-tests)
+- [Testing Best Practices](./testing-best-practices)
+- [User Event Simulation](./user-events)
+
+### Storybook Testing
+
+Visual component testing with Storybook.
+
+- [Storybook Setup](./storybook-setup)
+- [Story Organization](./story-organization)
+- [Visual Testing](./visual-testing)
+- [Accessibility Testing](./storybook-a11y)
+
+## E2E Testing
+
+### Playwright
+
+End-to-end testing framework for critical user journeys.
+
+- [Playwright Setup](./playwright-setup)
+- [Test Organization](./e2e-organization)
+- [Page Object Model](./page-object-model)
+- [Test Data Management](./test-data)
+
+### E2E Test Scenarios
+
+Critical user journey tests.
+
+- [Authentication Flow](./e2e-auth)
+- [Student Dashboard](./e2e-student-dashboard)
+- [Admin Workflow](./e2e-admin-workflow)
+- [Transfer Credit Request](./e2e-transfer-request)
+- [Compliance Review](./e2e-compliance-review)
+
+## Accessibility Testing
+
+### Axe-Core Integration
+
+Automated accessibility testing.
+
+- [Axe Setup](./axe-setup)
+- [Axe Rules](./axe-rules)
+- [Accessibility Audits](./a11y-audits)
+- [WCAG 2.2 Compliance](./wcag-compliance)
+
+### Manual Accessibility Testing
+
+Manual accessibility testing procedures.
+
+- [Keyboard Navigation](./keyboard-testing)
+- [Screen Reader Testing](./screen-reader-testing)
+- [Color Contrast Testing](./color-contrast)
+- [Focus Management](./focus-testing)
+
+## Performance Testing
+
+### Lighthouse CI
+
+Automated performance testing in CI/CD pipeline.
+
+- [Lighthouse Setup](./lighthouse-setup)
+- [Lighthouse CI Config](./lighthouse-ci-config)
+- [Performance Budgets](./performance-budgets)
+- [Performance Regression Detection](./perf-regression)
+
+### Load Testing
+
+Load testing tools and strategies.
+
+- [k6 Load Testing](./k6-setup)
+- [Artillery Load Testing](./artillery-setup)
+- [Load Test Scenarios](./load-test-scenarios)
+- [Load Test Analysis](./load-test-analysis)
+
+## API Testing
+
+### Contract Tests
+
+tRPC contract testing for type safety.
+
+- [Contract Test Setup](./contract-test-setup)
+- [Type Assertions](./type-assertions)
+- [API Contract Testing](./api-contract-tests)
+- [Contract Drift Detection](./contract-drift)
+
+### Integration Tests
+
+API integration testing strategies.
+
+- [Integration Test Setup](./integration-test-setup)
+- [Test Database](./test-database)
+- [Service Mocking](./service-mocking)
+- [Integration Test Scenarios](./integration-scenarios)
+
+## Visual Regression
+
+### Visual Regression Tests
+
+Automated visual testing for UI components.
+
+- [Chromatic Setup](./chromatic-setup)
+- [Percy Setup](./percy-setup)
+- [Visual Test Organization](./visual-test-org)
+- [Visual Diff Management](./visual-diff)
+
+## Related Tasks
+
+- [Infrastructure](../track1/testing-config)
+- [Design System](../track3/visual-testing)
+- [Main Microsite](../track4/performance-optimization)
+- [CI/CD](../track9/test-pipeline)

@@ -1,4 +1,6 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Button } from "@aah/ui";
 import {
   Card,
@@ -7,7 +9,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@aah/ui";
-import { FileText, ClipboardCheck, Upload, FolderOpen } from "lucide-react";
+import {
+  FileText,
+  ClipboardCheck,
+  Upload,
+  FolderOpen,
+  LayoutDashboard,
+} from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Student Portal - Athletic Academics Hub",
+  description:
+    "Manage your NCAA eligibility and transfer credits through our student portal",
+  openGraph: {
+    type: "website",
+    url: "/student",
+    title: "Student Portal - Athletic Academics Hub",
+    description:
+      "Manage your NCAA eligibility and transfer credits through our student portal",
+  },
+};
 
 export default function Home() {
   return (
@@ -23,6 +44,12 @@ export default function Home() {
         </header>
 
         <nav className="mb-8 flex flex-wrap gap-2" aria-label="Main navigation">
+          <Button asChild variant="outline">
+            <Link href="/dashboard">
+              <LayoutDashboard className="mr-2 h-4 w-4" aria-hidden="true" />
+              Dashboard
+            </Link>
+          </Button>
           <Button asChild variant="outline">
             <Link href="/preliminary">
               <ClipboardCheck className="mr-2 h-4 w-4" aria-hidden="true" />
@@ -50,6 +77,21 @@ export default function Home() {
         </nav>
 
         <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Dashboard</CardTitle>
+              <CardDescription>
+                View your personalized dashboard
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600">
+                Access your student dashboard to view GPA, compliance status,
+                and manage your profile with interactive widgets.
+              </p>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Preliminary Assessment</CardTitle>

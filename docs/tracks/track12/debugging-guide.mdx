@@ -1,0 +1,539 @@
+# Debugging Guide
+
+This guide covers debugging techniques and tools for Athletic Academics Hub.
+
+## Overview
+
+Debugging is the process of identifying and resolving issues in code. This guide covers:
+
+- Browser debugging
+- Server-side debugging
+- Database debugging
+- Performance debugging
+- Debugging tools and techniques
+
+## Browser Debugging
+
+### Chrome DevTools
+
+#### Console Debugging
+
+```javascript
+// 1. Check for errors
+console.error("Error occurred:", error);
+
+// 2. Log variables for inspection
+console.log("User data:", user);
+
+// 3. Use console.table for arrays
+console.table(users);
+
+// 4. Use console.group for organization
+console.group("User Request");
+console.log("URL:", url);
+console.log("Method:", method);
+console.log("Body:", body);
+console.groupEnd();
+```
+
+#### Network Tab Debugging
+
+1. **Open** DevTools → Network
+2. **Filter** by `XHR/Fetch`
+3. **Click** on request to view:
+   - Request headers
+   - Request payload
+   - Response headers
+   - Response body
+   - Timing information
+
+```typescript
+// Add request IDs for tracing
+const requestId = crypto.randomUUID();
+console.log("[Request]", requestId, "Fetching user data");
+
+fetch("/api/users").then((res) => {
+  console.log("[Response]", requestId, res.status);
+  return res.json();
+});
+```
+
+#### Breakpoints
+
+```typescript
+// 1. Set breakpoint in DevTools Sources
+// 2. Or use debugger statement
+function processData(data) {
+  debugger; // Execution stops here
+  const processed = data.map((item) => item.value);
+  return processed;
+}
+
+// 3. Inspect variables in Scope panel
+// 4. Step through code with controls
+```
+
+### React DevTools
+
+Install React DevTools browser extension.
+
+#### Component Inspection
+
+```typescript
+// 1. Open React DevTools → Components tab
+// 2. Click on component to inspect
+// 3. View props, state, and hooks
+
+// Add component name for easier debugging
+export function UserProfile({ user }: { user: User }) {
+  // ...
+}
+
+// Name display: UserProfile
+```
+
+#### Profiler
+
+```typescript
+// 1. Open React DevTools → Profiler
+// 2. Click "Record"
+// 3. Interact with application
+// 4. Stop recording
+// 5. Analyze render times
+
+// Add profiler comments
+<Profiler id="UserProfile" onRender={(id, phase, actualDuration) => {
+  console.log(`${id} ${phase} took ${actualDuration}ms`);
+}}>
+  <UserProfile user={user} />
+</Profiler>
+```
+
+## Server-Side Debugging
+
+### Next.js Debugging
+
+#### API Route Debugging
+
+```typescript
+// apps/main/app/api/users/route.ts
+import { NextRequest, NextResponse } from "next/server";
+
+export async function GET(request: NextRequest) {
+  // Debug: Log request
+  console.log("[API] GET /api/users", {
+    url: request.url,
+    method: request.method,
+    headers: Object.fromEntries(request.headers),
+  });
+
+  try {
+    const users = await prisma.user.findMany();
+
+    // Debug: Log response
+    console.log("[API] Found users:", users.length);
+
+    return NextResponse.json(users);
+  } catch (error) {
+    // Debug: Log error
+    console.error("[API] Error fetching users:", error);
+
+    return NextResponse.json(
+      { error: "Failed to fetch users" },
+      { status: 500 },
+    );
+  }
+}
+```
+
+#### Server Component Debugging
+
+```typescript
+// apps/main/app/dashboard/page.tsx
+async function DashboardPage() {
+  // Debug: Check environment
+  console.log('[Dashboard] Environment:', process.env.NODE_ENV);
+
+  const users = await prisma.user.findMany();
+
+  // Debug: Check data
+  console.log('[Dashboard] User count:', users.length);
+
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      <p>Total users: {users.length}</p>
+    </div>
+  );
+}
+```
+
+### tRPC Debugging
+
+```typescript
+// packages/trpc/src/router.ts
+export const appRouter = t.router({
+  users: t.router({
+    list: t.procedure.query(async ({ ctx }) => {
+      // Debug: Check context
+      console.log("[tRPC] User query", {
+        userId: ctx.user?.id,
+        timestamp: new Date().toISOString(),
+      });
+
+      const users = await prisma.user.findMany();
+
+      // Debug: Log result
+      console.log("[tRPC] Returning users:", users.length);
+
+      return users;
+    }),
+  }),
+});
+```
+
+### Error Handling
+
+```typescript
+// packages/api-utils/src/error.ts
+export class APIError extends Error {
+  constructor(
+    public message: string,
+    public statusCode: number,
+    public code: string,
+    public details?: any,
+  ) {
+    super(message);
+    this.name = "APIError";
+  }
+}
+
+// Usage
+try {
+  const result = await someOperation();
+} catch (error) {
+  // Debug: Log full error
+  console.error("[Operation] Error:", {
+    message: error.message,
+    stack: error.stack,
+    code: error.code,
+  });
+
+  throw new APIError("Operation failed", 500, "OPERATION_FAILED", {
+    originalError: error.message,
+  });
+}
+```
+
+## Database Debugging
+
+### Prisma Debugging
+
+#### Query Logging
+
+```typescript
+// Enable query logging
+const prisma = new PrismaClient({
+  log: [
+    { level: "query", emit: "event" },
+    { level: "error", emit: "stdout" },
+  ],
+});
+
+// Listen to queries
+prisma.$on("query", (e) => {
+  console.log("Query: " + e.query);
+  console.log("Params: " + e.params);
+  console.log("Duration: " + e.duration + "ms");
+});
+```
+
+#### Query Analysis
+
+```typescript
+// Find slow queries
+const slowQuery = await prisma.user.findMany({
+  where: {
+    email: {
+      contains: search,
+    },
+  },
+});
+
+// Check with EXPLAIN
+const prismaQuery = prisma.$queryRaw`
+  EXPLAIN ANALYZE SELECT * FROM users WHERE email LIKE ${`%${search}%`}
+`;
+const explainResult = await prismaQuery;
+console.log("Query plan:", explainResult);
+```
+
+#### Data Validation
+
+```typescript
+// Validate data before save
+const userData = {
+  email: "user@example.com",
+  name: "John Doe",
+};
+
+console.log("[DB] Saving user:", userData);
+
+try {
+  const user = await prisma.user.create({
+    data: userData,
+  });
+  console.log("[DB] User created:", user.id);
+} catch (error) {
+  console.error("[DB] Create failed:", {
+    code: error.code,
+    message: error.message,
+    meta: error.meta,
+  });
+}
+```
+
+### Connection Debugging
+
+```typescript
+// Test database connection
+async function testConnection() {
+  try {
+    await prisma.$connect();
+    console.log("[DB] Connected successfully");
+
+    const result = await prisma.$queryRaw`SELECT NOW()`;
+    console.log("[DB] Server time:", result[0]);
+
+    await prisma.$disconnect();
+  } catch (error) {
+    console.error("[DB] Connection failed:", error);
+  }
+}
+
+testConnection();
+```
+
+## Performance Debugging
+
+### React Performance
+
+```typescript
+import { memo, useMemo, useCallback } from 'react';
+
+// 1. Use React.memo to prevent unnecessary re-renders
+const UserCard = memo(function UserCard({ user }: { user: User }) {
+  return (
+    <div>
+      <h3>{user.name}</h3>
+      <p>{user.email}</p>
+    </div>
+  );
+});
+
+// 2. Use useMemo for expensive calculations
+const sortedUsers = useMemo(() => {
+  console.log('[Performance] Sorting users');
+  return users.sort((a, b) => a.name.localeCompare(b.name));
+}, [users]);
+
+// 3. Use useCallback to prevent function recreation
+const handleClick = useCallback(() => {
+  console.log('[Performance] User clicked');
+}, []);
+```
+
+### Bundle Analysis
+
+```bash
+# Analyze bundle size
+pnpm build
+
+# Use webpack-bundle-analyzer
+pnpm add -D @next/bundle-analyzer
+
+# next.config.js
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+module.exports = withBundleAnalyzer(nextConfig);
+
+# Run analysis
+ANALYZE=true pnpm build
+```
+
+### Memory Profiling
+
+```typescript
+// Track memory usage
+function trackMemory() {
+  if (performance.memory) {
+    const memory = performance.memory;
+    console.log("[Memory]", {
+      used: (memory.usedJSHeapSize / 1048576).toFixed(2) + " MB",
+      total: (memory.totalJSHeapSize / 1048576).toFixed(2) + " MB",
+      limit: (memory.jsHeapSizeLimit / 1048576).toFixed(2) + " MB",
+    });
+  }
+}
+
+// Call periodically
+setInterval(trackMemory, 5000);
+```
+
+## Debugging Tools
+
+### Sentry
+
+Error tracking and debugging:
+
+```typescript
+import * as Sentry from "@sentry/nextjs";
+
+Sentry.init({
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  environment: process.env.NODE_ENV,
+  tracesSampleRate: 1.0,
+});
+
+// Capture error
+try {
+  const result = await riskyOperation();
+} catch (error) {
+  Sentry.captureException(error, {
+    tags: {
+      module: "user-service",
+      operation: "create-user",
+    },
+    extra: {
+      userId: user.id,
+      timestamp: new Date().toISOString(),
+    },
+  });
+}
+```
+
+### Vercel Logs
+
+```bash
+# 1. Go to Vercel dashboard
+# 2. Select project
+# 3. Go to Logs tab
+# 4. Filter by:
+#    - Function name
+#    - Status code
+#    - Request ID
+
+# Or via CLI
+vercel logs
+```
+
+### PostgreSQL Logs
+
+```bash
+# 1. Vercel Postgres dashboard
+# 2. Select database
+# 3. Go to Logs tab
+# 4. View query logs, slow queries, errors
+
+# Or connect via psql
+psql -U aah_user -d aah
+
+# View slow queries
+SELECT * FROM pg_stat_statements
+ORDER BY mean_exec_time DESC
+LIMIT 10;
+```
+
+## Common Issues and Solutions
+
+### Issue: Infinite Loop
+
+```typescript
+// Bad
+useEffect(() => {
+  setCount(count + 1); // Triggers effect again
+}, [count]);
+
+// Good
+useEffect(() => {
+  setCount((prev) => prev + 1); // Uses previous value
+}, []); // No dependency on count
+```
+
+### Issue: Memory Leak
+
+```typescript
+// Bad
+useEffect(() => {
+  const interval = setInterval(() => {
+    console.log("tick");
+  }, 1000);
+  // Missing cleanup!
+}, []);
+
+// Good
+useEffect(() => {
+  const interval = setInterval(() => {
+    console.log("tick");
+  }, 1000);
+
+  return () => clearInterval(interval); // Cleanup
+}, []);
+```
+
+### Issue: Race Condition
+
+```typescript
+// Bad
+let userId;
+fetch("/api/user")
+  .then((res) => res.json())
+  .then((data) => {
+    userId = data.id; // May be undefined
+  });
+console.log(userId); // Race!
+
+// Good
+const user = await fetch("/api/user").then((res) => res.json());
+console.log(user.id); // Guaranteed
+```
+
+### Issue: Stale Closure
+
+```typescript
+// Bad
+for (let i = 0; i < 5; i++) {
+  setTimeout(() => {
+    console.log(i); // All print 5!
+  }, 1000);
+}
+
+// Good
+for (let i = 0; i < 5; i++) {
+  setTimeout(() => {
+    console.log(i);
+  }, 1000 * i); // Stagger
+}
+```
+
+## Debugging Best Practices
+
+1. **Start with console.log** before using debugger
+2. **Use meaningful log messages** with context
+3. **Clean up debugging code** before committing
+4. **Test hypotheses** one at a time
+5. **Document findings** as you debug
+6. **Use version control** to bisect issues
+
+<Callout type="info">
+  **Pro Tip**: Use `console.trace()` to see call stack without setting
+  breakpoints.
+</Callout>
+
+## Related Documentation
+
+- [Deployment Runbook](./runbook-deploy)
+- [Rollback Runbook](./runbook-rollback)
+- [Testing Architecture](../../test-architecture.md)

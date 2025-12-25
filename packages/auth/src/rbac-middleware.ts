@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "./auth.config";
 import { Role, Permission, canAccessRoute, hasPermission } from "./permissions";
 
 export class AuthorizationError extends Error {
@@ -15,38 +15,22 @@ export interface AuthContext {
   email?: string;
 }
 
-export async function getAuthContext(
-  request: NextRequest,
-): Promise<AuthContext | null> {
-  const { userId } = await auth();
+export async function getAuthContext(): Promise<AuthContext | null> {
+  const session = await auth();
 
-  if (!userId) {
+  if (!session?.user) {
     return null;
   }
 
-  const { getToken } = auth();
-  const tokenPromise = getToken?.({ template: "default" });
-  const token = tokenPromise ? await tokenPromise : null;
-
-  let role = Role.STUDENT;
-
-  if (token) {
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      role = (payload.metadata?.role as Role) || Role.STUDENT;
-    } catch (e) {
-      console.error("Error parsing token:", e);
-    }
-  }
-
   return {
-    userId,
-    role,
+    userId: session.user.id || "",
+    role: (session.user as any).role || Role.STUDENT,
+    email: session.user.email || undefined,
   };
 }
 
-export async function requireAuth(request: NextRequest): Promise<AuthContext> {
-  const authContext = await getAuthContext(request);
+export async function requireAuth(): Promise<AuthContext> {
+  const authContext = await getAuthContext();
 
   if (!authContext) {
     throw new AuthorizationError("Authentication required");
@@ -55,9 +39,9 @@ export async function requireAuth(request: NextRequest): Promise<AuthContext> {
   return authContext;
 }
 
-export function requireRole(requiredRoles: Role[]) {
-  return async (request: NextRequest): Promise<AuthContext> => {
-    const authContext = await requireAuth(request);
+export function requireRoles(requiredRoles: Role[]) {
+  return async (): Promise<AuthContext> => {
+    const authContext = await requireAuth();
 
     if (!requiredRoles.includes(authContext.role)) {
       throw new AuthorizationError(
@@ -70,8 +54,8 @@ export function requireRole(requiredRoles: Role[]) {
 }
 
 export function requirePermission(permission: Permission) {
-  return async (request: NextRequest): Promise<AuthContext> => {
-    const authContext = await requireAuth(request);
+  return async (): Promise<AuthContext> => {
+    const authContext = await requireAuth();
 
     if (!hasPermission(authContext.role, permission)) {
       throw new AuthorizationError(`Requires ${permission} permission`);
@@ -82,8 +66,8 @@ export function requirePermission(permission: Permission) {
 }
 
 export function requireAnyPermission(permissions: Permission[]) {
-  return async (request: NextRequest): Promise<AuthContext> => {
-    const authContext = await requireAuth(request);
+  return async (): Promise<AuthContext> => {
+    const authContext = await requireAuth();
 
     const hasAny = permissions.some((p) => hasPermission(authContext.role, p));
 
@@ -98,8 +82,8 @@ export function requireAnyPermission(permissions: Permission[]) {
 }
 
 export function requireAllPermissions(permissions: Permission[]) {
-  return async (request: NextRequest): Promise<AuthContext> => {
-    const authContext = await requireAuth(request);
+  return async (): Promise<AuthContext> => {
+    const authContext = await requireAuth();
 
     const hasAll = permissions.every((p) => hasPermission(authContext.role, p));
 
@@ -121,7 +105,7 @@ export function withAuth(
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
     try {
-      const context = await requireAuth(request);
+      const context = await requireAuth();
       return await handler(request, context);
     } catch (error) {
       if (error instanceof AuthorizationError) {
@@ -132,7 +116,7 @@ export function withAuth(
   };
 }
 
-export function withRole(
+export function withRoles(
   requiredRoles: Role[],
   handler: (
     request: NextRequest,
@@ -141,7 +125,7 @@ export function withRole(
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
     try {
-      const context = await requireRole(requiredRoles)(request);
+      const context = await requireRoles(requiredRoles)();
       return await handler(request, context);
     } catch (error) {
       if (error instanceof AuthorizationError) {
@@ -161,7 +145,7 @@ export function withPermission(
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
     try {
-      const context = await requirePermission(permission)(request);
+      const context = await requirePermission(permission)();
       return await handler(request, context);
     } catch (error) {
       if (error instanceof AuthorizationError) {
@@ -180,7 +164,7 @@ export function withRouteAccess(
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
     try {
-      const context = await requireAuth(request);
+      const context = await requireAuth();
       const pathname = request.nextUrl.pathname;
 
       if (!canAccessRoute(context.role, pathname)) {

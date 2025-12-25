@@ -1,0 +1,63 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Grid Component > Snapshots > should match snapshot with all column options 1`] = `
+<div
+  class="grid grid-cols-1 gap-4 items-stretch"
+>
+  1
+   cols
+</div>
+`;
+
+exports[`Grid Component > Snapshots > should match snapshot with all column options 2`] = `
+<div
+  class="grid grid-cols-2 gap-4 items-stretch"
+>
+  2
+   cols
+</div>
+`;
+
+exports[`Grid Component > Snapshots > should match snapshot with all column options 3`] = `
+<div
+  class="grid grid-cols-3 gap-4 items-stretch"
+>
+  3
+   cols
+</div>
+`;
+
+exports[`Grid Component > Snapshots > should match snapshot with all column options 4`] = `
+<div
+  class="grid grid-cols-4 gap-4 items-stretch"
+>
+  4
+   cols
+</div>
+`;
+
+exports[`Grid Component > Snapshots > should match snapshot with all column options 5`] = `
+<div
+  class="grid grid-cols-6 gap-4 items-stretch"
+>
+  6
+   cols
+</div>
+`;
+
+exports[`Grid Component > Snapshots > should match snapshot with all column options 6`] = `
+<div
+  class="grid grid-cols-12 gap-4 items-stretch"
+>
+  12
+   cols
+</div>
+`;
+
+exports[`Grid Component > Snapshots > should match snapshot with default props 1`] = `
+<div
+  class="grid grid-cols-1 gap-4 items-stretch"
+>
+  Grid
+</div>
+`;

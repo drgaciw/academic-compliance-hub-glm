@@ -1,0 +1,236 @@
+name: Cache Monitoring
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      time_range:
+        description: "Time range for analysis (hours)"
+        required: false
+        default: "6"
+        type: string
+
+permissions:
+  contents: read
+  deployments: read
+
+jobs:
+  monitor-cache:
+    name: Monitor Turbo Cache
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Get cache statistics
+        id: cache-stats
+        run: |
+          echo "Analyzing cache statistics..."
+
+          echo "## Turbo Cache Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Cache Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- **Team ID:** ${{ secrets.TURBO_TEAM }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Remote Cache:** Enabled" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Recent Build Performance" >> $GITHUB_STEP_SUMMARY
+
+      - name: Analyze GitHub Actions cache
+        run: |
+          echo "Analyzing GitHub Actions cache usage..."
+
+          gh cache list \
+            --limit 100 \
+            --json key,created-at,size-in-bytes,last-accessed-at \
+            > cache-list.json
+
+          echo "### GitHub Actions Cache" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat cache-list.json | head -20 >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Calculate cache hit rate
+        id: hit-rate
+        run: |
+          echo "Calculating cache hit rate..."
+
+          total_caches=$(gh cache list --json id | jq length)
+          used_caches=$(gh cache list --sort last-accessed-at --json id,last-accessed-at | \
+            jq '[.[] | select(.lastAccessedAt > (now - 86400000))] | length')
+
+          if [ "$total_caches" -gt 0 ]; then
+            hit_rate=$(( used_caches * 100 / total_caches ))
+            echo "hit_rate=$hit_rate" >> $GITHUB_OUTPUT
+            echo "Total caches: $total_caches"
+            echo "Used (24h): $used_caches"
+            echo "Hit rate: ${hit_rate}%"
+          else
+            echo "No caches found"
+          fi
+
+      - name: Check cache health
+        run: |
+          echo "### Cache Health" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Caches:** ${{ steps.hit-rate.outputs.hit_rate || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Hit Rate (24h):** ${{ steps.hit-rate.outputs.hit_rate || 'N/A' }}%" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.hit-rate.outputs.hit_rate }}" -lt 50 ]; then
+            echo "⚠️ Low cache hit rate detected" >> $GITHUB_STEP_SUMMARY
+            echo "Consider reviewing cache configuration" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.hit-rate.outputs.hit_rate }}" -ge 70 ]; then
+            echo "✅ Good cache hit rate" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ Moderate cache hit rate" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Clean old caches
+        run: |
+          echo "Checking for old caches to clean..."
+
+          gh cache list \
+            --sort last-accessed-at \
+            --json id,key,last-accessed-at \
+            --jq '.[] | select(.lastAccessedAt < (now - 2592000000)) | .id' \
+            > old-cache-ids.txt
+
+          cache_count=$(wc -l < old-cache-ids.txt)
+          echo "Found $cache_count caches older than 30 days"
+
+          if [ "$cache_count" -gt 0 ] && [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "Deleting old caches..."
+            while read -r cache_id; do
+              gh cache delete "$cache_id" || true
+            done < old-cache-ids.txt
+            echo "Deleted $cache_count old caches"
+          elif [ "$cache_count" -gt 0 ]; then
+            echo "Run workflow manually to clean old caches"
+            echo "- **Old caches (30+ days):** $cache_count" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Monitor remote cache (Turbo)
+        run: |
+          echo "### Remote Cache Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -n "${{ secrets.TURBO_TOKEN }}" ]; then
+            echo "- **Remote Cache:** ✅ Configured" >> $GITHUB_STEP_SUMMARY
+            echo "- **Token:** ✅ Available" >> $GITHUB_STEP_SUMMARY
+            echo "- **Team:** ${{ secrets.TURBO_TEAM }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Remote Cache:** ❌ Not configured" >> $GITHUB_STEP_SUMMARY
+            echo "- **Recommendation:** Add TURBO_TOKEN to GitHub secrets" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check build times
+        id: build-times
+        run: |
+          echo "Analyzing recent build times..."
+
+          echo "### Recent Build Times" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          gh run list \
+            --workflow build.yml \
+            --limit 10 \
+            --json databaseId,conclusion,createdAt,durationSeconds \
+            --jq '.[] | {
+              id: .databaseId,
+              status: .conclusion,
+              created: .createdAt,
+              duration: .durationSeconds
+            }' \
+            > build-times.json
+
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat build-times.json >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate recommendations
+        run: |
+          echo "### Recommendations" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          recommendations=()
+
+          if [ "${{ steps.hit-rate.outputs.hit_rate }}" -lt 50 ]; then
+            recommendations+=("- Low cache hit rate - review cache key strategy")
+          fi
+
+          if [ "${{ secrets.TURBO_TOKEN }}" == "" ]; then
+            recommendations+=("- Enable Turbo remote cache for better performance")
+          fi
+
+          if [ "${{ secrets.TURBO_TEAM }}" == "" ]; then {
+            recommendations+=("- Set TURBO_TEAM secret for team cache sharing")
+          fi
+
+          if [ ${#recommendations[@]} -eq 0 ]; then
+            echo "- ✅ Cache configuration is optimal" >> $GITHUB_STEP_SUMMARY
+          else
+            for rec in "${recommendations[@]}"; do
+              echo "- $rec" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+      - name: Create cache report
+        if: always()
+        run: |
+          echo "Cache monitoring completed at: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo "Check the summary for detailed metrics"
+
+  alert-low-hit-rate:
+    name: Alert on Low Cache Hit Rate
+    runs-on: ubuntu-latest
+    needs: monitor-cache
+    if: steps.monitor-cache.outputs.hit_rate < 50
+
+    steps:
+      - name: Send alert
+        run: |
+          echo "⚠️ Low cache hit rate detected: ${{ steps.monitor-cache.outputs.hit_rate }}%"
+          echo "Consider reviewing cache configuration"
+
+      - name: Create issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '⚠️ Low Cache Hit Rate Alert',
+              body: `## Cache Performance Alert
+
+              **Current Hit Rate:** ${{ needs.monitor-cache.outputs.hit_rate }}%
+              **Threshold:** 50%
+              **Time:** ${new Date().toISOString()}
+
+              ## Recommendations
+
+              - Review cache key strategy
+              - Check if cache keys are too specific
+              - Verify dependencies are stable
+              - Consider enabling remote cache
+
+              ## Actions
+
+              [View Cache Monitoring Workflow](https://github.com/${{ github.repository }}/actions/workflows/cache-monitoring.yml)
+              `,
+              labels: ['performance', 'cache', 'needs-review']
+            })

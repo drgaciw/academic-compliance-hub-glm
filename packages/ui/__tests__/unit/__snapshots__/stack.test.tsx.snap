@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Stack Component > Snapshots > should match snapshot with all directions 1`] = `
+<div
+  class="flex flex-row items-stretch justify-start gap-0"
+>
+  row
+</div>
+`;
+
+exports[`Stack Component > Snapshots > should match snapshot with all directions 2`] = `
+<div
+  class="flex flex-col items-stretch justify-start gap-0"
+>
+  col
+</div>
+`;
+
+exports[`Stack Component > Snapshots > should match snapshot with default props 1`] = `
+<div
+  class="flex flex-col items-stretch justify-start gap-0"
+>
+  Stack
+</div>
+`;

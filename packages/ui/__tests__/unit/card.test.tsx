@@ -34,21 +34,23 @@ describe("Card Component", () => {
 
   describe("Card Root", () => {
     it("should render with default props", () => {
-      render(<Card>Card content</Card>);
-      const card = screen.getByText("Card content");
-      expect(card).toBeInTheDocument();
-      expect(card.parentElement).toHaveAttribute("data-slot", "card");
+      const { container } = render(<Card>Card content</Card>);
+      const card = container.querySelector('[data-slot="card"]');
+      expect(screen.getByText("Card content")).toBeInTheDocument();
+      expect(card).toHaveAttribute("data-slot", "card");
     });
 
     it("should render with custom className", () => {
-      render(<Card className="custom-card">Content</Card>);
-      const card = screen.getByText("Content").parentElement;
+      const { container } = render(
+        <Card className="custom-card">Content</Card>,
+      );
+      const card = container.querySelector('[data-slot="card"]');
       expect(card).toHaveClass("custom-card");
     });
 
     it("should render with default styling", () => {
-      render(<Card>Content</Card>);
-      const card = screen.getByText("Content").parentElement;
+      const { container } = render(<Card>Content</Card>);
+      const card = container.querySelector('[data-slot="card"]');
       expect(card).toHaveClass(
         "bg-card",
         "text-card-foreground",
@@ -70,6 +72,7 @@ describe("Card Component", () => {
       );
       const card = screen.getByTestId("test-card");
       expect(card).toHaveAttribute("id", "test-card");
+      expect(card).toHaveAttribute("data-slot", "card");
     });
 
     it("should render with nested elements", () => {

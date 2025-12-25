@@ -1,0 +1,63 @@
+name: Lighthouse CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "pnpm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build applications
+        run: pnpm run build
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            http://localhost:3000
+            http://localhost:3000/student
+            http://localhost:3000/admin
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          budgetPath: ./.github/lighthouse-budget.json
+          assertMatrix:
+            - aggregationMethod: median
+              asserts:
+                - "categories:performance >= 0.9"
+                - "categories:accessibility >= 0.9"
+                - "categories:best-practices >= 0.9"
+                - "categories:seo >= 0.9"
+                - "first-contentful-paint <= 1800"
+                - "largest-contentful-paint <= 2500"
+                - "cumulative-layout-shift <= 0.1"
+                - "interaction-to-next-paint <= 200"
+                - "speed-index <= 2500"
+                - "total-blocking-time <= 300"
+
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/

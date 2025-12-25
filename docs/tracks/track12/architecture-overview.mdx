@@ -1,0 +1,276 @@
+import Callout from "nextra/components/callout";
+
+# Architecture Overview
+
+This document provides a high-level overview of the Athletic Academics Hub (AAH) platform architecture.
+
+## System Architecture
+
+### Multi-Zone Application
+
+AAH is built as a multi-zone Next.js application with three distinct frontend applications:
+
+```
+athletic-academics-hub/
+├── apps/
+│   ├── main/           # Public-facing website
+│   ├── student/        # Student portal (microsite)
+│   └── admin/          # Admin dashboard (microsite)
+└── packages/           # Shared packages
+```
+
+**Zone Separation:**
+
+- Each zone is a separate Next.js application
+- Zones share packages via Turborepo monorepo
+- Zones have independent deployments
+- Zones can scale independently
+
+### Monorepo Structure
+
+Using **Turborepo** for efficient monorepo management:
+
+<Callout type="info">
+  **Why Turborepo?**
+
+- Fast builds with intelligent caching
+- Efficient task orchestration
+- Remote caching for CI/CD
+- Excellent TypeScript support
+  </Callout>
+
+```
+packages/
+├── auth/              # Authentication & RBAC
+├── database/          # Prisma ORM & schema
+├── api-utils/         # API utilities & helpers
+├── ui/                # Shadcn/UI components
+├── ai/                # AI utilities & agents
+├── config/            # Shared configurations
+├── tsconfig/          # TypeScript configs
+├── prettier-config/   # Prettier configs
+├── eslint-config/     # ESLint configs
+├── trpc/              # tRPC setup
+├── logging/           # Structured logging
+├── schemas/           # Zod validation schemas
+├── compliance-engine/ # NCAA compliance rules
+├── course-mapping/    # Course transfer logic
+├── document-processing/ # Document OCR/processing
+├── integration-adapter/ # External integrations
+└── report-generation/  # Report generation
+```
+
+## Technology Stack
+
+### Frontend
+
+**Next.js 14 with App Router**
+
+- Server Components for optimal performance
+- File-based routing with App Router
+- Built-in image optimization
+- API routes for serverless functions
+- TypeScript-first development
+
+**UI Framework**
+
+- React 18 with Server Components
+- Shadcn/UI v2 components
+- Tailwind CSS for styling
+- Framer Motion for animations
+
+### Backend
+
+**Serverless Microservices**
+
+- Vercel Functions for serverless compute
+- Hono for API routing (future)
+- Nitro for edge functions (future)
+
+**Database**
+
+- PostgreSQL via Vercel Postgres
+- Prisma ORM for type-safe queries
+- pgvector for AI embeddings
+- Connection pooling with connection limits
+
+### Authentication
+
+**Clerk Authentication**
+
+- User management & RBAC
+- Multi-factor authentication
+- Social logins (Google, SSO)
+- Session management
+- Webhook integration
+
+### AI/ML
+
+**Vercel AI SDK**
+
+- OpenAI GPT-4 for reasoning
+- Anthropic Claude for analysis
+- LangChain for agent orchestration
+- Vector search with pgvector
+- Streaming responses
+
+## Data Flow
+
+### Request Flow
+
+```
+User Request
+    ↓
+DNS (Vercel)
+    ↓
+Edge Network (Vercel Edge)
+    ↓
+Next.js App Router
+    ↓
+Server Component / API Route
+    ↓
+tRPC / Direct Database Query
+    ↓
+Prisma ORM
+    ↓
+PostgreSQL Database
+```
+
+### AI Request Flow
+
+```
+User Query
+    ↓
+AI Service (Vercel AI SDK)
+    ↓
+OpenAI/Anthropic API
+    ↓
+Embedding Generation
+    ↓
+pgvector Similarity Search
+    ↓
+Context Retrieval
+    ↓
+Response Generation
+    ↓
+Streaming to Client
+```
+
+## Deployment Architecture
+
+### Vercel Deployment
+
+```
+GitHub Repository
+    ↓
+Push/PR
+    ↓
+GitHub Actions (CI)
+    ↓
+Turborepo Build
+    ↓
+Vercel Deployment
+    ↓
+Edge Network (50+ locations)
+```
+
+**Environments:**
+
+- **Production**: Main branch → production domain
+- **Preview**: Pull requests → preview domains
+- **Development**: Local development
+
+**Domains:**
+
+- Main: `athletic-academics-hub.com`
+- Student: `student.athletic-academics-hub.com`
+- Admin: `admin.athletic-academics-hub.com`
+- Docs: `docs.athletic-academics-hub.com`
+
+## Security Architecture
+
+### Layered Security
+
+1. **Application Layer**
+   - Next.js security headers
+   - CSP policies
+   - XSS protection
+   - CSRF tokens
+
+2. **Authentication Layer**
+   - Clerk RBAC
+   - Multi-factor authentication
+   - Session management
+   - Webhook verification
+
+3. **Data Layer**
+   - Prisma query sanitization
+   - Row-level security
+   - Encrypted connections (TLS)
+   - Secrets management (Vercel Env)
+
+4. **Infrastructure Layer**
+   - Vercel DDoS protection
+   - Edge network security
+   - Rate limiting (Upstash)
+   - Audit logging
+
+## Observability
+
+### Monitoring Stack
+
+```
+Applications
+    ↓
+Sentry (Error Tracking)
+    ↓
+Vercel Analytics (User Analytics)
+    ↓
+Vercel Speed Insights (Performance)
+    ↓
+Upstash Redis (Rate Limiting/Analytics)
+    ↓
+Custom Dashboard (Health Checks)
+```
+
+**Tools:**
+
+- **Sentry**: Error tracking, performance monitoring
+- **Vercel Analytics**: User analytics, page views
+- **Speed Insights**: Core Web Vitals, LCP, CLS
+- **Upstash Redis**: Rate limiting, caching, analytics
+
+## Scalability Considerations
+
+### Horizontal Scaling
+
+- **Edge Functions**: Scale automatically with Vercel Edge
+- **Database**: Read replicas, connection pooling
+- **Redis**: Automatic scaling with Upstash
+- **Storage**: CDN-cached static assets
+
+### Performance Optimization
+
+- **Server Components**: Reduce client-side JS
+- **Image Optimization**: Next.js Image component
+- **Code Splitting**: Route-based code splitting
+- **Caching**: ISR, SWR, React Query
+- **CDN**: Vercel Edge Network
+
+## Architecture Decisions
+
+For detailed architecture decisions, see our [Architecture Decision Records (ADRs)](../adr-examples).
+
+### Key ADRs
+
+- [ADR-001: Next.js Framework](../adr-examples/ADR-001-nextjs.md)
+- [ADR-002: TypeScript Adoption](../adr-examples/ADR-002-typescript.md)
+- [ADR-003: Turborepo Monorepo](../adr-examples/ADR-003-turborepo.md)
+- [ADR-004: tRPC for APIs](../adr-examples/ADR-004-trpc.md)
+
+## Related Documentation
+
+- [Monorepo Setup](../../architecture/MONOREPO_SETUP.md)
+- [Deployment Guide](../../architecture/DEPLOYMENT.md)
+- [Testing Architecture](../../test-architecture.md)
+- [First Task Tutorial](./first-task-tutorial)

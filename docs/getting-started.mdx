@@ -1,0 +1,135 @@
+import Callout from "nextra/components/callout";
+
+# Getting Started
+
+Get up and running with Athletic Academics Hub in minutes.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js** >= 18.0.0
+- **pnpm** >= 8.0.0
+- **PostgreSQL** (or Vercel Postgres)
+- **Git**
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-org/athletic-academics-hub.git
+cd athletic-academics-hub
+```
+
+### 2. Install Dependencies
+
+```bash
+pnpm install
+```
+
+### 3. Set Up Environment Variables
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your configuration:
+
+```env
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/aah"
+
+# Authentication (Clerk)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
+CLERK_SECRET_KEY="sk_test_..."
+
+# AI Services
+OPENAI_API_KEY="sk-..."
+ANTHROPIC_API_KEY="sk-ant-..."
+
+# Vercel
+VERCEL_TOKEN="..."
+VERCEL_ORG_ID="..."
+VERCEL_PROJECT_ID="..."
+```
+
+### 4. Set Up the Database
+
+```bash
+# Generate Prisma client
+pnpm db:generate
+
+# Push schema to database
+pnpm db:push
+
+# (Optional) Seed with sample data
+pnpm db:seed
+```
+
+### 5. Start Development Servers
+
+```bash
+# Start all services
+pnpm dev
+
+# Or start specific services
+pnpm dev:main        # Main web app
+pnpm dev:student      # Student portal
+pnpm dev:admin       # Admin dashboard
+```
+
+## Project Structure
+
+```
+athletic-academics-hub/
+├── apps/                    # Frontend applications
+│   ├── main/               # Main web application
+│   ├── student/            # Student portal
+│   └── admin/              # Admin dashboard
+├── packages/                 # Shared packages
+│   ├── auth/               # Authentication & authorization
+│   ├── database/            # Prisma schema & client
+│   ├── api-utils/          # API utilities
+│   ├── ui/                 # Shared UI components
+│   ├── ai/                 # AI utilities
+│   └── config/             # Shared configurations
+├── services/                 # Microservices
+│   ├── user/               # User management
+│   ├── advising/           # Course advising
+│   ├── compliance/          # NCAA compliance
+│   └── ai/                 # AI & ML service
+└── docs/                    # Documentation (this site)
+```
+
+## Available Scripts
+
+```bash
+# Development
+pnpm dev              # Start all services
+pnpm build            # Build all packages
+pnpm test             # Run all tests
+
+# Database
+pnpm db:generate      # Generate Prisma client
+pnpm db:push         # Push schema to database
+pnpm db:migrate       # Run migrations
+pnpm db:studio        # Open Prisma Studio
+
+# Quality
+pnpm lint             # Run ESLint
+pnpm type-check       # Run TypeScript checks
+pnpm format           # Format code with Prettier
+```
+
+## Next Steps
+
+- [Read the architecture overview](./tracks/track1/infrastructure)
+- [Explore the design system](./tracks/track3/components)
+- [Set up your development environment](./tracks/track12/onboarding)
+- [Learn about our testing approach](./tracks/track8/overview)
+
+<Callout type="info">
+  New to the project? Check out our [Developer Onboarding
+  Guide](./tracks/track12/onboarding) for a detailed walkthrough.
+</Callout>

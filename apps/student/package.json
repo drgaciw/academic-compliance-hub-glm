@@ -18,19 +18,21 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
-    "@clerk/nextjs": "^4.29.0",
     "@aah/ai": "workspace:*",
+    "@aah/api-utils": "workspace:*",
     "@aah/auth": "workspace:*",
     "@aah/database": "workspace:*",
-    "@aah/api-utils": "workspace:*",
     "@aah/ui": "workspace:*",
+    "@clerk/nextjs": "^4.29.0",
     "@radix-ui/react-slot": "^1.0.2",
+    "@sentry/nextjs": "^10.32.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "lucide-react": "^0.462.0",
     "next": "^14.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "recharts": "^3.6.0",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7"
   },
@@ -41,13 +43,13 @@
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.2.1",
     "@vitest/coverage-v8": "^1.0.4",
-    "jsdom": "^23.0.1",
-    "typescript": "^5.3.3",
+    "autoprefixer": "^10.4.16",
     "eslint": "^8.55.0",
     "eslint-config-next": "^14.0.0",
-    "autoprefixer": "^10.4.16",
+    "jsdom": "^23.0.1",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
+    "typescript": "^5.3.3",
     "vitest": "^1.0.4"
   }
 }

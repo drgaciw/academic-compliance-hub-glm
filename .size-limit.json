@@ -1,0 +1,72 @@
+[
+  {
+    "name": "@aah/ui",
+    "path": "./packages/ui/dist",
+    "limit": "300 kB"
+  },
+  {
+    "name": "@aah/auth",
+    "path": "./packages/auth/dist",
+    "limit": "150 kB"
+  },
+  {
+    "name": "@aah/api-utils",
+    "path": "./packages/api-utils/dist",
+    "limit": "100 kB"
+  },
+  {
+    "name": "@aah/database",
+    "path": "./packages/database/dist",
+    "limit": "200 kB"
+  },
+  {
+    "name": "@aah/trpc",
+    "path": "./packages/trpc/dist",
+    "limit": "250 kB"
+  },
+  {
+    "name": "@aah/compliance-engine",
+    "path": "./packages/compliance-engine/dist",
+    "limit": "150 kB"
+  },
+  {
+    "name": "@aah/ai",
+    "path": "./packages/ai/dist",
+    "limit": "200 kB"
+  },
+  {
+    "name": "@aah/document-processing",
+    "path": "./packages/document-processing/dist",
+    "limit": "180 kB"
+  },
+  {
+    "name": "@aah/course-mapping",
+    "path": "./packages/course-mapping/dist",
+    "limit": "150 kB"
+  },
+  {
+    "name": "@aah/integration-adapter",
+    "path": "./packages/integration-adapter/dist",
+    "limit": "200 kB"
+  },
+  {
+    "name": "@aah/report-generation",
+    "path": "./packages/report-generation/dist",
+    "limit": "200 kB"
+  },
+  {
+    "name": "main-app",
+    "path": "./apps/main/.next/static",
+    "limit": "400 kB"
+  },
+  {
+    "name": "student-app",
+    "path": "./apps/student/.next/static",
+    "limit": "500 kB"
+  },
+  {
+    "name": "admin-app",
+    "path": "./apps/admin/.next/static",
+    "limit": "600 kB"
+  }
+]

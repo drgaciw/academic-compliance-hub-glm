@@ -1,0 +1,317 @@
+# Interactive API Explorer
+
+This guide covers creating an interactive API explorer for testing and documenting tRPC endpoints.
+
+## Overview
+
+We'll use **Scalar** to create a beautiful, interactive API explorer that provides:
+
+- Live API testing
+- Request/response examples
+- Authentication handling
+- Real-time validation
+- Beautiful documentation
+
+## Setup Scalar
+
+### 1. Install Dependencies
+
+```bash
+cd docs
+pnpm add @scalar/nextjs-api-reference
+```
+
+### 2. Create API Explorer Page
+
+Create `docs/pages/api/explorer.mdx`:
+
+```typescript
+'use client';
+
+import { ApiReferenceReact } from '@scalar/nextjs-api-reference';
+import '@scalar/nextjs-api-reference/style.css';
+
+export default function ApiExplorer() {
+  return (
+    <ApiReferenceReact
+      spec={{
+        url: '/api/openapi.json',
+      }}
+      darkMode={false}
+      defaultLanguage="bash"
+      layout="classic"
+    />
+  );
+}
+```
+
+### 3. Configure Nextra
+
+Update `docs/theme.config.jsx`:
+
+```javascript
+export default {
+  // ... existing config
+  sidebar: {
+    defaultMenuCollapseLevel: 2,
+  },
+};
+```
+
+## Alternative: Swagger UI
+
+If you prefer Swagger UI:
+
+### 1. Install Dependencies
+
+```bash
+cd docs
+pnpm add swagger-ui-react swagger-ui
+```
+
+### 2. Create Swagger UI Page
+
+Create `docs/pages/api/swagger.tsx`:
+
+```typescript
+'use client';
+
+import SwaggerUI from 'swagger-ui-react';
+import 'swagger-ui-react/swagger-ui.css';
+
+export default function SwaggerExplorer() {
+  return (
+    <SwaggerUI
+      url="/api/openapi.json"
+      docExpansion="list"
+      defaultModelsExpandDepth={1}
+      tryItOutEnabled={true}
+      requestInterceptor={(req) => {
+        req.headers.Authorization = `Bearer ${localStorage.getItem('token')}`;
+        return req;
+      }}
+    />
+  );
+}
+```
+
+## Customization
+
+### Dark Mode Support
+
+```typescript
+'use client';
+
+import { ApiReferenceReact } from '@scalar/nextjs-api-reference';
+import '@scalar/nextjs-api-reference/style.css';
+
+export default function ApiExplorer() {
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    setDarkMode(prefersDark.matches);
+  }, []);
+
+  return (
+    <ApiReferenceReact
+      spec={{
+        url: '/api/openapi.json',
+      }}
+      darkMode={darkMode}
+      layout="modern"
+    />
+  );
+}
+```
+
+### Add Authentication
+
+```typescript
+'use client';
+
+import { ApiReferenceReact } from '@scalar/nextjs-api-reference';
+import '@scalar/nextjs-api-reference/style.css';
+
+export default function ApiExplorer() {
+  return (
+    <ApiReferenceReact
+      spec={{
+        url: '/api/openapi.json',
+      }}
+      onAuthentication={({ type, token }) => {
+        if (type === 'bearer') {
+          localStorage.setItem('token', token);
+        }
+      }}
+      authentication={{
+        apiKey: {
+          token: localStorage.getItem('token') || '',
+          prefix: 'Bearer',
+        },
+      }}
+    />
+  );
+}
+```
+
+### Customize Layout
+
+```typescript
+export default function ApiExplorer() {
+  return (
+    <ApiReferenceReact
+      spec={{
+        url: '/api/openapi.json',
+      }}
+      layout={{
+        singleColumn: true,
+        hidden: {
+          models: false,
+          security: false,
+        },
+      }}
+      theme={{
+        cssVariable: '--colors-primary-500',
+        darkMode: true,
+      }}
+    />
+  );
+}
+```
+
+## Example: Full API Explorer
+
+Create `docs/tracks/track12/api-explorer.mdx`:
+
+```typescript
+'use client';
+
+import { ApiReferenceReact } from '@scalar/nextjs-api-reference';
+import '@scalar/nextjs-api-reference/style.css';
+import { useState, useEffect } from 'react';
+
+export default function ApiExplorer() {
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    setDarkMode(prefersDark.matches);
+
+    const handler = (e: MediaQueryListEvent) => setDarkMode(e.matches);
+    prefersDark.addEventListener('change', handler);
+    return () => prefersDark.removeEventListener('change', handler);
+  }, []);
+
+  return (
+    <div className="api-explorer">
+      <ApiReferenceReact
+        spec={{
+          url: '/api/openapi.json',
+        }}
+        darkMode={darkMode}
+        defaultLanguage="bash"
+        layout="modern"
+        onAuthentication={({ type, token }) => {
+          if (type === 'bearer') {
+            localStorage.setItem('api-token', token);
+          }
+        }}
+        authentication={{
+          apiKey: {
+            token: localStorage.getItem('api-token') || '',
+            prefix: 'Bearer',
+          },
+        }}
+        meta={{
+          title: 'Athletic Academics Hub API',
+          description: 'Interactive API explorer for AAH platform',
+        }}
+      />
+    </div>
+  );
+}
+```
+
+## Deployment
+
+### Serve API Explorer
+
+Update `docs/next.config.js`:
+
+```javascript
+module.exports = {
+  async rewrites() {
+    return [
+      {
+        source: "/api/openapi.json",
+        destination: "/openapi.json",
+      },
+    ];
+  },
+};
+```
+
+### Preview URL
+
+Add preview URL to Nextra navigation:
+
+Update `docs/tracks/track12/_meta.mdx`:
+
+```json
+{
+  "api-explorer": {
+    "title": "API Explorer",
+    "href": "https://docs-preview.athletic-academics-hub.com/api/explorer"
+  }
+}
+```
+
+## Troubleshooting
+
+### Issue: API Explorer Not Loading
+
+**Solution**: Verify OpenAPI spec is accessible:
+
+```bash
+curl http://localhost:3000/api/openapi.json
+```
+
+### Issue: CORS Errors
+
+**Solution**: Add CORS headers to API server:
+
+```typescript
+import cors from "cors";
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://docs.athletic-academics-hub.com",
+    ],
+    credentials: true,
+  }),
+);
+```
+
+### Issue: Authentication Not Working
+
+**Solution**: Ensure token is stored in localStorage:
+
+```typescript
+const handleLogin = async () => {
+  const response = await fetch("/api/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+  const { token } = await response.json();
+  localStorage.setItem("token", token);
+};
+```
+
+## Related Documentation
+
+- [OpenAPI Generation](./api-openapi)
+- [API Examples](./api-examples)
+- [API Testing](./api-testing)

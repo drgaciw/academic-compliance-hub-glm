@@ -1,0 +1,138 @@
+# Track 9: CI/CD & Deployment
+
+Documentation for continuous integration, continuous deployment, and deployment pipelines.
+
+## Overview
+
+Track 9 implements CI/CD pipelines with GitHub Actions, pre-commit hooks, preview deployments, and production deployment workflows.
+
+## CI/CD Pipeline
+
+### GitHub Actions
+
+Automated workflow for linting, type-checking, and testing.
+
+- [Workflow Configuration](./github-actions-config)
+- [Lint Job](./lint-job)
+- [Type Check Job](./typecheck-job)
+- [Test Job](./test-job)
+- [Build Job](./build-job)
+- [Pipeline Optimization](./pipeline-optimization)
+
+### Pipeline Caching
+
+Pipeline caching strategies for faster builds.
+
+- [Action Caching](./action-caching)
+- [Dependency Caching](./dependency-caching)
+- [Build Artifact Caching](./artifact-caching)
+- [Cache Invalidation](./cache-invalidation)
+
+## Pre-commit Hooks
+
+### Husky
+
+Git hooks for quality checks before commits.
+
+- [Husky Setup](./husky-setup)
+- [Pre-commit Hook](./pre-commit-hook)
+- [Commit Message Hook](./commit-msg-hook)
+- [Hook Management](./hook-management)
+
+### Lint-Staged
+
+Lint and format staged files before commit.
+
+- [Lint-Staged Config](./lint-staged-config)
+- [File Matching Patterns](./file-patterns)
+- [Linting Rules](./linting-rules)
+- [Formatting Rules](./formatting-rules)
+
+## Preview Deployments
+
+### Vercel Preview
+
+Automatic preview deployments for pull requests.
+
+- [Preview Deployment Setup](./preview-setup)
+- [Preview URL Generation](./preview-urls)
+- [Preview Environment Vars](./preview-env-vars)
+- [Preview Deployment Caching](./preview-caching)
+
+### Preview Testing
+
+Automated testing of preview deployments.
+
+- [Preview Testing Workflow](./preview-testing)
+- [Smoke Tests](./smoke-tests)
+- [Integration Tests](./preview-integration-tests)
+- [Preview Notifications](./preview-notifications)
+
+## Production Deployment
+
+### Production Pipeline
+
+Production deployment workflow with approval gates.
+
+- [Production Workflow Config](./production-workflow)
+- [Approval Gates](./approval-gates)
+- [Manual Triggers](./manual-triggers)
+- [Automated Triggers](./automated-triggers)
+
+### Environment Management
+
+Managing dev, staging, and production environments.
+
+- [Environment Configuration](./env-config)
+- [Environment Variables](./env-var-management)
+- [Environment Promotion](./env-promotion)
+- [Environment Sync](./env-sync)
+
+## Rollback Procedures
+
+### Rollback Workflow
+
+Fast rollback procedures for production issues.
+
+- [Rollback Strategy](./rollback-strategy)
+- [Rollback Execution](./rollback-execution)
+- [Rollback Validation](./rollback-validation)
+- [Rollback Documentation](./rollback-docs)
+
+### Hotfix Workflow
+
+Emergency hotfix deployment procedure.
+
+- [Hotfix Branch Creation](./hotfix-branch)
+- [Hotfix Testing](./hotfix-testing)
+- [Hotfix Deployment](./hotfix-deployment)
+- [Hotfix to Main](./hotfix-merge)
+
+## Turborepo Remote Caching
+
+### Remote Cache Setup
+
+Shared cache for faster builds across team.
+
+- [Remote Cache Config](./remote-cache-config)
+- [Cache Authentication](./cache-auth)
+- [Cache Management](./cache-management)
+- [Cache Analytics](./cache-analytics)
+
+## Deployment Metrics
+
+### Deployment Monitoring
+
+Track deployment performance and success rates.
+
+- [Deployment Metrics](./deploy-metrics)
+- [Build Time Tracking](./build-time-tracking)
+- [Deployment Success Rate](./deploy-success-rate)
+- [Deployment Frequency](./deploy-frequency)
+
+## Related Tasks
+
+- [Infrastructure](../track1/build-system)
+- [Security](../track11/security-policies)
+- [Observability](../track10/deploy-monitoring)
+- [Testing](../track8/ci-integration)

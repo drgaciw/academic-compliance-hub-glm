@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Disallow: /api/
+Disallow: /_next/
+Disallow: /test/
+
+Sitemap: https://athleticacademics.com/sitemap.xml

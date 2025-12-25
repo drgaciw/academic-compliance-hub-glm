@@ -1,0 +1,71 @@
+# Track 2: App Shell & Multi-Zone Setup
+
+Documentation for app shell architecture and multi-zone routing.
+
+## Overview
+
+Track 2 implements the shared app shell and multi-zone routing architecture that enables multiple microsites to work seamlessly under a single domain.
+
+## Architecture
+
+### App Shell
+
+Shared layout and navigation components used across all microsites.
+
+- [Shell Layout](./shell-layout)
+- [Navigation Components](./navigation)
+- [Responsive Header](./responsive-header)
+- [Footer Component](./footer)
+
+### Multi-Zone Routing
+
+Next.js rewrites and routing configuration for microsite composition.
+
+- [Routing Configuration](./routing-config)
+- [Rewrite Rules](./rewrite-rules)
+- [Zone Architecture](./zone-architecture)
+- [Performance Optimization](./zone-performance)
+
+## Authentication
+
+### Authentication Middleware
+
+Shared authentication flow across all microsites.
+
+- [Middleware Setup](./auth-middleware)
+- [Role-Based Guards](./role-guards)
+- [Session Management](./session-management)
+- [Cookie Configuration](./cookie-config)
+
+### Authorization
+
+Access control implementation for different user roles.
+
+- [COMPLIANCE_OFFICER](./roles/compliance-officer)
+- [STUDENT](./roles/student)
+- [ADVISOR](./roles/advisor)
+- [ADMIN](./roles/admin)
+
+## Vercel Configuration
+
+### Project Setup
+
+Vercel project configuration for multi-zone deployment.
+
+- [vercel.json Guide](./vercel-config)
+- [Environment Variables](./env-vars)
+- [Edge Network Setup](./edge-network)
+- [Preview Deployments](./preview-deploys)
+
+## Integration Tests
+
+- [Multi-Zone Tests](./integration-tests)
+- [Cross-Zone Auth Tests](./cross-zone-auth)
+- [Route Transition Tests](./route-tests)
+
+## Related Tasks
+
+- [Design System](../track3/components)
+- [Main Microsite](../track4/landing-page)
+- [Student Microsite](../track5/dashboard)
+- [Admin Microsite](../track6/admin-dashboard)

@@ -1,0 +1,176 @@
+# Track 11: Security & Compliance
+
+Documentation for security measures, compliance requirements, and vulnerability management.
+
+## Overview
+
+Track 11 implements comprehensive security including CSP headers, rate limiting, input validation, secret management, and security scanning.
+
+## Security Headers
+
+### CSP Configuration
+
+Content Security Policy header configuration.
+
+- [CSP Setup](./csp-setup)
+- [CSP Directives](./csp-directives)
+- [CSP Reporting](./csp-reporting)
+- [CSP Validation](./csp-validation)
+- [CSP Debugging](./csp-debugging)
+
+### Security Headers
+
+Additional security headers implementation.
+
+- [X-Frame-Options](./x-frame-options)
+- [X-Content-Type-Options](./x-content-type)
+- [Strict-Transport-Security](./hsts)
+- [Referrer-Policy](./referrer-policy)
+
+## Rate Limiting
+
+### Rate Limiting Middleware
+
+API endpoint rate limiting and abuse prevention.
+
+- [Rate Limit Setup](./rate-limit-setup)
+- [Rate Limit Strategies](./rate-limit-strategies)
+- [Rate Limit Per Role](./rate-limit-per-role)
+- [Rate Limit Testing](./rate-limit-testing)
+
+### DDoS Protection
+
+Protection against distributed denial of service attacks.
+
+- [DDoS Protection Setup](./ddos-protection)
+- [Rate Limiting](./ddos-rate-limiting)
+- [IP Blocking](./ip-blocking)
+- [WAF Rules](./waf-rules)
+
+## Input Validation
+
+### Zod Validation
+
+Schema-based input validation for all API endpoints.
+
+- [Zod Setup](./zod-setup)
+- [Schema Definition](./schema-definition)
+- [Validation Middleware](./validation-middleware)
+- [Custom Validators](./custom-validators)
+- [Error Handling](./validation-errors)
+
+### Input Sanitization
+
+Sanitizing user input to prevent injection attacks.
+
+- [Input Sanitization](./input-sanitization)
+- [SQL Injection Prevention](./sql-injection-prevention)
+- [XSS Prevention](./xss-prevention)
+- [CSRF Protection](./csrf-protection)
+
+## Secret Management
+
+### Vercel Environment Variables
+
+Secure storage of secrets and configuration.
+
+- [Environment Variable Setup](./env-var-setup)
+- [Secret Management](./secret-management)
+- [Environment-Specific Secrets](./env-specific-secrets)
+- [Secret Rotation](./secret-rotation)
+
+### No Hardcoded Secrets
+
+Preventing secrets in code and git history.
+
+- [Secret Detection](./secret-detection)
+- [Git Hooks](./git-secrets-hook)
+- [Secret Scanning](./secret-scanning)
+- [Secret Remediation](./secret-remediation)
+
+## SAST Integration
+
+### CodeQL
+
+Static application security testing with CodeQL.
+
+- [CodeQL Setup](./codeql-setup)
+- [CodeQL Queries](./codeql-queries)
+- [CodeQL Alerts](./codeql-alerts)
+- [CodeQL Reporting](./codeql-reporting)
+
+### Semgrep
+
+Alternative SAST tool with custom rules.
+
+- [Semgrep Setup](./semgrep-setup)
+- [Custom Rules](./custom-semgrep-rules)
+- [Semgrep Alerts](./semgrep-alerts)
+- [Semgrep Reporting](./semgrep-reporting)
+
+## Dependency Security
+
+### Dependabot
+
+Automated dependency vulnerability scanning.
+
+- [Dependabot Setup](./dependabot-setup)
+- [Dependabot Config](./dependabot-config)
+- [Vulnerability Alerts](./vulnerability-alerts)
+- [Automated PRs](./automated-prs)
+
+### Snyk
+
+Alternative dependency scanning.
+
+- [Snyk Setup](./snyk-setup)
+- [Snyk Monitoring](./snyk-monitoring)
+- [Vulnerability Reporting](./snyk-reporting)
+- [Remediation Guidance](./snyk-guidance)
+
+## Security Audits
+
+### Security Checklist
+
+Comprehensive security audit checklist.
+
+- [Audit Checklist](./audit-checklist)
+- [Audit Frequency](./audit-frequency)
+- [Audit Reporting](./audit-reporting)
+- [Audit Sign-off](./audit-signoff)
+
+### Penetration Testing
+
+Regular penetration testing procedures.
+
+- [Pen Testing Setup](./pen-test-setup)
+- [Pen Testing Scope](./pen-test-scope)
+- [Pen Testing Schedule](./pen-test-schedule)
+- [Pen Testing Reports](./pen-test-reports)
+
+## FERPA Compliance
+
+### Data Protection
+
+FERPA-compliant data protection measures.
+
+- [Data Encryption](./data-encryption)
+- [Access Controls](./access-controls)
+- [Data Minimization](./data-minimization)
+- [Data Retention](./data-retention)
+
+### Audit Logging
+
+FERPA-compliant audit logging.
+
+- [Audit Log Setup](./audit-log-setup)
+- [Access Logging](./access-logging)
+- [Log Retention](./log-retention)
+- [Log Export](./log-export)
+
+## Related Tasks
+
+- [Infrastructure](../track1/security-config)
+- [Backend Services](../track7/api-security)
+- [Auth](../track2/authentication)
+- [Observability](../track10/security-alerts)

@@ -1,0 +1,94 @@
+{
+  "dashboard": {
+    "title": "AAH Performance Dashboard",
+    "widgets": [
+      {
+        "id": "core-web-vitals",
+        "title": "Core Web Vitals",
+        "type": "gauge",
+        "queries": [
+          {
+            "metric": "vital:lcp",
+            "title": "Largest Contentful Paint"
+          },
+          {
+            "metric": "vital:fid",
+            "title": "First Input Delay"
+          },
+          {
+            "metric": "vital:cls",
+            "title": "Cumulative Layout Shift"
+          }
+        ]
+      },
+      {
+        "id": "page-performance",
+        "title": "Page Performance",
+        "type": "timeseries",
+        "query": "vital:page_load"
+      },
+      {
+        "id": "error-rate",
+        "title": "Error Rate",
+        "type": "single_value",
+        "query": "error_rate:overall"
+      },
+      {
+        "id": "user-satisfaction",
+        "title": "User Satisfaction",
+        "type": "percentage",
+        "query": "satisfaction:score"
+      }
+    ],
+    "filters": {
+      "environment": "production",
+      "timeRange": "7d",
+      "groupBy": ["route", "device", "browser"]
+    }
+  },
+  "alerts": [
+    {
+      "id": "high-error-rate",
+      "name": "High Error Rate Alert",
+      "condition": {
+        "metric": "error_rate:overall",
+        "operator": ">",
+        "threshold": 0.05
+      },
+      "notification": {
+        "channels": ["slack", "email"],
+        "slack_channel": "#aah-alerts",
+        "email_recipients": ["team@aah.com"]
+      },
+      "cooldown": "15m"
+    },
+    {
+      "id": "slow-page-load",
+      "name": "Slow Page Load Alert",
+      "condition": {
+        "metric": "vital:lcp",
+        "operator": ">",
+        "threshold": 4
+      },
+      "notification": {
+        "channels": ["slack", "email"],
+        "slack_channel": "#aah-alerts"
+      },
+      "cooldown": "30m"
+    },
+    {
+      "id": "high-cls",
+      "name": "High Cumulative Layout Shift Alert",
+      "condition": {
+        "metric": "vital:cls",
+        "operator": ">",
+        "threshold": 0.25
+      },
+      "notification": {
+        "channels": ["slack"],
+        "slack_channel": "#aah-alerts"
+      },
+      "cooldown": "10m"
+    }
+  ]
+}

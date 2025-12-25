@@ -1,0 +1,482 @@
+# API Code Examples
+
+This guide provides code examples for all major tRPC procedures and API endpoints.
+
+## Authentication
+
+### Login
+
+```typescript
+import { trpc } from "@packages/trpc/client";
+
+const login = async (email: string, password: string) => {
+  const result = await trpc.auth.login.mutate({
+    email,
+    password,
+  });
+
+  // Store token
+  localStorage.setItem("token", result.token);
+
+  return result;
+};
+
+// Usage
+const user = await login("student@example.com", "password123");
+```
+
+### Logout
+
+```typescript
+const logout = async () => {
+  await trpc.auth.logout.mutate();
+  localStorage.removeItem("token");
+};
+
+// Usage
+await logout();
+```
+
+### Get Current User
+
+```typescript
+const getCurrentUser = async () => {
+  const user = await trpc.auth.getCurrentUser.query();
+  return user;
+};
+
+// Usage
+const currentUser = await getCurrentUser();
+console.log(currentUser.name);
+```
+
+## Users
+
+### Get All Users (Admin)
+
+```typescript
+const getAllUsers = async (limit = 10, cursor?: string) => {
+  const users = await trpc.users.list.query({
+    limit,
+    cursor,
+  });
+
+  return users;
+};
+
+// Usage
+const users = await getAllUsers(20);
+```
+
+### Get User by ID
+
+```typescript
+const getUserById = async (userId: string) => {
+  const user = await trpc.users.byId.query({ id: userId });
+  return user;
+};
+
+// Usage
+const user = await getUserById("user-123");
+```
+
+### Update User
+
+```typescript
+const updateUser = async (userId: string, updates: Partial<User>) => {
+  const updatedUser = await trpc.users.update.mutate({
+    id: userId,
+    ...updates,
+  });
+
+  return updatedUser;
+};
+
+// Usage
+const updatedUser = await updateUser("user-123", {
+  name: "John Doe",
+  email: "john@example.com",
+});
+```
+
+### Delete User
+
+```typescript
+const deleteUser = async (userId: string) => {
+  await trpc.users.delete.mutate({ id: userId });
+};
+
+// Usage
+await deleteUser("user-123");
+```
+
+## Students
+
+### Get Student Profile
+
+```typescript
+const getStudentProfile = async (studentId: string) => {
+  const profile = await trpc.students.profile.query({ id: studentId });
+  return profile;
+};
+
+// Usage
+const profile = await getStudentProfile("student-123");
+console.log(profile.gpa, profile.major);
+```
+
+### Get Student Courses
+
+```typescript
+const getStudentCourses = async (studentId: string, semester: string) => {
+  const courses = await trpc.students.courses.query({
+    studentId,
+    semester,
+  });
+
+  return courses;
+};
+
+// Usage
+const courses = await getStudentCourses("student-123", "2024-Spring");
+```
+
+### Get Student Eligibility
+
+```typescript
+const getStudentEligibility = async (studentId: string) => {
+  const eligibility = await trpc.students.eligibility.query({
+    studentId,
+  });
+
+  return eligibility;
+};
+
+// Usage
+const eligibility = await getStudentEligibility("student-123");
+if (eligibility.eligible) {
+  console.log("Student is eligible");
+} else {
+  console.log("Issues:", eligibility.issues);
+}
+```
+
+## Courses
+
+### Get All Courses
+
+```typescript
+const getAllCourses = async (filters?: CourseFilters) => {
+  const courses = await trpc.courses.list.query(filters);
+  return courses;
+};
+
+// Usage
+const courses = await getAllCourses({
+  department: "CS",
+  level: "undergraduate",
+});
+```
+
+### Get Course Details
+
+```typescript
+const getCourseDetails = async (courseId: string) => {
+  const course = await trpc.courses.byId.query({ id: courseId });
+  return course;
+};
+
+// Usage
+const course = await getCourseDetails("CS-101");
+```
+
+### Search Courses
+
+```typescript
+const searchCourses = async (query: string) => {
+  const results = await trpc.courses.search.query({ q: query });
+  return results;
+};
+
+// Usage
+const results = await searchCourses("Introduction to Programming");
+```
+
+## Advising
+
+### Get Student Advising Plan
+
+```typescript
+const getAdvisingPlan = async (studentId: string) => {
+  const plan = await trpc.advising.plan.query({ studentId });
+  return plan;
+};
+
+// Usage
+const plan = await getAdvisingPlan("student-123");
+console.log(plan.recommendedCourses, plan.progress);
+```
+
+### Schedule Course
+
+```typescript
+const scheduleCourse = async (studentId: string, courseId: string) => {
+  const result = await trpc.advising.schedule.mutate({
+    studentId,
+    courseId,
+    semester: "2024-Fall",
+  });
+
+  return result;
+};
+
+// Usage
+const scheduled = await scheduleCourse("student-123", "CS-101");
+if (scheduled.conflicts.length > 0) {
+  console.log("Conflicts:", scheduled.conflicts);
+}
+```
+
+### Check for Conflicts
+
+```typescript
+const checkConflicts = async (studentId: string, courseId: string) => {
+  const conflicts = await trpc.advising.checkConflicts.query({
+    studentId,
+    courseId,
+  });
+
+  return conflicts;
+};
+
+// Usage
+const conflicts = await checkConflicts("student-123", "CS-101");
+if (conflicts.hasConflict) {
+  console.log("Conflict:", conflicts.details);
+}
+```
+
+## Compliance
+
+### Check Eligibility
+
+```typescript
+const checkEligibility = async (studentId: string) => {
+  const result = await trpc.compliance.eligibility.query({
+    studentId,
+  });
+
+  return result;
+};
+
+// Usage
+const check = await checkEligibility("student-123");
+console.log("GPA:", check.gpa);
+console.log("Credits:", check.credits);
+console.log("Eligible:", check.eligible);
+```
+
+### Get Compliance Report
+
+```typescript
+const getComplianceReport = async (studentId: string) => {
+  const report = await trpc.compliance.report.query({
+    studentId,
+  });
+
+  return report;
+};
+
+// Usage
+const report = await getComplianceReport("student-123");
+console.log("Issues:", report.issues);
+console.log("Warnings:", report.warnings);
+```
+
+### Verify Progress Toward Degree
+
+```typescript
+const verifyProgress = async (studentId: string, degreeId: string) => {
+  const progress = await trpc.compliance.progress.query({
+    studentId,
+    degreeId,
+  });
+
+  return progress;
+};
+
+// Usage
+const progress = await verifyProgress("student-123", "CS-BS");
+console.log("Completed:", progress.completedCredits);
+console.log("Remaining:", progress.remainingCredits);
+```
+
+## AI Features
+
+### AI Assistant Query
+
+```typescript
+const askAI = async (question: string, context?: string) => {
+  const response = await trpc.ai.chat.query({
+    question,
+    context,
+  });
+
+  return response;
+};
+
+// Usage
+const answer = await askAI("What are the prerequisites for CS-201?");
+console.log(answer.text);
+```
+
+### Generate Course Recommendations
+
+```typescript
+const getRecommendations = async (studentId: string) => {
+  const recommendations = await trpc.ai.recommendations.query({
+    studentId,
+  });
+
+  return recommendations;
+};
+
+// Usage
+const recs = await getRecommendations("student-123");
+recs.courses.forEach((course) => {
+  console.log(course.name, course.reason);
+});
+```
+
+### Analyze Study Plan
+
+```typescript
+const analyzePlan = async (plan: Course[]) => {
+  const analysis = await trpc.ai.analyzePlan.mutate({
+    plan,
+  });
+
+  return analysis;
+};
+
+// Usage
+const analysis = await analyzePlan(myStudyPlan);
+console.log("Workload:", analysis.workload);
+console.log("Balance:", analysis.balance);
+console.log("Suggestions:", analysis.suggestions);
+```
+
+## Reports
+
+### Generate Progress Report
+
+```typescript
+const generateReport = async (studentId: string) => {
+  const report = await trpc.reports.progress.mutate({
+    studentId,
+  });
+
+  return report;
+};
+
+// Usage
+const report = await generateReport("student-123");
+const pdfUrl = report.url;
+window.open(pdfUrl, "_blank");
+```
+
+### Get Dashboard Stats
+
+```typescript
+const getDashboardStats = async (role: "advisor" | "admin") => {
+  const stats = await trpc.reports.dashboard.query({ role });
+  return stats;
+};
+
+// Usage
+const stats = await getDashboardStats("advisor");
+console.log("Total students:", stats.totalStudents);
+console.log("At risk:", stats.atRiskCount);
+```
+
+## File Uploads
+
+### Upload Document
+
+```typescript
+const uploadDocument = async (file: File, type: "transcript" | "form") => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("type", type);
+
+  const result = await trpc.documents.upload.mutate(formData);
+  return result;
+};
+
+// Usage
+const fileInput = document.querySelector('input[type="file"]');
+const file = fileInput.files[0];
+const uploaded = await uploadDocument(file, "transcript");
+```
+
+### Get Document
+
+```typescript
+const getDocument = async (documentId: string) => {
+  const document = await trpc.documents.byId.query({ id: documentId });
+  return document;
+};
+
+// Usage
+const doc = await getDocument("doc-123");
+window.open(doc.url, "_blank");
+```
+
+## Error Handling
+
+### Try-Catch Pattern
+
+```typescript
+try {
+  const user = await trpc.users.byId.query({ id: "user-123" });
+  console.log(user);
+} catch (error) {
+  if (error instanceof TRPCError) {
+    console.error("Error:", error.message);
+    console.error("Code:", error.code);
+
+    if (error.code === "NOT_FOUND") {
+      console.log("User not found");
+    } else if (error.code === "UNAUTHORIZED") {
+      console.log("Not authorized");
+    }
+  }
+}
+```
+
+### Loading States
+
+```typescript
+const { data, isLoading, error } = trpc.users.byId.useQuery(
+  { id: 'user-123' },
+  {
+    onSuccess: (data) => {
+      console.log('User loaded:', data);
+    },
+    onError: (error) => {
+      console.error('Failed to load user:', error);
+    },
+  }
+);
+
+if (isLoading) return <div>Loading...</div>;
+if (error) return <div>Error: {error.message}</div>;
+
+return <div>{data?.name}</div>;
+```
+
+## Related Documentation
+
+- [OpenAPI Generation](./api-openapi)
+- [API Explorer](./api-explorer)
+- [tRPC Documentation](https://trpc.io/docs)

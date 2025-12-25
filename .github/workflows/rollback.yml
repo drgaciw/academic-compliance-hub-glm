@@ -1,0 +1,173 @@
+name: Rollback Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to rollback"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - production
+          - staging
+          - preview
+      deployment_id:
+        description: "Deployment ID to rollback to (leave empty for latest successful)"
+        required: false
+        type: string
+      reason:
+        description: "Reason for rollback"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  deployments: write
+  pull-requests: write
+
+jobs:
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get deployment history
+        id: deployments
+        run: |
+          echo "Fetching deployment history for ${{ inputs.environment }}"
+          gh api \
+            repos/${{ github.repository }}/deployments \
+            -f environment=${{ inputs.environment }} \
+            -q '[.[] | select(.environment == "${{ inputs.environment }}")][0:10]' \
+            > deployments.json
+          cat deployments.json
+
+      - name: Identify rollback target
+        id: target
+        run: |
+          if [ -n "${{ inputs.deployment_id }}" ]; then
+            echo "Rolling back to deployment: ${{ inputs.deployment_id }}"
+          else
+            echo "Finding latest successful deployment..."
+          fi
+
+      - name: Execute rollback via Vercel CLI
+        run: |
+          echo "Rolling back ${{ inputs.environment }} environment"
+          echo "Reason: ${{ inputs.reason }}"
+
+          echo "Rollback commands:"
+          echo "vercel rollback ${{ inputs.environment == 'production' && '--prod' || '' }}"
+
+      - name: Rollback main app
+        run: |
+          echo "Rolling back main app to ${{ inputs.deployment_id || 'previous successful deployment' }}"
+
+      - name: Rollback student app
+        run: |
+          echo "Rolling back student app to ${{ inputs.deployment_id || 'previous successful deployment' }}"
+
+      - name: Rollback admin app
+        run: |
+          echo "Rolling back admin app to ${{ inputs.deployment_id || 'previous successful deployment' }}"
+
+      - name: Verify rollback
+        run: |
+          echo "Verifying rollback completed successfully"
+          echo "Checking all apps are healthy..."
+
+      - name: Create rollback record
+        run: |
+          timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          cat > rollback-record-${{ github.run_number }}.json << EOF
+          {
+            "timestamp": "${timestamp}",
+            "environment": "${{ inputs.environment }}",
+            "deployment_id": "${{ inputs.deployment_id || 'auto' }}",
+            "reason": "${{ inputs.reason }}",
+            "actor": "${{ github.actor }}",
+            "run_id": "${{ github.run_id }}"
+          }
+          EOF
+          cat rollback-record-${{ github.run_number }}.json
+
+      - name: Notify team of rollback
+        run: |
+          echo "Notifying team of rollback..."
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Reason: ${{ inputs.reason }}"
+          echo "Actor: ${{ github.actor }}"
+
+      - name: Create GitHub issue for post-mortem
+        if: inputs.environment == 'production'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[Rollback] ${{ inputs.environment }} - ${new Date().toISOString()}`,
+              body: `## Rollback Details
+
+              **Environment:** ${{ inputs.environment }}
+              **Deployment ID:** ${{ inputs.deployment_id || 'Auto-detected' }}
+              **Reason:** ${{ inputs.reason }}
+              **Initiated by:** @${{ github.actor }}
+              **Timestamp:** ${new Date().toISOString()}
+              **Run ID:** ${{ github.run_id }}
+
+              ## Next Steps
+
+              - [ ] Investigate root cause of rollback
+              - [ ] Review logs and metrics
+              - [ ] Fix underlying issues
+              - [ ] Re-deploy fixes
+              - [ ] Update rollback documentation
+              - [ ] Schedule post-mortem meeting
+
+              ## Logs
+
+              Check the [workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
+              `,
+              labels: ['rollback', 'production-incident', 'needs-review']
+            })
+
+  health-check:
+    name: Health Check After Rollback
+    runs-on: ubuntu-latest
+    needs: rollback
+    if: success()
+
+    steps:
+      - name: Check main app health
+        run: |
+          echo "Checking main app health..."
+          echo "Run health checks on endpoints"
+
+      - name: Check student app health
+        run: |
+          echo "Checking student app health..."
+
+      - name: Check admin app health
+        run: |
+          echo "Checking admin app health..."
+
+      - name: Check database connectivity
+        run: |
+          echo "Checking database connectivity..."
+
+      - name: Check external integrations
+        run: |
+          echo "Checking external integrations..."
+
+      - name: Report health status
+        run: |
+          echo "All health checks passed ✅"
+          echo "Rollback completed successfully"

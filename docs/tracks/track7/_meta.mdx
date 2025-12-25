@@ -1,0 +1,127 @@
+# Track 7: Backend Integration Services
+
+Documentation for backend APIs and microservices integration.
+
+## Overview
+
+Track 7 implements tRPC router and backend microservices for advising, compliance, document processing, and course mapping.
+
+## API Framework
+
+### tRPC Router
+
+End-to-end type-safe API with React Query integration.
+
+- [Router Setup](./router-setup)
+- [Router Structure](./router-structure)
+- [Middleware](./router-middleware)
+- [Error Handling](./error-handling)
+- [Validation](./router-validation)
+
+### OpenAPI Documentation
+
+Auto-generated API documentation.
+
+- [Documentation Generation](./api-docs)
+- [Endpoint Reference](./endpoint-reference)
+- [Type Definitions](./type-definitions)
+- [Examples](./api-examples)
+
+## Microservices
+
+### Advising Service
+
+Course recommendations and academic advising.
+
+- [Service Overview](./advising-service)
+- [Course Recommendations API](./course-recommendations)
+- [Conflict Detection API](./conflict-detection)
+- [Degree Progress API](./degree-progress)
+- [Scheduling API](./scheduling)
+
+### Compliance Engine
+
+NCAA Division I eligibility rule evaluation.
+
+- [Service Overview](./compliance-service)
+- [Initial Eligibility API](./initial-eligibility)
+- [Continuing Eligibility API](./continuing-eligibility)
+- [Progress Toward Degree API](./progress-degree)
+- [Waiver Detection API](./waiver-detection)
+- [Compliance Report API](./compliance-report)
+
+### Document Processing
+
+OCR and document parsing services.
+
+- [Service Overview](./document-service)
+- [Upload API](./upload-api)
+- [OCR Processing API](./ocr-api)
+- [Batch Processing API](./batch-api)
+- [Document Status API](./document-status)
+
+### Course Mapping
+
+Transfer credit equivalency matching and course database.
+
+- [Service Overview](./mapping-service)
+- [Course Search API](./course-search)
+- [Equivalency Lookup API](./equivalency-lookup)
+- [Institution API](./institution-api)
+- [Vector Search API](./vector-search)
+
+### Report Service
+
+Integration with existing report generation microservice.
+
+- [Service Adapter](./report-adapter)
+- [Report Generation API](./report-generation)
+- [Report Status API](./report-status)
+- [Export API](./export-api)
+
+## API Security
+
+### Rate Limiting
+
+API endpoint rate limiting and abuse prevention.
+
+- [Rate Limit Setup](./rate-limiting)
+- [Rate Limit Config](./rate-limit-config)
+- [Rate Limit Headers](./rate-limit-headers)
+- [Rate Limit Testing](./rate-limit-testing)
+
+### Caching Layer
+
+Redis-based caching for improved performance.
+
+- [Cache Setup](./cache-setup)
+- [Cache Strategies](./cache-strategies)
+- [Cache Invalidation](./cache-invalidation)
+- [Cache Analytics](./cache-analytics)
+
+## Performance
+
+### Latency Targets
+
+P99 latency targets for different endpoint types.
+
+- [Sync Endpoints](./sync-latency)
+- [Async Endpoints](./async-latency)
+- [Streaming Endpoints](./streaming-latency)
+- [Performance Tuning](./performance-tuning)
+
+### Load Testing
+
+Load testing strategies for API endpoints.
+
+- [Load Test Setup](./load-test-setup)
+- [Load Test Scenarios](./load-test-scenarios)
+- [Load Test Results](./load-test-results)
+- [Performance Baselines](./performance-baselines)
+
+## Related Tasks
+
+- [Database](../track1/database-schema)
+- [Design System](../track3/api-integration)
+- [Admin Microsite](../track6/admin-dashboard)
+- [Testing](../track8/api-tests)

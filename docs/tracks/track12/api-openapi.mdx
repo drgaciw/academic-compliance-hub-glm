@@ -1,0 +1,398 @@
+# Generate OpenAPI from tRPC
+
+This guide covers generating OpenAPI specifications from tRPC procedures.
+
+## Overview
+
+tRPC provides type-safe APIs without the need for traditional REST API definitions. However, we can generate OpenAPI (Swagger) specifications for external documentation and API exploration.
+
+## Prerequisites
+
+```bash
+cd packages/trpc
+pnpm install
+```
+
+## Setup OpenAPI Generation
+
+### 1. Install Dependencies
+
+```bash
+pnpm add zod-openapi @asteasolutions/zod-to-openapi
+```
+
+### 2. Configure OpenAPI Generator
+
+Create `packages/trpc/src/openapi.ts`:
+
+```typescript
+import { createOpenApiExpressMiddleware } from "@trpc/server/adapters/openapi";
+import { appRouter } from "./router";
+import { createContext } from "./context";
+
+export const openApiMiddleware = createOpenApiExpressMiddleware({
+  router: appRouter,
+  createContext,
+  onError: ({ error, type, path, input, ctx, req }) => {
+    console.error(`Error in ${type} at ${path}:`, error);
+  },
+});
+```
+
+### 3. Add OpenAPI to Server
+
+Update server to expose OpenAPI endpoint:
+
+```typescript
+import express from "express";
+import { createOpenApiExpressMiddleware } from "@trpc/server/adapters/openapi";
+import { appRouter } from "./router";
+import { createContext } from "./context";
+
+const app = express();
+
+app.get("/api/openapi.json", (req, res) => {
+  const openApiDocument = {
+    openapi: "3.1.0",
+    info: {
+      title: "Athletic Academics Hub API",
+      version: "1.0.0",
+      description: "API documentation for AAH platform",
+    },
+    paths: {},
+    components: {
+      schemas: {},
+    },
+  };
+
+  // Generate OpenAPI spec from tRPC router
+  const { generateOpenApi } = require("@trpc/openapi");
+  const spec = generateOpenApi(appRouter);
+
+  res.json(spec);
+});
+
+app.use(
+  "/api/trpc",
+  createOpenApiExpressMiddleware({
+    router: appRouter,
+    createContext,
+  }),
+);
+
+app.listen(3001, () => {
+  console.log("OpenAPI server running on port 3001");
+});
+```
+
+## OpenAPI Specification Generation
+
+### Manual Generation
+
+Create script `scripts/generate-openapi.ts`:
+
+```typescript
+import { generateOpenApi } from "@trpc/openapi";
+import { appRouter } from "../packages/trpc/src/router";
+import { writeFileSync } from "fs";
+import { join } from "path";
+
+const openApiSpec = generateOpenApi(appRouter, {
+  title: "Athletic Academics Hub API",
+  version: "1.0.0",
+  baseUrl: "https://api.athletic-academics-hub.com",
+  docsUrl: "https://docs.athletic-academics-hub.com",
+  tags: [
+    "auth",
+    "users",
+    "students",
+    "courses",
+    "advising",
+    "compliance",
+    "ai",
+  ],
+});
+
+writeFileSync(
+  join(__dirname, "../docs/openapi.json"),
+  JSON.stringify(openApiSpec, null, 2),
+);
+
+console.log("OpenAPI specification generated!");
+```
+
+Run the script:
+
+```bash
+pnpm tsx scripts/generate-openapi.ts
+```
+
+### Auto-Generation in Build Process
+
+Add to `package.json`:
+
+```json
+{
+  "scripts": {
+    "openapi:generate": "tsx scripts/generate-openapi.ts"
+  }
+}
+```
+
+Add to `turbo.json`:
+
+```json
+{
+  "pipeline": {
+    "openapi:generate": {
+      "outputs": ["docs/openapi.json"]
+    }
+  }
+}
+```
+
+## OpenAPI Schema Structure
+
+### Generated Schema Example
+
+```json
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Athletic Academics Hub API",
+    "version": "1.0.0",
+    "description": "API documentation for AAH platform"
+  },
+  "servers": [
+    {
+      "url": "https://api.athletic-academics-hub.com",
+      "description": "Production API"
+    },
+    {
+      "url": "http://localhost:3001",
+      "description": "Local development"
+    }
+  ],
+  "paths": {
+    "/api/users": {
+      "get": {
+        "tags": ["users"],
+        "summary": "Get all users",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserList"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["users"],
+        "summary": "Create a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["student", "advisor", "admin"]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+## Customizing OpenAPI Spec
+
+### Add Custom Metadata to Procedures
+
+```typescript
+import { z } from "zod";
+import { openApi } from "@trpc/openapi";
+
+const userRouter = t.router({
+  list: t.procedure
+    .meta({
+      openapi: {
+        path: "/users",
+        method: "GET",
+        tags: ["users"],
+        summary: "Get all users",
+        description: "Returns a paginated list of users",
+        protect: true,
+      },
+    })
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).default(10),
+        cursor: z.string().optional(),
+      }),
+    )
+    .output(z.array(UserSchema))
+    .query(async ({ input, ctx }) => {
+      const users = await prisma.user.findMany({
+        take: input.limit + 1,
+        cursor: input.cursor ? { id: input.cursor } : undefined,
+      });
+      return users;
+    }),
+
+  create: t.procedure
+    .meta({
+      openapi: {
+        path: "/users",
+        method: "POST",
+        tags: ["users"],
+        summary: "Create a new user",
+        protect: true,
+      },
+    })
+    .input(UserCreateSchema)
+    .output(UserSchema)
+    .mutation(async ({ input, ctx }) => {
+      return await prisma.user.create({ data: input });
+    }),
+});
+```
+
+### Add Authentication
+
+```typescript
+import { z } from "zod";
+
+const authRouter = t.router({
+  login: t.procedure
+    .meta({
+      openapi: {
+        path: "/auth/login",
+        method: "POST",
+        tags: ["auth"],
+        summary: "User login",
+        protect: false,
+      },
+    })
+    .input(
+      z.object({
+        email: z.string().email(),
+        password: z.string().min(8),
+      }),
+    )
+    .output(
+      z.object({
+        token: z.string(),
+        user: UserSchema,
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const user = await authenticateUser(input.email, input.password);
+      const token = generateToken(user);
+      return { token, user };
+    }),
+});
+```
+
+## Validation
+
+### Validate OpenAPI Spec
+
+```bash
+pnpm add -g @apidevtools/swagger-cli
+swagger-cli validate docs/openapi.json
+```
+
+### Test API Endpoints
+
+```bash
+curl https://api.athletic-academics-hub.com/api/openapi.json
+```
+
+## Deployment
+
+### Serve OpenAPI Spec
+
+Add endpoint to serve OpenAPI spec:
+
+```typescript
+app.get("/api/openapi.json", (req, res) => {
+  res.sendFile(join(__dirname, "../docs/openapi.json"));
+});
+```
+
+### Update on Deployment
+
+Add to CI/CD pipeline:
+
+```yaml
+name: Generate OpenAPI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate OpenAPI spec
+        run: pnpm openapi:generate
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add docs/openapi.json
+          git commit -m "chore: update OpenAPI spec"
+          git push
+```
+
+## Related Documentation
+
+- [API Explorer](./api-explorer)
+- [API Examples](./api-examples)
+- [tRPC Documentation](https://trpc.io/docs)

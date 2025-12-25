@@ -1,0 +1,105 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Section Component > Snapshots > should match snapshot with all maxWidth options 1`] = `
+<section
+  class="w-full mx-auto max-w-xs"
+>
+  xs
+</section>
+`;
+
+exports[`Section Component > Snapshots > should match snapshot with all maxWidth options 2`] = `
+<section
+  class="w-full mx-auto max-w-sm"
+>
+  sm
+</section>
+`;
+
+exports[`Section Component > Snapshots > should match snapshot with all maxWidth options 3`] = `
+<section
+  class="w-full mx-auto max-w-md"
+>
+  md
+</section>
+`;
+
+exports[`Section Component > Snapshots > should match snapshot with all maxWidth options 4`] = `
+<section
+  class="w-full mx-auto max-w-lg"
+>
+  lg
+</section>
+`;
+
+exports[`Section Component > Snapshots > should match snapshot with all maxWidth options 5`] = `
+<section
+  class="w-full mx-auto max-w-xl"
+>
+  xl
+</section>
+`;
+
+exports[`Section Component > Snapshots > should match snapshot with all maxWidth options 6`] = `
+<section
+  class="w-full mx-auto max-w-2xl"
+>
+  2xl
+</section>
+`;
+
+exports[`Section Component > Snapshots > should match snapshot with all maxWidth options 7`] = `
+<section
+  class="w-full mx-auto max-w-3xl"
+>
+  3xl
+</section>
+`;
+
+exports[`Section Component > Snapshots > should match snapshot with all maxWidth options 8`] = `
+<section
+  class="w-full mx-auto max-w-4xl"
+>
+  4xl
+</section>
+`;
+
+exports[`Section Component > Snapshots > should match snapshot with all maxWidth options 9`] = `
+<section
+  class="w-full mx-auto max-w-5xl"
+>
+  5xl
+</section>
+`;
+
+exports[`Section Component > Snapshots > should match snapshot with all maxWidth options 10`] = `
+<section
+  class="w-full mx-auto max-w-6xl"
+>
+  6xl
+</section>
+`;
+
+exports[`Section Component > Snapshots > should match snapshot with all maxWidth options 11`] = `
+<section
+  class="w-full mx-auto max-w-7xl"
+>
+  7xl
+</section>
+`;
+
+exports[`Section Component > Snapshots > should match snapshot with all maxWidth options 12`] = `
+<section
+  class="w-full mx-auto max-w-full"
+>
+  full
+</section>
+`;
+
+exports[`Section Component > Snapshots > should match snapshot with default props 1`] = `
+<section
+  class="w-full mx-auto max-w-lg"
+>
+  Section
+</section>
+`;

@@ -1,0 +1,447 @@
+# Deployment Runbook
+
+This runbook provides step-by-step procedures for deploying Athletic Academics Hub to production.
+
+## Prerequisites
+
+- Access to Vercel dashboard
+- Git repository write access
+- Project administrator privileges
+- Valid environment variables in Vercel
+
+## Pre-Deployment Checklist
+
+Before deploying to production, verify:
+
+- [ ] All tests passing locally
+- [ ] Linting completes without errors
+- [ ] Type checking passes
+- [ ] Database migrations tested
+- [ ] Environment variables configured
+- [ ] Feature flags set correctly
+- [ ] Backwards compatibility verified (if needed)
+- [ ] Rollback plan prepared
+
+## Deployment Methods
+
+### Method 1: Git Push (Standard)
+
+**When to use**: Regular deployments, feature releases
+
+```bash
+# 1. Ensure on correct branch
+git checkout main
+
+# 2. Pull latest changes
+git pull origin main
+
+# 3. Merge feature branch
+git merge feature/new-feature
+
+# 4. Push to trigger deployment
+git push origin main
+```
+
+Vercel automatically:
+
+- Runs CI/CD pipeline
+- Builds application
+- Runs tests
+- Deploys to production
+
+### Method 2: Vercel CLI (Manual)
+
+**When to use**: Deploying specific commits, hotfixes
+
+```bash
+# 1. Login to Vercel
+vercel login
+
+# 2. Deploy specific commit
+vercel --prod --message="Hotfix: Critical bug fix"
+
+# 3. Deploy from specific branch
+vercel --prod --branch=hotfix-branch
+```
+
+### Method 3: Vercel Dashboard (Manual)
+
+**When to use**: Emergency deployments, specific commit deployments
+
+1. **Navigate** to project in Vercel dashboard
+2. **Go to** Deployments tab
+3. **Find** desired deployment or commit
+4. **Click** "..." → "Promote to Production"
+5. **Confirm** deployment
+
+## Deployment Pipeline
+
+### Automated Steps
+
+1. **GitHub Action triggers** on push to `main`
+2. **CI/CD pipeline runs**:
+   ```yaml
+   - Checkout code
+   - Install dependencies (pnpm install)
+   - Run linting (pnpm lint)
+   - Run type checking (pnpm type-check)
+   - Run tests (pnpm test)
+   - Build applications (pnpm build)
+   ```
+3. **Vercel builds**:
+   - Main application
+   - Student application
+   - Admin application
+   - Documentation site
+4. **Vercel deploys** to edge network
+5. **Health checks** automatically run
+
+### Manual Verification Steps
+
+After deployment completes, verify:
+
+```bash
+# 1. Check Vercel deployment status
+# https://vercel.com/[org]/[project]/deployments
+
+# 2. Verify main application
+curl https://athletic-academics-hub.com
+
+# 3. Verify student portal
+curl https://student.athletic-academics-hub.com
+
+# 4. Verify admin dashboard
+curl https://admin.athletic-academics-hub.com
+
+# 5. Verify API health
+curl https://api.athletic-academics-hub.com/health
+
+# 6. Check Vercel logs
+# Vercel dashboard → Deployments → Latest → Logs
+```
+
+## Database Migrations
+
+### Before Deployment
+
+1. **Test migration locally**:
+
+   ```bash
+   pnpm db:generate
+   pnpm db:push
+   ```
+
+2. **Backup production database**:
+   ```sql
+   -- Via Vercel Postgres dashboard
+   -- Export database backup
+   ```
+
+### During Deployment
+
+1. **Vercel automatically runs migrations**:
+   - Migrations included in build
+   - Executed in correct order
+   - Rollback on failure
+
+2. **Monitor migration logs**:
+   ```
+   Vercel dashboard → Deployments → Latest → Build Logs
+   ```
+
+### After Deployment
+
+1. **Verify schema changes**:
+
+   ```bash
+   pnpm db:studio
+   ```
+
+2. **Test database operations**:
+   - Create records
+   - Update records
+   - Delete records
+   - Verify relationships
+
+## Environment Configuration
+
+### Production Environment Variables
+
+Required in Vercel project settings:
+
+```bash
+# Database
+DATABASE_URL="postgresql://..."
+
+# Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_live_..."
+CLERK_SECRET_KEY="sk_live_..."
+
+# Application
+NEXT_PUBLIC_APP_URL="https://athletic-academics-hub.com"
+NEXT_PUBLIC_STUDENT_URL="https://student.athletic-academics-hub.com"
+NEXT_PUBLIC_ADMIN_URL="https://admin.athletic-academics-hub.com"
+
+# AI Services
+OPENAI_API_KEY="sk-..."
+ANTHROPIC_API_KEY="sk-ant-..."
+
+# Monitoring
+NEXT_PUBLIC_SENTRY_DSN="..."
+SENTRY_AUTH_TOKEN="..."
+
+# Email (if using)
+RESEND_API_KEY="re_..."
+```
+
+### Verifying Environment Variables
+
+```bash
+# 1. Go to Vercel project → Settings → Environment Variables
+# 2. Check all required variables are set
+# 3. Verify no test keys in production
+# 4. Check environment: Production (not Preview/Development)
+```
+
+## Zero-Downtime Deployment
+
+### Canary Deployments
+
+Gradually roll out new version:
+
+```bash
+# 1. Deploy to canary environment
+git push origin canary
+
+# 2. Gradually increase traffic
+# Vercel dashboard → Settings → Edge Network → Traffic Split
+
+# 3. Monitor metrics
+# - Error rates
+# - Response times
+# - User feedback
+
+# 4. Promote to production when stable
+```
+
+### Blue-Green Deployment
+
+Run two environments simultaneously:
+
+1. **Deploy** new version to green environment
+2. **Test** green environment thoroughly
+3. **Switch traffic** from blue to green
+4. **Monitor** green environment
+5. **Rollback** if issues detected
+
+## Health Checks
+
+### Automated Health Checks
+
+Vercel automatically runs health checks on:
+
+```typescript
+// apps/main/app/api/health/route.ts
+import { NextResponse } from "next/server";
+
+export async function GET() {
+  try {
+    // Check database connection
+    await prisma.$queryRaw`SELECT 1`;
+
+    // Check external services
+    // ...
+
+    return NextResponse.json({
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      version: process.env.GIT_COMMIT || "unknown",
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { status: "unhealthy", error: error.message },
+      { status: 503 },
+    );
+  }
+}
+```
+
+### Manual Health Check
+
+After deployment:
+
+```bash
+# Check all endpoints
+curl https://athletic-academics-hub.com/api/health
+curl https://student.athletic-academics-hub.com/api/health
+curl https://admin.athletic-academics-hub.com/api/health
+
+# Expected response:
+{
+  "status": "healthy",
+  "timestamp": "2025-01-20T10:00:00.000Z",
+  "version": "abc123"
+}
+```
+
+## Monitoring and Alerts
+
+### Vercel Metrics
+
+Monitor in dashboard:
+
+- **Response times**: Should be < 200ms
+- **Error rate**: Should be < 1%
+- **Build time**: Should be consistent
+- **Bandwidth**: Monitor usage trends
+
+### Sentry Alerts
+
+Configure alerts for:
+
+```typescript
+// Sentry dashboard → Settings → Alerts
+{
+  "error_rate_threshold": 1.0,  // 1% error rate
+  "response_time_threshold": 1000,  // 1 second
+  "alert_channels": ["slack", "email"]
+}
+```
+
+### Custom Monitoring
+
+```typescript
+// Track deployment events
+import { trackDeployment } from "@packages/monitoring";
+
+trackDeployment({
+  version: process.env.GIT_COMMIT,
+  environment: "production",
+  timestamp: new Date(),
+});
+```
+
+## Post-Deployment Verification
+
+### Smoke Tests
+
+Run critical user flows:
+
+1. **Authentication**
+   - Login as student
+   - Login as admin
+   - Logout
+   - Password reset
+
+2. **Core Features**
+   - View dashboard
+   - Access courses
+   - Generate report
+
+3. **API Endpoints**
+   - Test key endpoints
+   - Verify responses
+   - Check error handling
+
+### User Acceptance Testing
+
+- [ ] Product team validates
+- [ ] QA team approves
+- [ ] Stakeholders review
+- [ ] Documentation updated
+
+## Rollback Procedure
+
+If deployment causes issues:
+
+```bash
+# 1. Identify issue
+# Check Sentry, Vercel logs, user reports
+
+# 2. Rollback immediately
+vercel rollback [deployment-url]
+
+# Or via Vercel dashboard:
+# Deployments → Find previous successful deployment → Promote to Production
+
+# 3. Verify rollback
+curl https://athletic-academics-hub.com
+
+# 4. Notify team
+# Post in Slack/Discord with details
+
+# 5. Investigate issue
+# Review logs, test fixes
+
+# 6. Document incident
+# Create post-mortem
+```
+
+See [Rollback Runbook](./runbook-rollback) for detailed rollback procedures.
+
+## Deployment Troubleshooting
+
+### Build Fails
+
+**Symptoms**: Vercel build fails
+
+**Solutions**:
+
+1. Check build logs in Vercel dashboard
+2. Verify dependencies in `package.json`
+3. Check TypeScript errors
+4. Test locally with `pnpm build`
+
+### Deployment Times Out
+
+**Symptoms**: Vercel deployment hangs
+
+**Solutions**:
+
+1. Increase build timeout in `vercel.json`
+2. Optimize build scripts
+3. Reduce bundle size
+4. Use Turborepo caching
+
+### 504 Gateway Timeout
+
+**Symptoms**: Requests timeout after deployment
+
+**Solutions**:
+
+1. Check serverless function duration
+2. Optimize database queries
+3. Add caching
+4. Increase Vercel timeout limits
+
+### Environment Variables Missing
+
+**Symptoms**: Application errors with missing env vars
+
+**Solutions**:
+
+1. Verify environment variables in Vercel settings
+2. Check variable names match code references
+3. Restart deployment after adding variables
+4. Check variable scope (Production vs Preview)
+
+## Documentation Updates
+
+After successful deployment, update:
+
+1. **Release notes** in GitHub releases
+2. **Changelog** in documentation
+3. **Version** in `package.json`
+4. **Migration guide** if breaking changes
+5. **API documentation** if API changed
+
+## Related Documentation
+
+- [Rollback Runbook](./runbook-rollback)
+- [Debugging Guide](./debugging-guide)
+- [Deployment Architecture](../../architecture/DEPLOYMENT.md)
+- [CI/CD Configuration](../../tracks/track9)
+
+<Callout type="warning">
+  **Always have a rollback plan ready** before deploying to production.
+</Callout>

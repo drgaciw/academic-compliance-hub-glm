@@ -1,0 +1,6 @@
+{
+  "root": "out",
+  "globs": ["**/*.{html,mdx,md}"],
+  "excludeSelectors": [".no-search"],
+  "verbose": true
+}

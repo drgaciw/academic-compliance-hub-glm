@@ -1,0 +1,13 @@
+# Sentry Inbound Filters
+# Add URLs to ignore from Sentry
+.filter
+*localhost*
+*.local
+127.0.0.1
+
+# Ignore known third-party errors
+- Extension
+- browser-update
+- adblock
+- gstatic
+- googlesyndication

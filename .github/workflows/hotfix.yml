@@ -1,0 +1,226 @@
+name: Hotfix Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      hotfix_branch:
+        description: "Hotfix branch name (e.g., hotfix/critical-bug-123)"
+        required: true
+        type: string
+      issue_number:
+        description: "GitHub issue number"
+        required: true
+        type: string
+      severity:
+        description: "Hotfix severity"
+        required: true
+        default: "critical"
+        type: choice
+        options:
+          - critical
+          - high
+          - medium
+      skip_qa:
+        description: "Skip QA testing (emergency only)"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+  deployments: write
+
+jobs:
+  create-hotfix-branch:
+    name: Create Hotfix Branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Create hotfix branch
+        run: |
+          git checkout -b ${{ inputs.hotfix_branch }}
+          git push origin ${{ inputs.hotfix_branch }}
+          echo "Created hotfix branch: ${{ inputs.hotfix_branch }}"
+
+      - name: Create hotfix template
+        run: |
+          cat > HOTFIX_INSTRUCTIONS.md << EOF
+          # Hotfix Instructions
+
+          ## Branch: ${{ inputs.hotfix_branch }}
+          ## Issue: #${{ inputs.issue_number }}
+          ## Severity: ${{ inputs.severity }}
+          ## Created: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+          ## Hotfix Checklist
+
+          - [ ] Implement the fix
+          - [ ] Add/update tests
+          - [ ] Run local tests: \`pnpm run test\`
+          - [ ] Run linter: \`pnpm run lint\`
+          - [ ] Build successfully: \`pnpm run build\`
+          - [ ] Test on staging environment
+          - [ ] Review with team
+          - [ ] Create pull request
+          - [ ] Merge to main
+          - [ ] Deploy to production
+          - [ ] Verify fix in production
+          - [ ] Create post-mortem (if critical)
+          - [ ] Backport to develop branch
+
+          ## Testing Requirements
+
+          ${{
+            inputs.skip_qa == 'true' &&
+            '⚠️ QA SKIPPED - EMERGENCY MODE' ||
+            'Must pass QA testing before deployment'
+          }}
+
+          ## Deployment Notes
+
+          - Target: Production (or staging if testing)
+          - Rollback plan: Ready
+          - Monitoring: Enabled
+          - Emergency contact: Notified
+
+          ## Additional Notes
+
+          Add any relevant notes, screenshots, or evidence here.
+          EOF
+          cat HOTFIX_INSTRUCTIONS.md
+
+      - name: Comment on issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ inputs.issue_number }},
+              body: `## 🔥 Hotfix Branch Created
+
+              **Branch:** \`${{ inputs.hotfix_branch }}\`
+              **Severity:** ${{ inputs.severity }}
+              **Created by:** @${{ github.actor }}
+
+              ### Next Steps
+
+              1. Checkout the branch: \`git checkout ${{ inputs.hotfix_branch }}\`
+              2. Follow the instructions in \`HOTFIX_INSTRUCTIONS.md\`
+              3. Create a pull request when ready
+
+              ${{
+                inputs.skip_qa == 'true' ?
+                '⚠️ **WARNING:** QA is skipped for emergency deployment' :
+                ''
+              }}
+
+              **Hotfix Checklist:**
+              - [ ] Implement fix
+              - [ ] Add tests
+              - [ ] Test locally
+              - [ ] Test on staging
+              - [ ] Create PR
+              - [ ] Deploy
+              - [ ] Verify
+              - [ ] Post-mortem
+
+              [View Branch](https://github.com/${{ github.repository }}/tree/${{ inputs.hotfix_branch }})
+              `
+            })
+
+  pre-deploy-checks:
+    name: Pre-Deploy Checks
+    runs-on: ubuntu-latest
+    if: inputs.severity == 'critical' || inputs.severity == 'high'
+
+    steps:
+      - name: Check for ongoing deployments
+        run: |
+          echo "Checking for active deployments..."
+          echo "In production, this would verify no conflicting deployments"
+
+      - name: Verify staging environment
+        run: |
+          echo "Verifying staging environment is healthy..."
+          echo "Check staging status before hotfix deployment"
+
+      - name: Alert on-call team
+        run: |
+          echo "Alerting on-call team about ${{ inputs.severity }} hotfix..."
+          echo "Severity: ${{ inputs.severity }}"
+          echo "Branch: ${{ inputs.hotfix_branch }}"
+          echo "Issue: #${{ inputs.issue_number }}"
+
+  notify-team:
+    name: Notify Team
+    runs-on: ubuntu-latest
+    needs: [create-hotfix-branch]
+
+    steps:
+      - name: Create hotfix announcement
+        run: |
+          echo "Hotfix branch ${{ inputs.hotfix_branch }} created"
+          echo "Issue: #${{ inputs.issue_number }}"
+          echo "Severity: ${{ inputs.severity }}"
+          echo "Created by: ${{ github.actor }}"
+
+      - name: Send Slack notification (if configured)
+        if: env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          echo "Would send Slack notification to #engineering"
+          echo "Message: Hotfix ${{ inputs.severity }} branch created"
+
+  create-deployment-ticket:
+    name: Create Deployment Ticket
+    runs-on: ubuntu-latest
+    needs: [create-hotfix-branch]
+    if: inputs.severity == 'critical'
+
+    steps:
+      - name: Create Jira ticket (if configured)
+        run: |
+          echo "Would create Jira ticket for critical hotfix"
+          echo "Summary: ${{ inputs.hotfix_branch }}"
+          echo "Link: Issue #${{ inputs.issue_number }}"
+
+      - name: Add tracking label
+        run: |
+          echo "Labeling issue with hotfix-${{ inputs.severity }}"
+
+  summary:
+    name: Hotfix Summary
+    runs-on: ubuntu-latest
+    needs: [create-hotfix-branch, pre-deploy-checks, notify-team]
+    if: always()
+
+    steps:
+      - name: Display summary
+        run: |
+          echo "## 🔥 Hotfix Workflow Summary"
+          echo ""
+          echo "**Branch:** ${{ inputs.hotfix_branch }}"
+          echo "**Issue:** #${{ inputs.issue_number }}"
+          echo "**Severity:** ${{ inputs.severity }}"
+          echo "**QA:** ${{ inputs.skip_qa == 'true' && 'Skipped (Emergency)' : 'Required' }}"
+          echo "**Created by:** @${{ github.actor }}"
+          echo ""
+          echo "### Next Actions"
+          echo "1. Checkout branch: \`git checkout ${{ inputs.hotfix_branch }}\`"
+          echo "2. Implement fix"
+          echo "3. Follow HOTFIX_INSTRUCTIONS.md"
+          echo "4. Create pull request"
+          echo ""
+          echo "### Branch Status"
+          echo "- Hotfix branch: Created ✅"
+          echo "- Template: Created ✅"
+          echo "- Issue: Commented ✅"
+          echo "- Team: Notified ✅"

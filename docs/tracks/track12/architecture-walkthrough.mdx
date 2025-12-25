@@ -1,0 +1,477 @@
+# Architecture Walkthrough
+
+This guide provides a detailed walkthrough of the Athletic Academics Hub architecture with diagrams and explanations.
+
+## System Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Users                                 │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐               │
+│  │  Public  │  │ Students │  │   Admin  │               │
+│  │  Users   │  │          │  │          │               │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘               │
+└───────┼─────────────┼─────────────┼───────────────────────┘
+        │             │             │
+        └─────────────┼─────────────┘
+                      │
+        ┌─────────────▼─────────────┐
+        │   Vercel Edge Network     │
+        │  (50+ Global Locations)   │
+        └─────────────┬─────────────┘
+                      │
+        ┌─────────────▼─────────────┐
+        │   Next.js App Router      │
+        │  ┌────────┬────────┐    │
+        │  │  Main  │Student  │    │
+        │  │  App   │ App    │    │
+        │  │ :3000  │ :3001   │    │
+        │  └────────┴────────┘    │
+        └─────────────┬─────────────┘
+                      │
+        ┌─────────────▼─────────────┐
+        │   API Layer               │
+        │  ┌────────┬────────┐    │
+        │  │  tRPC  │  Next  │    │
+        │  │ Routes │  API   │    │
+        │  └────────┴────────┘    │
+        └─────────────┬─────────────┘
+                      │
+        ┌─────────────▼─────────────┐
+        │   Services                │
+        │  ┌────────┬────────┐    │
+        │  │  Auth  │   AI   │    │
+        │  │Service │Service │    │
+        │  └────────┴────────┘    │
+        └─────────────┬─────────────┘
+                      │
+        ┌─────────────▼─────────────┐
+        │   Database Layer          │
+        │  ┌────────┬────────┐    │
+        │  │Prisma  │Postgres│    │
+        │  │  ORM   │ Database│    │
+        │  └────────┴────────┘    │
+        └───────────────────────────┘
+```
+
+## Multi-Zone Architecture
+
+### Zone 1: Main Application
+
+```
+apps/main/
+├── app/                    # Next.js App Router
+│   ├── (marketing)/        # Marketing pages
+│   │   ├── page.tsx        # Landing page
+│   │   └── about/
+│   ├── (auth)/            # Authentication pages
+│   │   ├── login/
+│   │   └── signup/
+│   ├── api/               # API routes
+│   │   └── trpc/          # tRPC endpoints
+│   └── layout.tsx         # Root layout
+└── public/               # Static assets
+```
+
+**Purpose**: Public-facing marketing site
+
+**Features**:
+
+- Landing page with CTA
+- Feature showcase
+- Pricing information
+- Authentication flow
+- Marketing content
+
+### Zone 2: Student Portal
+
+```
+apps/student/
+├── app/
+│   ├── (dashboard)/       # Dashboard layout
+│   │   ├── dashboard/
+│   │   ├── courses/
+│   │   ├── advising/
+│   │   ├── compliance/
+│   │   └── ai-assistant/
+│   ├── api/              # Student-specific API
+│   └── layout.tsx
+└── components/           # Student components
+```
+
+**Purpose**: Student-facing features
+
+**Features**:
+
+- Personalized dashboard
+- Course selection
+- Advising tools
+- Compliance status
+- AI assistant
+
+### Zone 3: Admin Dashboard
+
+```
+apps/admin/
+├── app/
+│   ├── (admin)/         # Admin layout
+│   │   ├── dashboard/
+│   │   ├── users/
+│   │   ├── students/
+│   │   ├── compliance/
+│   │   ├── reports/
+│   │   └── settings/
+│   ├── api/              # Admin API
+│   └── layout.tsx
+└── components/           # Admin components
+```
+
+**Purpose**: Admin and staff tools
+
+**Features**:
+
+- User management
+- Student oversight
+- Compliance monitoring
+- Report generation
+- System configuration
+
+## Package Architecture
+
+### Core Packages
+
+```
+packages/
+├── auth/                 # Authentication & RBAC
+│   ├── src/
+│   │   ├── clerk.ts      # Clerk integration
+│   │   ├── rbac.ts       # Role-based access
+│   │   └── middleware.ts # Auth middleware
+│   └── package.json
+│
+├── database/             # Database layer
+│   ├── prisma/
+│   │   ├── schema.prisma # Database schema
+│   │   └── seed.ts      # Seed data
+│   ├── src/
+│   │   ├── client.ts     # Prisma client
+│   │   └── utils.ts     # DB utilities
+│   └── package.json
+│
+├── api-utils/            # API utilities
+│   ├── src/
+│   │   ├── response.ts   # Response helpers
+│   │   ├── error.ts      # Error handling
+│   │   └── validation.ts # Validation utils
+│   └── package.json
+│
+└── ui/                   # Shared UI components
+    ├── src/
+    │   ├── components/   # Shadcn components
+    │   ├── lib/         # Utilities (cn, etc.)
+    │   └── styles/      # Global styles
+    └── package.json
+```
+
+### Specialized Packages
+
+```
+packages/
+├── ai/                   # AI/ML utilities
+│   ├── src/
+│   │   ├── openai.ts     # OpenAI integration
+│   │   ├── anthropic.ts  # Anthropic integration
+│   │   ├── agents.ts     # AI agents
+│   │   └── embeddings.ts # Vector embeddings
+│   └── package.json
+│
+├── compliance-engine/    # NCAA compliance
+│   ├── src/
+│   │   ├── rules.ts      # Compliance rules
+│   │   ├── checks.ts     # Eligibility checks
+│   │   └── reports.ts    # Compliance reports
+│   └── package.json
+│
+├── course-mapping/       # Transfer credits
+│   ├── src/
+│   │   ├── mapper.ts     # Course mapping
+│   │   ├── evaluator.ts  # Transfer evaluation
+│   │   └── database.ts   # Course database
+│   └── package.json
+│
+├── document-processing/   # Document handling
+│   ├── src/
+│   │   ├── ocr.ts        # OCR processing
+│   │   ├── parser.ts     # Document parsing
+│   │   └── storage.ts    # File storage
+│   └── package.json
+│
+└── report-generation/    # Report generation
+    ├── src/
+    │   ├── pdf.ts        # PDF generation
+    │   ├── templates/    # Report templates
+    │   └── charts/      # Chart generation
+    └── package.json
+```
+
+## Data Flow Architecture
+
+### Request Flow
+
+```
+1. User makes request
+   ↓
+2. Vercel Edge Network (routing, CDN)
+   ↓
+3. Next.js App Router (middleware, routing)
+   ↓
+4. Server Component / API Route
+   ↓
+5. tRPC Client / Direct Call
+   ↓
+6. Service Layer (business logic)
+   ↓
+7. Prisma ORM
+   ↓
+8. PostgreSQL Database
+   ↓
+9. Response flows back up
+```
+
+### AI Request Flow
+
+```
+1. User submits query
+   ↓
+2. tRPC route receives request
+   ↓
+3. AI Service processes query
+   ↓
+4. Vector search (pgvector) for context
+   ↓
+5. LLM API (OpenAI/Anthropic)
+   ↓
+6. Response generation
+   ↓
+7. Streaming to client
+   ↓
+8. Display in UI
+```
+
+### Auth Flow
+
+```
+1. User navigates to protected route
+   ↓
+2. Clerk middleware checks session
+   ↓
+3. If not authenticated → redirect to login
+   ↓
+4. User logs in via Clerk
+   ↓
+5. Clerk generates JWT
+   ↓
+6. Session stored in cookie
+   ↓
+7. User redirected to protected route
+   ↓
+8. Subsequent requests include JWT
+   ↓
+9. Server validates JWT
+   ↓
+10. Access granted
+```
+
+## Deployment Architecture
+
+### Production Deployment
+
+```
+GitHub Repository
+    ↓
+Push to main
+    ↓
+GitHub Actions (CI)
+    - Lint
+    - Type check
+    - Tests
+    - Build
+    ↓
+Vercel Deployment
+    - Main zone → athletic-academics-hub.com
+    - Student zone → student.athletic-academics-hub.com
+    - Admin zone → admin.athletic-academics-hub.com
+    - Docs zone → docs.athletic-academics-hub.com
+    ↓
+Vercel Edge Network
+    - 50+ locations globally
+    - Automatic HTTPS
+    - CDN caching
+```
+
+### Preview Deployments
+
+```
+Pull Request
+    ↓
+GitHub Actions (CI)
+    ↓
+Vercel Preview Deployment
+    - Auto-generated URL
+    - Shared with reviewers
+    ↓
+Testing & Review
+    ↓
+Merge to main → Production
+```
+
+## Security Architecture
+
+### Security Layers
+
+```
+┌─────────────────────────────────────┐
+│ 1. Network Layer                   │
+│    - DDoS protection               │
+│    - WAF                          │
+│    - Edge security                 │
+└─────────────┬─────────────────────┘
+              │
+┌─────────────▼─────────────────────┐
+│ 2. Application Layer              │
+│    - CORS policies                │
+│    - CSP headers                  │
+│    - XSS protection               │
+│    - CSRF tokens                 │
+└─────────────┬─────────────────────┘
+              │
+┌─────────────▼─────────────────────┐
+│ 3. Authentication Layer          │
+│    - Clerk RBAC                  │
+│    - Multi-factor auth            │
+│    - Session management           │
+└─────────────┬─────────────────────┘
+              │
+┌─────────────▼─────────────────────┐
+│ 4. Data Layer                    │
+│    - Encrypted connections (TLS)   │
+│    - Row-level security           │
+│    - Input validation             │
+│    - Secrets management           │
+└───────────────────────────────────┘
+```
+
+## Technology Stack Diagram
+
+### Frontend Stack
+
+```
+┌─────────────────────────────────────┐
+│ Next.js 14 (App Router)          │
+│ - Server Components               │
+│ - Client Components               │
+│ - File-based Routing              │
+│ - API Routes                     │
+└─────────────┬─────────────────────┘
+              │
+┌─────────────▼─────────────────────┐
+│ React 18 + TypeScript            │
+│ - Server Components              │
+│ - Client Components              │
+│ - Type Safety                    │
+└─────────────┬─────────────────────┘
+              │
+┌─────────────▼─────────────────────┐
+│ Shadcn/UI v2 + Tailwind CSS     │
+│ - Component Library               │
+│ - Utility-first CSS              │
+│ - Design System                  │
+└───────────────────────────────────┘
+```
+
+### Backend Stack
+
+```
+┌─────────────────────────────────────┐
+│ Serverless Functions              │
+│ - Vercel Functions               │
+│ - Edge Functions                 │
+│ - Automatic scaling              │
+└─────────────┬─────────────────────┘
+              │
+┌─────────────▼─────────────────────┐
+│ tRPC + Zod                      │
+│ - Type-safe API                 │
+│ - End-to-end types             │
+│ - Validation                   │
+└─────────────┬─────────────────────┘
+              │
+┌─────────────▼─────────────────────┐
+│ Prisma ORM + PostgreSQL          │
+│ - Type-safe queries             │
+│ - Migrations                   │
+│ - Connection pooling           │
+└───────────────────────────────────┘
+```
+
+### Integration Stack
+
+```
+┌─────────────────────────────────────┐
+│ Vercel AI SDK                   │
+│ - OpenAI GPT-4                 │
+│ - Anthropic Claude              │
+│ - Streaming responses           │
+└─────────────┬─────────────────────┘
+              │
+┌─────────────▼─────────────────────┐
+│ Clerk Authentication             │
+│ - User management               │
+│ - RBAC                         │
+│ - Multi-factor auth             │
+└─────────────┬─────────────────────┘
+              │
+┌─────────────▼─────────────────────┐
+│ Vercel Integrations              │
+│ - Postgres                     │
+│ - KV Store (Redis)             │
+│ - Blob Storage                 │
+└───────────────────────────────────┘
+```
+
+## Key Design Patterns
+
+### 1. Monorepo Pattern
+
+- Shared code in `packages/`
+- App-specific code in `apps/`
+- Turborepo for orchestration
+- Efficient caching
+
+### 2. Type-Safe API
+
+- tRPC for internal APIs
+- End-to-end TypeScript
+- Zod for validation
+- Auto-generated types
+
+### 3. Server-First Rendering
+
+- Server Components by default
+- Client Components when needed
+- Optimal performance
+- SEO friendly
+
+### 4. Service Layer Pattern
+
+- Business logic in services
+- Reusable across apps
+- Easy testing
+- Clear separation of concerns
+
+## Related Documentation
+
+- [Architecture Overview](./architecture-overview)
+- [Monorepo Setup](../../architecture/MONOREPO_SETUP.md)
+- [Deployment Guide](../../architecture/DEPLOYMENT.md)
+- [First Task Tutorial](./first-task-tutorial)

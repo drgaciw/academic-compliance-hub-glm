@@ -1,0 +1,170 @@
+import Callout from "nextra/components/callout";
+
+# Documentation Site Structure
+
+This document explains the navigation structure and organization of the Athletic Academics Hub documentation site.
+
+## Overview
+
+The documentation site is built with Nextra and organized around 12 parallel development tracks, plus operational and contribution documentation.
+
+## File Structure
+
+```
+docs/
+├── index.mdx                          # Landing page
+├── getting-started.mdx               # Quick start guide
+├── theme.config.jsx                  # Nextra configuration
+├── next.config.js                    # Next.js config for docs
+├── package.json                      # Dependencies
+├── adrs/                              # Architecture Decision Records
+│   └── ADR-001-nextjs-framework.md
+├── ai-evals/                         # AI evaluations
+├── architecture/                      # Architecture docs
+│   ├── DEPLOYMENT.md
+│   ├── MONOREPO_SETUP.md
+│   └── PRISMA_MIGRATION_WORKFLOW.md
+├── project-management/                # Project management
+├── tracks/                            # Track-specific documentation
+│   ├── _meta.mdx                     # Global metadata
+│   ├── track0/                       # Coordination & Risk Management
+│   ├── track1/                       # Infrastructure & Shared Packages
+│   ├── track2/                       # App Shell & Multi-Zone Setup
+│   ├── track3/                       # Design System
+│   ├── track4/                       # Main Microsite
+│   ├── track5/                       # Student Microsite
+│   ├── track6/                       # Admin Microsite
+│   ├── track7/                       # Backend Services
+│   ├── track8/                       # Testing & Quality Assurance
+│   ├── track9/                       # CI/CD & Deployment
+│   ├── track10/                      # Observability & Monitoring
+│   ├── track11/                      # Security & Compliance
+│   └── track12/                      # Documentation & Onboarding
+│       ├── _meta.mdx
+│       ├── adr-template.mdx
+│       ├── docs-setup.mdx            # T12.1.2
+│       ├── architecture-overview.mdx # T12.1.3
+│       ├── docs-deploy.mdx           # T12.1.4
+│       ├── api-openapi.mdx           # T12.2.1
+│       ├── api-explorer.mdx          # T12.2.2
+│       ├── api-examples.mdx          # T12.2.3
+│       ├── component-guidelines.mdx  # T12.3.2
+│       ├── component-changelog.mdx   # T12.3.3
+│       ├── local-setup.mdx           # T12.4.1
+│       ├── architecture-walkthrough.mdx  # T12.4.2
+│       ├── first-task-tutorial.mdx   # T12.4.3
+│       ├── troubleshooting-faq.mdx  # T12.4.4
+│       ├── adr-process.mdx           # T12.5.3
+│       ├── runbook-deploy.mdx        # T12.6.1
+│       ├── runbook-rollback.mdx      # T12.6.2
+│       ├── debugging-guide.mdx       # T12.6.3
+│       ├── contributing.mdx          # T12.7.1
+│       ├── code-review.mdx           # T12.7.4
+│       └── adr-examples/
+│           ├── ADR-002-typescript.md
+│           ├── ADR-003-turborepo.md
+│           ├── ADR-004-trpc.md
+│           └── ADR-005-shadcn.md
+└── vercel.json                       # Deployment config
+```
+
+## Navigation Configuration
+
+The navigation is configured in `theme.config.jsx`:
+
+```javascript
+export default {
+  logo: <span>Athletic Academics Hub</span>,
+  project: {
+    link: "https://github.com/your-org/athletic-academics-hub",
+  },
+  docsRepositoryBase:
+    "https://github.com/your-org/athletic-academics-hub/blob/main/docs",
+  useNextSeoProps() {
+    return {
+      titleTemplate: "%s | AAH Docs",
+    };
+  },
+  footer: {
+    text: "Athletic Academics Hub Documentation",
+  },
+  toc: {
+    backToTop: true,
+    extraContent: (
+      <>
+        <Callout type="info">
+          Need help? Check our{" "}
+          <a href="https://github.com/your-org/athletic-academics-hub/issues">
+            GitHub Issues
+          </a>
+        </Callout>
+      </>
+    ),
+  },
+};
+```
+
+## Track Metadata
+
+Each track has a `_meta.mdx` file that defines its navigation structure:
+
+```javascript
+{
+  "index": "Overview",
+  "filename": "Display Name"
+}
+```
+
+## Adding New Documentation
+
+### Adding a New Page
+
+1. Create a new `.mdx` file in the appropriate track directory
+2. Add an entry to the track's `_meta.mdx` file
+3. Write the content in Markdown with React components
+
+### Creating a New Track
+
+1. Create a new track directory: `docs/trackXX/`
+2. Add `_meta.mdx` with navigation configuration
+3. Create `index.mdx` with track overview
+4. Add track to main `index.mdx` if needed
+
+## Custom Components
+
+The documentation supports these Nextra components:
+
+- `Callout` - Information boxes (info, warning, error)
+- `Tabs` - Tabbed content
+- `Cards` - Card layouts
+- `Steps` - Step-by-step guides
+- Code blocks with syntax highlighting
+- Inline components via MDX
+
+## Best Practices
+
+<Callout type="info">
+  **Documentation Guidelines**
+
+- Use clear, descriptive titles
+- Include code examples with syntax highlighting
+- Add visual aids (diagrams, screenshots)
+- Keep content focused and scannable
+- Link to related documents
+- Update content as code changes
+  </Callout>
+
+## Deployment
+
+The documentation is deployed to Vercel:
+
+1. Connected to Vercel via GitHub integration
+2. Automatic deployment on push to `main`
+3. Preview deployments for PRs
+4. Custom domain: `docs.athletic-academics-hub.com`
+
+## Related Documentation
+
+- [Architecture Overview](./architecture-overview)
+- [Deployment Guide](./docs-deploy)
+- [Theme Customization](./theme-customization)

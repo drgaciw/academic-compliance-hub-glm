@@ -1,0 +1,57 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Container Component > Snapshots > should match snapshot with all padding options 1`] = `
+<div
+  class="w-full p-0"
+>
+  none
+</div>
+`;
+
+exports[`Container Component > Snapshots > should match snapshot with all padding options 2`] = `
+<div
+  class="w-full p-2"
+>
+  xs
+</div>
+`;
+
+exports[`Container Component > Snapshots > should match snapshot with all padding options 3`] = `
+<div
+  class="w-full p-4"
+>
+  sm
+</div>
+`;
+
+exports[`Container Component > Snapshots > should match snapshot with all padding options 4`] = `
+<div
+  class="w-full p-6"
+>
+  md
+</div>
+`;
+
+exports[`Container Component > Snapshots > should match snapshot with all padding options 5`] = `
+<div
+  class="w-full p-8"
+>
+  lg
+</div>
+`;
+
+exports[`Container Component > Snapshots > should match snapshot with all padding options 6`] = `
+<div
+  class="w-full p-12"
+>
+  xl
+</div>
+`;
+
+exports[`Container Component > Snapshots > should match snapshot with default props 1`] = `
+<div
+  class="w-full p-6"
+>
+  Container
+</div>
+`;

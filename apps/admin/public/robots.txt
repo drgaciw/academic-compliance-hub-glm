@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+
+Sitemap: https://athleticacademics.com/admin/sitemap.xml

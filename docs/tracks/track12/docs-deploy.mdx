@@ -1,0 +1,321 @@
+# Deploy Documentation Site
+
+This guide covers deploying the documentation site to Vercel.
+
+## Prerequisites
+
+- Vercel account
+- GitHub repository connected to Vercel
+- Vercel CLI installed: `pnpm add -g vercel`
+
+## Deployment Configuration
+
+### Vercel Project Setup
+
+The documentation site uses `vercel.json` for deployment configuration:
+
+```json
+{
+  "buildCommand": "pnpm build",
+  "outputDirectory": "out",
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "https://athletic-academics-hub.com",
+      "statusCode": 302
+    }
+  ]
+}
+```
+
+### Environment Variables
+
+Set these in Vercel project settings:
+
+<Callout type="info">
+  **Required Environment Variables**
+
+- `NEXT_PUBLIC_GITHUB_REPO`: Repository URL
+- `NEXT_PUBLIC_DISCORD_URL`: Discord server URL
+- `NEXT_PUBLIC_SUPPORT_EMAIL`: Support email address
+  </Callout>
+
+## Deployment Methods
+
+### Method 1: Automatic Deployment (Recommended)
+
+1. **Connect Repository**
+
+   ```bash
+   vercel link
+   ```
+
+2. **Configure Project**
+   - Root directory: `docs/`
+   - Framework preset: Next.js
+   - Build command: `pnpm build`
+   - Output directory: `out`
+
+3. **Deploy Automatically**
+   - Push to `main` branch → Production
+   - Open PR → Preview deployment
+
+### Method 2: Manual Deployment
+
+Deploy from your local machine:
+
+```bash
+# Install dependencies
+cd docs
+pnpm install
+
+# Build documentation
+pnpm build
+
+# Deploy to Vercel
+vercel --prod
+```
+
+### Method 3: CI/CD Deployment
+
+Add to `.github/workflows/docs-deploy.yml`:
+
+```yaml
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [main]
+    paths: ["docs/**"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.15.0
+
+      - name: Install dependencies
+        run: cd docs && pnpm install
+
+      - name: Build documentation
+        run: cd docs && pnpm build
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.ORG_ID }}
+          vercel-project-id: ${{ secrets.PROJECT_ID }}
+          vercel-args: "--prod"
+          working-directory: docs
+```
+
+## Preview Deployments
+
+Preview deployments are automatically created for:
+
+- Pull requests
+- Commits to non-main branches
+
+Preview URLs format: `docs-pr-123.athletic-academics-hub.vercel.app`
+
+### Preview Best Practices
+
+1. **Review Preview URLs** before merging
+2. **Test navigation** across all pages
+3. **Verify links** and images load correctly
+4. **Check mobile responsiveness**
+
+## Custom Domain
+
+### Add Custom Domain
+
+1. Go to Vercel project → Settings → Domains
+2. Add domain: `docs.athletic-academics-hub.com`
+3. Configure DNS records:
+
+   ```
+   Type: CNAME
+   Name: docs
+   Value: cname.vercel-dns.com
+   ```
+
+4. Wait for DNS propagation (5-15 minutes)
+5. Enable HTTPS (automatic)
+
+### Subdomain Configuration
+
+```
+Main docs:     docs.athletic-academics-hub.com
+Preview docs:  docs-pr-*.vercel.app
+```
+
+## Monitoring
+
+### Build Logs
+
+Monitor builds in Vercel dashboard:
+
+- Production: `https://vercel.com/[org]/[project]/deployments`
+- Previews: Check PR comments for preview URLs
+
+### Analytics
+
+Enable Vercel Analytics:
+
+1. Go to Project → Analytics
+2. Install analytics package:
+
+   ```bash
+   cd docs
+   pnpm add @vercel/analytics
+   ```
+
+3. Add to `layout.tsx`:
+
+   ```tsx
+   import { Analytics } from "@vercel/analytics/react";
+
+   export default function RootLayout({ children }) {
+     return (
+       <html>
+         {children}
+         <Analytics />
+       </html>
+     );
+   }
+   ```
+
+## Performance Optimization
+
+### Build Performance
+
+Optimize build times:
+
+```javascript
+// next.config.js
+module.exports = {
+  images: {
+    unoptimized: true,
+  },
+  swcMinify: true,
+  experimental: {
+    optimizePackageImports: ["nextra", "nextra/components"],
+  },
+};
+```
+
+### Static Exports
+
+Documentation uses static export for faster deployment:
+
+```javascript
+// next.config.js
+module.exports = {
+  output: "export",
+  trailingSlash: true,
+  images: {
+    unoptimized: true,
+  },
+};
+```
+
+## Rollback Procedure
+
+To rollback a deployment:
+
+1. **Open Deployments** in Vercel dashboard
+2. **Find previous successful deployment**
+3. **Click "..." → "Redeploy"**
+4. **Select "Promote to Production"**
+
+Or use CLI:
+
+```bash
+vercel rollback [deployment-url]
+```
+
+## Troubleshooting
+
+### Build Failures
+
+**Issue**: Build fails with "Module not found"
+
+**Solution**:
+
+```bash
+cd docs
+rm -rf node_modules .next
+pnpm install
+pnpm build
+```
+
+**Issue**: Environment variables missing
+
+**Solution**:
+
+1. Check Vercel project settings
+2. Add missing environment variables
+3. Redeploy
+
+### Preview Deployments Not Working
+
+**Issue**: Preview deployment URL 404s
+
+**Solution**:
+
+1. Check Vercel deployment logs
+2. Verify build output directory
+3. Ensure `vercel.json` is correct
+
+### Custom Domain Issues
+
+**Issue**: Custom domain not resolving
+
+**Solution**:
+
+1. Check DNS records
+2. Verify SSL certificate
+3. Contact Vercel support if persists
+
+## Related Documentation
+
+- [Navigation Configuration](./docs-structure)
+- [Local Development](./local-setup)
+- [Deployment Runbook](./runbook-deploy)
+- [Rollback Runbook](./runbook-rollback)

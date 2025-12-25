@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "mcp__MCP_DOCKER__sequentialthinking"
+      "mcp__MCP_DOCKER__sequentialthinking",
+      "Bash(git commit --amend -m \"$(cat <<''EOF''\ndocs: add comprehensive microsite agentic development plan v2.0\n\n- Create microsite-plan.md with 13 parallel development tracks\n- Add microsite-tasks.md with 293 granular tasks and dependencies\n- Define technical stack decisions (Zustand, tRPC, Prisma, SSE)\n- Include Track 0 for coordination and risk management\n- Add phase gates with go/no-go criteria\n- Document critical path and agent assignments\n- Include acceptance criteria for all subtasks\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit --amend --no-verify -m \"$(cat <<''EOF''\ndocs: add comprehensive microsite agentic development plan v2.0\n\n- Create microsite-plan.md with 13 parallel development tracks\n- Add microsite-tasks.md with 293 granular tasks and dependencies\n- Define technical stack decisions (Zustand, tRPC, Prisma, SSE)\n- Include Track 0 for coordination and risk management\n- Add phase gates with go/no-go criteria\n- Document critical path and agent assignments\n- Include acceptance criteria for all subtasks\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,58 @@
+name: Upload Source Maps to Sentry
+
+on:
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  upload-sourcemaps:
+    name: Upload Source Maps
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build apps
+        run: pnpm run build
+
+      - name: Upload source maps for admin
+        if: success()
+        working-directory: apps/admin
+        run: |
+          npx @sentry/wizard@latest -i sourcemaps \
+            --org=${{ secrets.SENTRY_ORG }} \
+            --project=aah-admin \
+            --auth-token=${{ secrets.SENTRY_AUTH_TOKEN }}
+
+      - name: Upload source maps for student
+        if: success()
+        working-directory: apps/student
+        run: |
+          npx @sentry/wizard@latest -i sourcemaps \
+            --org=${{ secrets.SENTRY_ORG }} \
+            --project=aah-student \
+            --auth-token=${{ secrets.SENTRY_AUTH_TOKEN }}
+
+      - name: Upload source maps for main
+        if: success()
+        working-directory: apps/main
+        run: |
+          npx @sentry/wizard@latest -i sourcemaps \
+            --org=${{ secrets.SENTRY_ORG }} \
+            --project=aah-main \
+            --auth-token=${{ secrets.SENTRY_AUTH_TOKEN }}

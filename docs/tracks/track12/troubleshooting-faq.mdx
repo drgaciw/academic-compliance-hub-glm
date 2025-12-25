@@ -1,0 +1,544 @@
+# Troubleshooting FAQ
+
+This FAQ covers common issues and their solutions when developing with Athletic Academics Hub.
+
+## Installation Issues
+
+### "pnpm: command not found"
+
+**Problem**: pnpm is not installed or not in PATH.
+
+**Solutions**:
+
+1. **Install pnpm**:
+
+   ```bash
+   npm install -g pnpm@8.15.0
+   ```
+
+2. **Use npx** (temporary):
+
+   ```bash
+   npx pnpm@8.15.0 install
+   ```
+
+3. **Verify installation**:
+   ```bash
+   pnpm --version
+   ```
+
+### "node_modules not found"
+
+**Problem**: Dependencies not installed.
+
+**Solution**:
+
+```bash
+pnpm install
+```
+
+**If this fails**, try:
+
+```bash
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
+```
+
+### "TypeScript error: Cannot find module '@packages/...'"
+
+**Problem**: TypeScript can't find workspace packages.
+
+**Solutions**:
+
+1. **Regenerate types**:
+
+   ```bash
+   pnpm db:generate
+   ```
+
+2. **Clear TypeScript cache**:
+
+   ```bash
+   rm -rf node_modules/.cache
+   pnpm install
+   ```
+
+3. **Check tsconfig.json** paths:
+   ```json
+   {
+     "compilerOptions": {
+       "paths": {
+         "@packages/*": ["./packages/*/src"]
+       }
+     }
+   }
+   ```
+
+## Database Issues
+
+### "Connection refused: PostgreSQL"
+
+**Problem**: Cannot connect to PostgreSQL database.
+
+**Solutions**:
+
+1. **Verify PostgreSQL is running**:
+
+   ```bash
+   # macOS
+   brew services list | grep postgresql
+
+   # Linux
+   sudo systemctl status postgresql
+
+   # Windows
+   # Check PostgreSQL service in Task Manager
+   ```
+
+2. **Start PostgreSQL**:
+
+   ```bash
+   # macOS
+   brew services start postgresql
+
+   # Linux
+   sudo systemctl start postgresql
+   ```
+
+3. **Check DATABASE_URL**:
+
+   ```bash
+   echo $DATABASE_URL
+   # Should be: postgresql://user:password@localhost:5432/dbname
+   ```
+
+4. **Test connection**:
+   ```bash
+   psql -U aah_user -d aah
+   ```
+
+### "Prisma: Connection pool timeout"
+
+**Problem**: Too many connections to database.
+
+**Solutions**:
+
+1. **Close existing connections**:
+
+   ```sql
+   SELECT pg_terminate_backend(pid)
+   FROM pg_stat_activity
+   WHERE datname = 'aah' AND pid <> pg_backend_pid();
+   ```
+
+2. **Increase pool size** in `.env`:
+
+   ```bash
+   DATABASE_POOL_SIZE=20
+   ```
+
+3. **Restart dev server**:
+   ```bash
+   # Ctrl+C
+   pnpm dev
+   ```
+
+### "Migration failed: Relation already exists"
+
+**Problem**: Database is out of sync with migrations.
+
+**Solution**:
+
+```bash
+# Reset database (DANGER: deletes all data)
+pnpm db:push --force-reset
+
+# Or manually drop table
+psql -U aah_user -d aah -c "DROP TABLE IF EXISTS tablename CASCADE;"
+```
+
+## Development Server Issues
+
+### "Port 3000 is already in use"
+
+**Problem**: Port is already occupied by another process.
+
+**Solutions**:
+
+1. **Kill process on port 3000**:
+
+   ```bash
+   # macOS/Linux
+   lsof -ti:3000 | xargs kill -9
+
+   # Windows
+   netstat -ano | findstr :3000
+   taskkill /PID <PID> /F
+   ```
+
+2. **Use different port**:
+   ```bash
+   PORT=3001 pnpm dev:main
+   ```
+
+### "Module not found: Can't resolve 'react'"
+
+**Problem**: React not installed in workspace.
+
+**Solution**:
+
+```bash
+cd packages/ui
+pnpm add react react-dom
+cd ../..
+pnpm install
+```
+
+### "Next.js: Invalid route configuration"
+
+**Problem**: Error in `next.config.js` or route structure.
+
+**Solutions**:
+
+1. **Check route structure**:
+
+   ```
+   app/
+   ├── (group)/          # Route groups
+   │   ├── page.tsx
+   │   └── layout.tsx
+   └── api/             # API routes
+       └── route.ts
+   ```
+
+2. **Verify next.config.js**:
+
+   ```javascript
+   /** @type {import('next').NextConfig} */
+   const nextConfig = {
+     reactStrictMode: true,
+   };
+
+   module.exports = nextConfig;
+   ```
+
+3. **Check for circular dependencies**:
+   - Components importing themselves
+   - Packages importing each other circularly
+
+## Build Issues
+
+### "Build failed: Out of memory"
+
+**Problem**: Build process exceeds memory limits.
+
+**Solutions**:
+
+1. **Increase Node.js memory**:
+
+   ```bash
+   NODE_OPTIONS="--max-old-space-size=4096" pnpm build
+   ```
+
+2. **Build individual packages**:
+
+   ```bash
+   pnpm build --filter=main-app
+   ```
+
+3. **Use Turborepo caching**:
+   ```bash
+   rm -rf .turbo
+   pnpm build
+   ```
+
+### "TypeScript: Type X is not assignable to Y"
+
+**Problem**: TypeScript type error.
+
+**Solutions**:
+
+1. **Check prop types**:
+
+   ```typescript
+   interface Props {
+     value: string;
+     onChange: (value: string) => void;
+   }
+   ```
+
+2. **Use `as` for casting** (temporary fix):
+
+   ```typescript
+   <Component value={value as any} />
+   ```
+
+3. **Run type-check separately**:
+   ```bash
+   pnpm type-check
+   ```
+
+### "ESLint: Error: Parsing error"
+
+**Problem**: ESLint cannot parse file.
+
+**Solutions**:
+
+1. **Check file extension**:
+
+   ```bash
+   # Should be .tsx, .ts, or .js
+   ```
+
+2. **Clear ESLint cache**:
+
+   ```bash
+   rm -rf .eslintcache
+   pnpm lint
+   ```
+
+3. **Update ESLint config**:
+   ```json
+   {
+     "extends": ["next/core-web-vitals", "prettier"],
+     "parser": "@typescript-eslint/parser"
+   }
+   ```
+
+## Authentication Issues
+
+### "Clerk: Invalid session"
+
+**Problem**: Authentication session is invalid.
+
+**Solutions**:
+
+1. **Clear cookies**:
+
+   ```javascript
+   // In browser console
+   document.cookie.split(";").forEach((c) => {
+     document.cookie =
+       c.trim().split("=")[0] +
+       "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";
+   });
+   ```
+
+2. **Check Clerk keys** in `.env`:
+
+   ```bash
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+   CLERK_SECRET_KEY=sk_test_...
+   ```
+
+3. **Logout and login again**:
+   ```typescript
+   await clerk.signOut();
+   await clerk.signIn();
+   ```
+
+### "Middleware: Authentication required"
+
+**Problem**: Protected route requires authentication.
+
+**Solutions**:
+
+1. **Check middleware configuration**:
+
+   ```typescript
+   // apps/main/middleware.ts
+   export default authMiddleware({
+     publicRoutes: ["/", "/login", "/signup"],
+   });
+   ```
+
+2. **Verify route protection**:
+
+   ```typescript
+   // Add to protected routes
+   import { auth } from "@clerk/nextjs";
+
+   export default async function Dashboard() {
+     const { userId } = auth();
+     if (!userId) redirect("/login");
+     // ...
+   }
+   ```
+
+## Testing Issues
+
+### "Test failed: Element not found"
+
+**Problem**: Test cannot find DOM element.
+
+**Solutions**:
+
+1. **Wait for element**:
+
+   ```typescript
+   await waitFor(() => {
+     expect(screen.getByText("Submit")).toBeInTheDocument();
+   });
+   ```
+
+2. **Check for async rendering**:
+
+   ```typescript
+   await waitFor(() => {
+     expect(screen.getByRole("button")).toBeInTheDocument();
+   });
+   ```
+
+3. **Use correct query**:
+
+   ```typescript
+   // Good
+   screen.getByRole("button", { name: "Submit" });
+
+   // Avoid
+   screen.getByText("Submit"); // Fragile
+   ```
+
+### "E2E test: Timeout exceeded"
+
+**Problem**: E2E test taking too long.
+
+**Solutions**:
+
+1. **Increase timeout**:
+
+   ```typescript
+   test("slow test", async ({ page }) => {
+     test.setTimeout(30000); // 30 seconds
+     // ...
+   });
+   ```
+
+2. **Wait for specific elements**:
+
+   ```typescript
+   await page.waitForSelector('button[type="submit"]');
+   ```
+
+3. **Check network requests**:
+   ```typescript
+   await page.waitForResponse((response) => {
+     return response.url().includes("/api/endpoint");
+   });
+   ```
+
+## Performance Issues
+
+### "Slow initial load"
+
+**Problem**: Application takes long to load.
+
+**Solutions**:
+
+1. **Check bundle size**:
+
+   ```bash
+   pnpm size-limit
+   ```
+
+2. **Use dynamic imports**:
+
+   ```typescript
+   const Modal = dynamic(() => import('./Modal'), {
+     loading: () => <Spinner />,
+   });
+   ```
+
+3. **Optimize images**:
+
+   ```typescript
+   import Image from 'next/image';
+
+   <Image
+     src="/hero.jpg"
+     alt="Hero"
+     width={1920}
+     height={1080}
+     priority
+   />
+   ```
+
+4. **Enable caching**:
+   ```typescript
+   export const revalidate = 3600; // 1 hour
+   ```
+
+## Git Issues
+
+### "Pull: Fast-forward failed"
+
+**Problem**: Local changes conflict with remote.
+
+**Solutions**:
+
+1. **Stash changes**:
+
+   ```bash
+   git stash
+   git pull
+   git stash pop
+   ```
+
+2. **Rebase instead**:
+
+   ```bash
+   git fetch
+   git rebase origin/main
+   ```
+
+3. **Resolve conflicts manually**:
+   ```bash
+   git pull
+   # Edit conflicted files
+   git add <resolved-files>
+   git commit
+   ```
+
+### "Push rejected: remote has diverged"
+
+**Problem**: Remote has commits not in local.
+
+**Solutions**:
+
+1. **Pull with rebase**:
+
+   ```bash
+   git pull --rebase
+   git push
+   ```
+
+2. **Force push (carefully)**:
+   ```bash
+   git push --force-with-lease
+   ```
+
+## Getting Additional Help
+
+If none of these solutions work:
+
+1. **Check error logs**:
+   - Browser console
+   - Server logs
+   - Build logs
+
+2. **Search existing issues**:
+   https://github.com/your-org/athletic-academics-hub/issues
+
+3. **Ask in Discord**:
+   https://discord.gg/your-server
+
+4. **Create new issue** with:
+   - Error message
+   - Steps to reproduce
+   - Environment details (OS, Node version, etc.)
+
+<Callout type="info">
+  **Pro Tip**: When reporting issues, always include: - Full error message -
+  Reproduction steps - Your environment (OS, Node version, pnpm version) - What
+  you've already tried
+</Callout>

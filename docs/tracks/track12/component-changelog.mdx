@@ -1,0 +1,385 @@
+# Component Changelog
+
+This document tracks changes, additions, and deprecations to the component library.
+
+## Version History
+
+### v2.1.0 (2025-01-20)
+
+#### Added
+
+**New Components**
+
+- `Select` - Dropdown select component with search
+- `Tree` - Hierarchical tree view component
+- `Breadcrumb` - Navigation breadcrumb component
+- `Command` - Command palette component
+
+**Features**
+
+- Added dark mode support to all components
+- Added animation variants for smooth transitions
+- Added keyboard navigation to interactive components
+- Added ARIA labels for accessibility
+
+**Stories**
+
+- Added usage examples for all components
+- Added accessibility test cases
+- Added visual regression tests
+
+#### Changed
+
+**Button**
+
+- Improved loading state animation
+- Added `fullWidth` prop
+- Enhanced touch target for mobile (44px minimum)
+
+**Input**
+
+- Added character count display
+- Improved error state styling
+- Added clear button for search inputs
+
+**Modal**
+
+- Added backdrop blur effect
+- Improved close button placement
+- Enhanced keyboard navigation
+
+**Card**
+
+- Added hover elevation effect
+- Improved spacing in card sections
+- Added responsive sizing
+
+#### Fixed
+
+- Fixed z-index stacking issues with modals
+- Fixed focus management in dialogs
+- Fixed dropdown closing on scroll
+- Fixed checkbox/radio keyboard navigation
+
+#### Deprecated
+
+- `OldButton` - Use `Button` instead
+- `DeprecatedInput` - Use `Input` instead
+
+---
+
+### v2.0.0 (2025-01-10)
+
+#### Breaking Changes
+
+**Migrated to Shadcn/UI v2**
+
+- All components now use Shadcn/UI v2 patterns
+- Updated component API to match v2 conventions
+- Removed deprecated v1 components
+
+**Theme System**
+
+- Changed from custom theme to CSS variables
+- Updated all color references to use CSS variables
+- Changed `className` API to use `cn()` utility
+
+#### Added
+
+**New Components**
+
+- `Button` - All button variants
+- `Input` - Text input with validation
+- `Card` - Card layout component
+- `Dialog` - Modal dialog component
+- `DropdownMenu` - Dropdown menu component
+- `Table` - Data table component
+- `Badge` - Badge/status component
+- `Avatar` - User avatar component
+- `Tooltip` - Tooltip component
+- `Select` - Select dropdown component
+
+**Features**
+
+- Full TypeScript support
+- Full accessibility (WCAG 2.2 AA)
+- Dark mode support
+- Responsive design
+- Tailwind CSS integration
+
+#### Removed
+
+- Legacy v1 components
+- Old theming system
+- Deprecated utility classes
+
+---
+
+### v1.5.0 (2024-12-20)
+
+#### Added
+
+**New Components**
+
+- `Pagination` - Pagination control
+- `Tabs` - Tab navigation
+- `Accordion` - Accordion component
+- `Skeleton` - Loading skeleton
+
+**Features**
+
+- Added Storybook documentation
+- Added visual regression tests
+- Added component examples
+
+#### Changed
+
+**Button**
+
+- Added loading prop
+- Improved hover states
+- Better focus indicators
+
+**Input**
+
+- Added error state
+- Added disabled state
+- Improved styling
+
+#### Fixed
+
+- Fixed Safari styling issues
+- Fixed focus management
+- Fixed z-index issues
+
+---
+
+### v1.4.0 (2024-12-10)
+
+#### Added
+
+**New Components**
+
+- `Alert` - Alert/alert dialog component
+- `Toast` - Toast notification component
+- `Progress` - Progress bar component
+- `Spinner` - Loading spinner
+
+**Features**
+
+- Added animation utilities
+- Added transition utilities
+- Added responsive utilities
+
+#### Changed
+
+**Card**
+
+- Improved responsive behavior
+- Added footer section
+
+**Modal**
+
+- Improved accessibility
+- Better keyboard navigation
+
+#### Fixed
+
+- Fixed mobile responsiveness
+- Fixed overflow issues
+
+---
+
+### v1.3.0 (2024-12-01)
+
+#### Added
+
+**New Components**
+
+- `Checkbox` - Checkbox input
+- `RadioGroup` - Radio button group
+- `Switch` - Toggle switch
+- `Slider` - Range slider
+
+**Features**
+
+- Added form validation examples
+- Added error handling patterns
+- Added success states
+
+#### Changed
+
+**Input**
+
+- Added helper text
+- Added error messages
+- Improved validation feedback
+
+#### Fixed
+
+- Fixed form submission behavior
+- Fixed validation timing
+
+---
+
+### v1.2.0 (2024-11-20)
+
+#### Added
+
+**New Components**
+
+- `CommandPalette` - Command palette for quick actions
+- `DataTable` - Enhanced data table with sorting/filtering
+- `DatePicker` - Date picker component
+
+**Features**
+
+- Added search functionality
+- Added filtering capabilities
+- Added sorting options
+
+#### Changed
+
+**Table**
+
+- Improved performance with virtualization
+- Added column resizing
+- Added row selection
+
+#### Fixed
+
+- Fixed performance issues with large datasets
+- Fixed sorting edge cases
+
+---
+
+### v1.1.0 (2024-11-10)
+
+#### Added
+
+**New Components**
+
+- `Sidebar` - Sidebar navigation
+- `Navbar` - Top navigation bar
+- `Footer` - Footer component
+- `Layout` - Layout components
+
+**Features**
+
+- Added responsive navigation
+- Added mobile menu
+- Added layout templates
+
+#### Changed
+
+**Button**
+
+- Added link variant
+- Improved mobile touch targets
+
+#### Fixed
+
+- Fixed mobile menu behavior
+- Fixed responsive breakpoints
+
+---
+
+### v1.0.0 (2024-11-01)
+
+#### Initial Release
+
+**Core Components**
+
+- `Button` - Basic button component
+- `Input` - Text input component
+- `Card` - Card layout component
+- `Modal` - Modal dialog component
+- `Typography` - Typography components
+
+**Features**
+
+- Basic styling system
+- Tailwind CSS integration
+- TypeScript support
+- Storybook setup
+- Basic documentation
+
+## Migration Guides
+
+### Migrating from v1 to v2
+
+#### Button Component
+
+**v1:**
+
+```tsx
+<Button primary size="large">
+  Click me
+</Button>
+```
+
+**v2:**
+
+```tsx
+<Button variant="primary" size="lg">
+  Click me
+</Button>
+```
+
+#### Input Component
+
+**v1:**
+
+```tsx
+<Input type="text" placeholder="Enter text" />
+```
+
+**v2:**
+
+```tsx
+<Input type="text" placeholder="Enter text" />
+```
+
+#### Theme System
+
+**v1:**
+
+```tsx
+import { theme } from "@packages/ui/theme";
+<Button theme={theme.primary}>Click</Button>;
+```
+
+**v2:**
+
+```tsx
+<Button variant="primary">Click</Button>
+```
+
+## Deprecation Policy
+
+- Components are deprecated for at least 6 months before removal
+- Deprecated components are marked in documentation
+- Migration guides are provided for all major changes
+- Breaking changes are reserved for major versions
+
+## Planned Changes
+
+### Upcoming in v2.2.0
+
+- `ComboBox` - Combobox with search and filtering
+- `SplitButton` - Split button component
+- `SpeedDial` - Speed dial action button
+- `FloatingAction` - Floating action button
+
+### Future Considerations
+
+- Native web components support
+- Animation library integration
+- Advanced form components
+- Data visualization components
+
+## Related Documentation
+
+- [Component Guidelines](./component-guidelines)
+- [Storybook Documentation](https://storybook.js.org/docs)
+- [Shadcn/UI v2 Migration Guide](https://ui.shadcn.com/docs/migration)

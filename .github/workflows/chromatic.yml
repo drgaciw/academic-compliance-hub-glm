@@ -1,0 +1,95 @@
+name: Visual Regression Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  chromatic:
+    name: Chromatic Visual Regression Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Storybook
+        working-directory: ./packages/ui
+        run: pnpm build-storybook
+
+      - name: Publish to Chromatic
+        working-directory: ./packages/ui
+        run: pnpm chromatic
+        env:
+          # Chromatic project token - store this in GitHub Secrets
+          CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+
+          # Auto-accept changes on main branch (baseline snapshots)
+          CHROMATIC_AUTO_ACCEPT: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'true' || 'false' }}
+
+          # Exit with zero for PRs (allows CI to continue with status check)
+          CHROMATIC_EXIT_ZERO: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}
+
+          # CI flag
+          CI: true
+
+          # GitHub token for status check
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  chromatic-baseline:
+    name: Capture Baseline Snapshots
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Storybook
+        working-directory: ./packages/ui
+        run: pnpm build-storybook
+
+      - name: Publish baseline to Chromatic
+        working-directory: ./packages/ui
+        run: pnpm chromatic
+        env:
+          CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          CHROMATIC_AUTO_ACCEPT: true
+          CHROMATIC_EXIT_ZERO: false
+          CI: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

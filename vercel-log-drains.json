@@ -1,0 +1,27 @@
+{
+  "drains": [
+    {
+      "name": "sentry-drain",
+      "url": "https://sentry.io/api/${SENTRY_PROJECT_ID}/store/",
+      "type": "json",
+      "format": "ndjson",
+      "headers": {
+        "X-Sentry-Auth": "${SENTRY_AUTH_TOKEN}"
+      },
+      "filter": {
+        "level": ["error", "warn"],
+        "sources": ["lambda", "edge", "build"]
+      }
+    },
+    {
+      "name": "log-analytics-drain",
+      "url": "https://${MONITORING_SERVICE_URL}/api/ingest-logs",
+      "type": "json",
+      "format": "ndjson",
+      "secret": "${LOG_DRAIN_SECRET}",
+      "filter": {
+        "level": ["info", "warn", "error", "debug"]
+      }
+    }
+  ]
+}

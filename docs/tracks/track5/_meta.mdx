@@ -1,0 +1,100 @@
+# Track 5: Student Microsite
+
+Documentation for student portal and self-service features.
+
+## Overview
+
+Track 5 enhances the student microsite with dashboard widgets, real-time updates, and transfer credit request workflow.
+
+## Dashboard
+
+### Dashboard Layout
+
+- [Dashboard Architecture](./dashboard-layout)
+- [Widget System](./widget-system)
+- [Responsive Design](./responsive-design)
+- [Performance](./dashboard-performance)
+
+### Dashboard Widgets
+
+#### GPA Progress Widget
+
+Real-time GPA tracking with visual progress indicators.
+
+- [Widget Component](./gpa-widget)
+- [Real-time Updates](./gpa-updates)
+- [Progress Visualization](./gpa-visualization)
+- [Historical Trends](./gpa-history)
+
+#### Compliance Status Widget
+
+Eligibility and compliance status monitoring.
+
+- [Widget Component](./compliance-widget)
+- [Status Indicators](./status-indicators)
+- [Drill-down Details](./compliance-details)
+- [Alert Notifications](./compliance-alerts)
+
+#### Transfer Credit Widget
+
+Transfer credit request status and history.
+
+- [Widget Component](./transfer-widget)
+- [Request History](./transfer-history)
+- [Status Tracking](transfer-status)
+
+## Features
+
+### Transfer Credit Request
+
+Multi-step form for submitting transfer credit evaluations.
+
+- [Workflow Overview](./transfer-workflow)
+- [Step 1: Student Info](./transfer-step-student)
+- [Step 2: Institution Selection](./transfer-step-institution)
+- [Step 3: Course Selection](./transfer-step-courses)
+- [Step 4: Document Upload](./transfer-step-upload)
+- [Step 5: Review & Submit](./transfer-step-review)
+
+### Document Upload
+
+Client-side validation and secure file upload.
+
+- [Upload Component](./upload-component)
+- [File Validation](./file-validation)
+- [Progress Indicator](./upload-progress)
+- [Error Handling](./upload-errors)
+
+### Notification Center
+
+Read/unread status and notification management.
+
+- [Notification List](./notification-list)
+- [Mark Read/Unread](./notification-status)
+- [Notification Types](./notification-types)
+- [Preference Settings](./notification-preferences)
+
+## Real-time Features
+
+### Server-Sent Events
+
+Real-time updates without WebSocket complexity.
+
+- [SSE Setup](./sse-setup)
+- [Event Types](./sse-events)
+- [Reconnection Logic](./sse-reconnection)
+- [Browser Support](./sse-browser-support)
+
+### Real-time Updates
+
+- [GPA Updates](./realtime-gpa)
+- [Compliance Changes](./realtime-compliance)
+- [Transfer Status](./realtime-transfer)
+- [System Announcements](./realtime-announcements)
+
+## Related Tasks
+
+- [Design System](../track3/domain-components)
+- [App Shell](../track2/auth-middleware)
+- [Backend Services](../track7/transfer-api)
+- [Testing](../track8/e2e-tests)

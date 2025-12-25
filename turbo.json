@@ -1,68 +1,67 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [
-    "**/.env.*local"
-  ],
+  "globalDependencies": ["**/.env.*local"],
+  "globalEnv": ["NODE_ENV", "DATABASE_URL", "NEXT_PUBLIC_API_URL"],
+  "remoteCache": {
+    "enabled": true,
+    "signature": true
+  },
   "tasks": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
+      "dependsOn": ["^build"],
       "outputs": [
         ".next/**",
         "!.next/cache/**",
-        "dist/**"
-      ]
+        "dist/**",
+        "!.next/cache/**",
+        "!.next/server/**"
+      ],
+      "env": ["NEXT_PUBLIC_*"]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "test": {
-      "dependsOn": [
-        "build"
-      ],
-      "outputs": [
-        "coverage/**"
-      ]
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"],
+      "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "**/*.test.ts"]
     },
     "test:unit": {
       "dependsOn": [],
-      "outputs": [
-        "coverage/**"
-      ]
+      "outputs": ["coverage/**"],
+      "inputs": ["src/**/*.ts", "**/*.test.ts", "**/*.spec.ts"]
     },
     "test:integration": {
-      "dependsOn": [
-        "build"
-      ],
-      "outputs": [
-        "coverage/**"
-      ]
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"],
+      "inputs": ["src/**/*.ts", "tests/integration/**/*.ts"]
     },
     "test:e2e": {
-      "dependsOn": [
-        "build"
-      ],
-      "outputs": []
+      "dependsOn": ["build"],
+      "outputs": [],
+      "inputs": ["e2e/**/*.ts"],
+      "cache": false
     },
     "lint": {
-      "outputs": []
+      "outputs": [],
+      "inputs": ["src/**/*.ts", "src/**/*.tsx"]
     },
     "lint:fix": {
-      "outputs": []
+      "outputs": [],
+      "inputs": ["src/**/*.ts", "src/**/*.tsx"]
     },
     "type-check": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": []
+      "dependsOn": ["^build"],
+      "outputs": [],
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "**/*.d.ts"]
     },
     "clean": {
       "cache": false
     },
     "db:generate": {
-      "cache": false
+      "cache": false,
+      "outputs": ["node_modules/.prisma/**"]
     },
     "db:push": {
       "cache": false

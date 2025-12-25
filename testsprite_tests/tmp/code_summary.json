@@ -1,121 +1,169 @@
 {
   "tech_stack": [
     "TypeScript",
-    "React",
-    "Next.js",
-    "Vitest",
-    "Playwright",
-    "Tailwind CSS",
+    "Next.js 14",
+    "React 18",
+    "shadcn/ui",
     "Radix UI",
-    "Shadcn/UI",
-    "Turbo",
-    "pnpm"
+    "Tailwind CSS",
+    "Vitest",
+    "React Testing Library",
+    "Playwright",
+    "Clerk",
+    "Sentry",
+    "Recharts"
   ],
   "features": [
     {
-      "name": "Button Component",
-      "description": "Reusable button component with multiple variants (default, destructive, outline, secondary, ghost, link) and sizes (default, sm, lg, icon, icon-sm, icon-lg)",
+      "name": "Student App Layout",
+      "description": "Root layout and main page components for student application",
       "files": [
+        "apps/student/app/layout.tsx",
+        "apps/student/app/page.tsx",
+        "apps/student/app/globals.css",
+        "apps/student/app/sitemap.ts"
+      ]
+    },
+    {
+      "name": "Student Dashboard Pages",
+      "description": "Dashboard, notifications, reports, status, transcripts, and upload pages",
+      "files": [
+        "apps/student/app/dashboard/page.tsx",
+        "apps/student/app/notifications/page.tsx",
+        "apps/student/app/preliminary/page.tsx",
+        "apps/student/app/reports/page.tsx",
+        "apps/student/app/status/page.tsx",
+        "apps/student/app/transcripts/page.tsx",
+        "apps/student/app/upload/page.tsx"
+      ]
+    },
+    {
+      "name": "Student API Routes",
+      "description": "API endpoints for CSP reporting, OG images, realtime updates, transfer credits, and file uploads",
+      "files": [
+        "apps/student/app/api/csp-report/route.ts",
+        "apps/student/app/api/og/route.tsx",
+        "apps/student/app/api/realtime/route.ts",
+        "apps/student/app/api/transfer-credits/submit/route.ts",
+        "apps/student/app/api/upload/route.ts"
+      ]
+    },
+    {
+      "name": "Student Components",
+      "description": "Core UI components for document preview, file upload, notifications, and reports",
+      "files": [
+        "apps/student/components/document-preview.tsx",
+        "apps/student/components/enhanced-file-upload.tsx",
+        "apps/student/components/header-with-notifications.tsx",
+        "apps/student/components/notification-bell.tsx",
+        "apps/student/components/notification-preferences.tsx",
+        "apps/student/components/optimized-image.tsx",
+        "apps/student/components/report-generation-ui.tsx",
+        "apps/student/components/upload-progress-indicator.tsx"
+      ]
+    },
+    {
+      "name": "Dashboard Layout Components",
+      "description": "Layout components for dashboard including drag-drop, skeleton loading, and widget wrapper",
+      "files": [
+        "apps/student/components/dashboard/dashboard-dragdrop.tsx",
+        "apps/student/components/dashboard/dashboard-layout.tsx",
+        "apps/student/components/dashboard/skeleton-loading.tsx",
+        "apps/student/components/dashboard/widget-wrapper.tsx"
+      ]
+    },
+    {
+      "name": "Dashboard Widgets",
+      "description": "Comprehensive set of dashboard widgets for compliance, GPA, course mapping, and file management",
+      "files": [
+        "apps/student/components/dashboard/widgets/circular-progress.tsx",
+        "apps/student/components/dashboard/widgets/compliance-timeline.tsx",
+        "apps/student/components/dashboard/widgets/compliance-widget.tsx",
+        "apps/student/components/dashboard/widgets/course-equivalency-preview.tsx",
+        "apps/student/components/dashboard/widgets/dashboard-widgets-advanced.tsx",
+        "apps/student/components/dashboard/widgets/dashboard-widgets.tsx",
+        "apps/student/components/dashboard/widgets/deadline-indicators.tsx",
+        "apps/student/components/dashboard/widgets/document-attachment-step.tsx",
+        "apps/student/components/dashboard/widgets/file-upload-with-validation.tsx",
+        "apps/student/components/dashboard/widgets/gpa-history-chart.tsx",
+        "apps/student/components/dashboard/widgets/gpa-widget.tsx",
+        "apps/student/components/dashboard/widgets/institution-search.tsx",
+        "apps/student/components/dashboard/widgets/multi-step-wizard.tsx",
+        "apps/student/components/dashboard/widgets/submit-transfer-credit-action.tsx",
+        "apps/student/components/dashboard/widgets/transfer-credit-wizard.tsx"
+      ]
+    },
+    {
+      "name": "Custom Hooks",
+      "description": "React hooks for draft submission, notifications, and SSE (Server-Sent Events)",
+      "files": [
+        "apps/student/hooks/use-draft-submission.ts",
+        "apps/student/hooks/use-notifications.ts",
+        "apps/student/hooks/use-sse.ts"
+      ]
+    },
+    {
+      "name": "UI Package - Form Components",
+      "description": "Form-related components including accordion, badge, button, card, carousel, checkbox, dialog, dropdown, file-upload, and form",
+      "files": [
+        "packages/ui/src/components/accordion.tsx",
+        "packages/ui/src/components/badge.tsx",
         "packages/ui/src/components/button.tsx",
-        "packages/ui/__tests__/unit/button.test.tsx"
-      ]
-    },
-    {
-      "name": "Card Component",
-      "description": "Card container component with header, title, description, content, and footer subcomponents",
-      "files": [
         "packages/ui/src/components/card.tsx",
-        "packages/ui/__tests__/unit/card.test.tsx"
-      ]
-    },
-    {
-      "name": "Dialog Component",
-      "description": "Modal dialog component with trigger, content, header, title, description, footer, and close functionality",
-      "files": [
+        "packages/ui/src/components/carousel.tsx",
+        "packages/ui/src/components/checkbox.tsx",
         "packages/ui/src/components/dialog.tsx",
-        "packages/ui/__tests__/unit/dialog.test.tsx"
-      ]
-    },
-    {
-      "name": "Dropdown Menu Component",
-      "description": "Dropdown menu with trigger, content, label, separator, item, checkbox item, and radio group functionality",
-      "files": [
         "packages/ui/src/components/dropdown-menu.tsx",
-        "packages/ui/__tests__/unit/dropdown-menu.test.tsx"
+        "packages/ui/src/components/file-upload.tsx",
+        "packages/ui/src/components/form.tsx"
       ]
     },
     {
-      "name": "Input Component",
-      "description": "Text input component with support for various input types and validation states",
+      "name": "UI Package - Layout Components",
+      "description": "Layout components including container, footer, grid, header, navigation, section, and stack",
+      "files": [
+        "packages/ui/src/components/container.tsx",
+        "packages/ui/src/components/footer.tsx",
+        "packages/ui/src/components/grid.tsx",
+        "packages/ui/src/components/header.tsx",
+        "packages/ui/src/components/navigation.tsx",
+        "packages/ui/src/components/section.tsx",
+        "packages/ui/src/components/stack.tsx"
+      ]
+    },
+    {
+      "name": "UI Package - Input Components",
+      "description": "Input components including input, label, select, select-search, textarea, and radio-group",
       "files": [
         "packages/ui/src/components/input.tsx",
-        "packages/ui/__tests__/unit/input.test.tsx"
-      ]
-    },
-    {
-      "name": "Label Component",
-      "description": "Form label component with proper accessibility attributes",
-      "files": [
         "packages/ui/src/components/label.tsx",
-        "packages/ui/__tests__/unit/label.test.tsx"
-      ]
-    },
-    {
-      "name": "Select Component",
-      "description": "Select dropdown component with trigger, value, content, group, label, item, and separator",
-      "files": [
         "packages/ui/src/components/select.tsx",
-        "packages/ui/__tests__/unit/select.test.tsx"
+        "packages/ui/src/components/select-search.tsx",
+        "packages/ui/src/components/textarea.tsx",
+        "packages/ui/src/components/radio-group.tsx"
       ]
     },
     {
-      "name": "Tabs Component",
-      "description": "Tab navigation component with list, trigger, and content subcomponents",
+      "name": "UI Package - Data Display Components",
+      "description": "Data display components including data-table, date-picker, popover, progress, sheet, tabs, and skip-to-content",
       "files": [
+        "packages/ui/src/components/data-table.tsx",
+        "packages/ui/src/components/date-picker.tsx",
+        "packages/ui/src/components/popover.tsx",
+        "packages/ui/src/components/progress.tsx",
+        "packages/ui/src/components/sheet.tsx",
         "packages/ui/src/components/tabs.tsx",
-        "packages/ui/__tests__/unit/tabs.test.tsx"
+        "packages/ui/src/components/skip-to-content.tsx"
       ]
     },
     {
-      "name": "Transcript Upload Flow",
-      "description": "Integration flow for uploading student transcripts with file validation, drag and drop, progress tracking, and error handling",
+      "name": "UI Package Utilities",
+      "description": "Utility functions and design tokens for the UI package",
       "files": [
-        "apps/admin/__tests__/integration/flows/transcript-upload-flow.test.tsx"
-      ]
-    },
-    {
-      "name": "Eligibility Review Flow",
-      "description": "Integration flow for reviewing student eligibility with filtering, sorting, approve/reject actions, and what-if scenarios",
-      "files": [
-        "apps/admin/__tests__/integration/flows/eligibility-review-flow.test.tsx"
-      ]
-    },
-    {
-      "name": "Compliance Dashboard Flow",
-      "description": "Integration flow for compliance dashboard monitoring with metrics display, activity feed, and filtering",
-      "files": [
-        "apps/admin/__tests__/integration/flows/compliance-dashboard-flow.test.tsx"
-      ]
-    },
-    {
-      "name": "Course Mapping Flow",
-      "description": "Integration flow for mapping transfer courses with course catalog browsing, single and bulk mapping, and manual review requests",
-      "files": [
-        "apps/admin/__tests__/integration/flows/course-mapping-flow.test.tsx"
-      ]
-    },
-    {
-      "name": "Audit Trail Flow",
-      "description": "Integration flow for reviewing audit logs with filtering, export functionality (CSV/PDF), detailed log viewing, and pagination",
-      "files": [
-        "apps/admin/__tests__/integration/flows/audit-trail-flow.test.tsx"
-      ]
-    },
-    {
-      "name": "Batch Upload Flow",
-      "description": "Integration flow for batch uploading multiple files with progress tracking, error handling, and results summary",
-      "files": [
-        "apps/admin/__tests__/integration/flows/batch-upload-flow.test.tsx"
+        "packages/ui/src/lib/utils.ts",
+        "packages/ui/src/tokens.ts",
+        "packages/ui/src/tokens/colors.css",
+        "packages/ui/src/tokens/index.ts"
       ]
     }
   ]

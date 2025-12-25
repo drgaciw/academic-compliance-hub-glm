@@ -1,0 +1,109 @@
+{
+  "rules": [
+    {
+      "matcher": {
+        "type": "issue"
+      },
+      "conditions": [
+        {
+          "field": "level",
+          "operator": "eq",
+          "value": "error"
+        },
+        {
+          "field": "environment",
+          "operator": "eq",
+          "value": "production"
+        }
+      ],
+      "action": {
+        "frequency": 5,
+        "window": "1h"
+      }
+    },
+    {
+      "matcher": {
+        "type": "issue"
+      },
+      "conditions": [
+        {
+          "field": "platform",
+          "operator": "eq",
+          "value": "javascript"
+        }
+      ],
+      "action": {
+        "grouping": "smart"
+      }
+    },
+    {
+      "matcher": {
+        "type": "issue"
+      },
+      "conditions": [
+        {
+          "field": "exception.value",
+          "operator": "regex",
+          "value": "^ChunkLoadError|Loading chunk \\d+ failed"
+        }
+      ],
+      "action": {
+        "grouping": {
+          "aggregateBy": [
+            {
+              "field": "exception.value"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "matcher": {
+        "type": "issue"
+      },
+      "conditions": [
+        {
+          "field": "title",
+          "operator": "regex",
+          "value": "network error|timeout|fetch failed"
+        }
+      ],
+      "action": {
+        "grouping": {
+          "aggregateBy": [
+            {
+              "field": "request.url"
+            },
+            {
+              "field": "exception.type"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "matcher": {
+        "type": "issue"
+      },
+      "conditions": [
+        {
+          "field": "transaction",
+          "operator": "regex",
+          "value": "^/api/"
+        }
+      ],
+      "action": {
+        "grouping": {
+          "aggregateBy": [
+            {
+              "field": "transaction"
+            },
+            {
+              "field": "http.method"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

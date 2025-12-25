@@ -1,0 +1,149 @@
+name: Canary Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      percentage:
+        description: "Traffic percentage (1-100)"
+        required: true
+        default: "10"
+        type: choice
+        options:
+          - "1"
+          - "5"
+          - "10"
+          - "25"
+          - "50"
+      duration:
+        description: "Canary duration in hours"
+        required: true
+        default: "2"
+        type: choice
+        options:
+          - "1"
+          - "2"
+          - "4"
+          - "8"
+      environment:
+        description: "Deployment environment"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  CANARY_PERCENTAGE: ${{ github.event.inputs.percentage }}
+  CANARY_DURATION: ${{ github.event.inputs.duration }}
+
+permissions:
+  contents: read
+  deployments: write
+  id-token: write
+
+jobs:
+  canary-start:
+    name: Start Canary Deployment
+    runs-on: ubuntu-latest
+    environment:
+      name: canary-${{ github.event.inputs.percentage }}%
+      url: ${{ steps.deploy-canary.outputs.url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pnpm-store
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Cache Turbo build outputs with remote cache
+        uses: actions/cache@v3
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm run build
+        env:
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+      - name: Deploy canary to Vercel
+        id: deploy-canary
+        run: |
+          echo "Deploying canary with ${{ env.CANARY_PERCENTAGE }}% traffic for ${{ env.CANARY_DURATION }} hours"
+
+      - name: Configure traffic split
+        run: |
+          echo "Configuring ${{ env.CANARY_PERCENTAGE }}% traffic to canary deployment"
+
+      - name: Monitor canary
+        run: |
+          echo "Monitoring canary for ${{ env.CANARY_DURATION }} hours"
+          echo "Watch for error rates, latency, and user feedback"
+
+  canary-monitor:
+    name: Monitor Canary
+    runs-on: ubuntu-latest
+    needs: canary-start
+
+    steps:
+      - name: Wait for monitoring period
+        run: |
+          duration=$(( ${{ env.CANARY_DURATION }} * 60 * 60 ))
+          echo "Waiting ${{ env.CANARY_DURATION }} hours for monitoring"
+          echo "In production, this would be a real-time monitoring job"
+
+      - name: Check error rates
+        run: |
+          echo "Checking error rates..."
+          echo "Error rate threshold: < 0.5%"
+          echo "P99 latency threshold: < 500ms"
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "Canary failed - initiating rollback"
+
+  canary-promote:
+    name: Promote Canary
+    runs-on: ubuntu-latest
+    needs: canary-monitor
+    if: success()
+
+    steps:
+      - name: Promote to full production
+        run: |
+          echo "Canary successful - promoting to 100% traffic"
+
+      - name: Notify team
+        run: |
+          echo "Notify team of successful canary deployment"

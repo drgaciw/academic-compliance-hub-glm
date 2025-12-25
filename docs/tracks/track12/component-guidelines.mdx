@@ -1,0 +1,469 @@
+# Component Usage Guidelines
+
+This guide covers best practices for using and documenting components in Storybook.
+
+## Overview
+
+Component documentation in Storybook should include:
+
+- Usage examples
+- Props documentation
+- Accessibility information
+- Interactive controls
+- Best practices
+
+## Storybook Documentation Structure
+
+### Component Story Template
+
+```typescript
+import type { Meta, StoryObj } from '@storybook/react';
+import { Button } from './Button';
+
+const meta: Meta<typeof Button> = {
+  title: 'Components/Button',
+  component: Button,
+  tags: ['autodocs'],
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['default', 'primary', 'secondary', 'outline', 'ghost'],
+      description: 'Button variant style',
+    },
+    size: {
+      control: 'select',
+      options: ['sm', 'md', 'lg', 'icon'],
+      description: 'Button size',
+    },
+    disabled: {
+      control: 'boolean',
+      description: 'Disable the button',
+    },
+    loading: {
+      control: 'boolean',
+      description: 'Show loading state',
+    },
+    onClick: { action: 'clicked' },
+  },
+  parameters: {
+    layout: 'centered',
+    docs: {
+      description: {
+        component: 'Buttons allow users to take actions and make choices. They are used throughout the application for primary and secondary actions.',
+      },
+    },
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof Button>;
+
+export const Default: Story = {
+  args: {
+    children: 'Button',
+  },
+};
+
+export const Variants: Story = {
+  render: (args) => (
+    <div className="flex gap-2">
+      <Button {...args} variant="default">Default</Button>
+      <Button {...args} variant="primary">Primary</Button>
+      <Button {...args} variant="secondary">Secondary</Button>
+      <Button {...args} variant="outline">Outline</Button>
+      <Button {...args} variant="ghost">Ghost</Button>
+    </div>
+  ),
+};
+
+export const Sizes: Story = {
+  render: (args) => (
+    <div className="flex items-center gap-2">
+      <Button {...args} size="sm">Small</Button>
+      <Button {...args} size="md">Medium</Button>
+      <Button {...args} size="lg">Large</Button>
+    </div>
+  ),
+};
+
+export const WithIcon: Story = {
+  args: {
+    children: (
+      <>
+        <Upload className="mr-2 h-4 w-4" />
+        Upload
+      </>
+    ),
+    variant: 'primary',
+  },
+};
+
+export const Loading: Story = {
+  args: {
+    children: 'Loading...',
+    loading: true,
+  },
+};
+
+export const Disabled: Story = {
+  args: {
+    children: 'Disabled',
+    disabled: true,
+  },
+};
+```
+
+## Usage Guidelines
+
+### Button Usage
+
+```typescript
+// Primary action
+<Button variant="primary">Submit Form</Button>
+
+// Secondary action
+<Button variant="secondary">Cancel</Button>
+
+// Destructive action
+<Button variant="outline" onClick={handleDelete}>Delete</Button>
+
+// Icon button
+<Button variant="ghost" size="icon">
+  <MoreVertical />
+</Button>
+
+// Loading state
+<Button loading={isLoading}>Submit</Button>
+```
+
+### Best Practices
+
+<Callout type="info">
+  **Button Guidelines**
+
+- Use primary variant for main actions
+- Use secondary variant for alternative actions
+- Use outline or ghost for less important actions
+- Provide clear, action-oriented text
+- Disable buttons during async operations
+  </Callout>
+
+## Form Components
+
+### Input Component
+
+```typescript
+import type { Meta, StoryObj } from '@storybook/react';
+import { Input } from './Input';
+
+const meta: Meta<typeof Input> = {
+  title: 'Components/Input',
+  component: Input,
+  tags: ['autodocs'],
+  argTypes: {
+    type: {
+      control: 'select',
+      options: ['text', 'email', 'password', 'number'],
+    },
+    placeholder: { control: 'text' },
+    disabled: { control: 'boolean' },
+    error: { control: 'text' },
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof Input>;
+
+export const Default: Story = {
+  args: {
+    type: 'text',
+    placeholder: 'Enter text...',
+  },
+};
+
+export const WithLabel: Story = {
+  render: (args) => (
+    <div className="space-y-2">
+      <label htmlFor="email">Email Address</label>
+      <Input {...args} id="email" type="email" placeholder="you@example.com" />
+    </div>
+  ),
+};
+
+export const WithError: Story = {
+  args: {
+    error: 'This field is required',
+    placeholder: 'Enter value...',
+  },
+};
+
+export const Password: Story = {
+  args: {
+    type: 'password',
+    placeholder: 'Password',
+  },
+};
+```
+
+### Form Component Usage
+
+```typescript
+// Simple input
+<Input placeholder="Search..." />
+
+// With label
+<div>
+  <Label htmlFor="email">Email</Label>
+  <Input id="email" type="email" />
+</div>
+
+// With error
+<Input error="Invalid email address" />
+
+// Controlled input
+const [value, setValue] = useState('');
+<Input
+  value={value}
+  onChange={(e) => setValue(e.target.value)}
+  placeholder="Type something..."
+/>
+```
+
+## Data Display Components
+
+### Table Component
+
+```typescript
+import type { Meta, StoryObj } from '@storybook/react';
+import { Table } from './Table';
+
+const data = [
+  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin' },
+  { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User' },
+  { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'User' },
+];
+
+const meta: Meta<typeof Table> = {
+  title: 'Components/Table',
+  component: Table,
+  tags: ['autodocs'],
+  args: {
+    data,
+    columns: [
+      { key: 'name', label: 'Name' },
+      { key: 'email', label: 'Email' },
+      { key: 'role', label: 'Role' },
+    ],
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof Table>;
+
+export const Default: Story = {};
+
+export const WithActions: Story = {
+  render: (args) => (
+    <Table {...args}>
+      {data.map((row) => (
+        <Table.Row key={row.id}>
+          <Table.Cell>{row.name}</Table.Cell>
+          <Table.Cell>{row.email}</Table.Cell>
+          <Table.Cell>{row.role}</Table.Cell>
+          <Table.Cell>
+            <Button variant="ghost" size="sm">Edit</Button>
+            <Button variant="ghost" size="sm">Delete</Button>
+          </Table.Cell>
+        </Table.Row>
+      ))}
+    </Table>
+  ),
+};
+```
+
+## Accessibility Guidelines
+
+### ARIA Labels
+
+```typescript
+// Icon buttons must have accessible labels
+<Button
+  variant="ghost"
+  size="icon"
+  aria-label="Close dialog"
+>
+  <X />
+</Button>
+
+// Form controls need labels
+<div>
+  <Label htmlFor="password">Password</Label>
+  <Input id="password" type="password" />
+</div>
+
+// Or aria-label if label isn't visible
+<Input aria-label="Search" placeholder="Search..." />
+```
+
+### Keyboard Navigation
+
+```typescript
+// Focusable elements must be reachable via keyboard
+<Button
+  variant="primary"
+  onClick={handleSubmit}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter') handleSubmit();
+  }}
+>
+  Submit
+</Button>
+
+// Provide visual focus indicators
+.button:focus-visible {
+  outline: 2px solid theme.colors.primary;
+  outline-offset: 2px;
+}
+```
+
+## Component Patterns
+
+### Compound Components
+
+```typescript
+// Card compound component
+<Card>
+  <Card.Header>
+    <Card.Title>Card Title</Card.Title>
+    <Card.Description>Card description</Card.Description>
+  </Card.Header>
+  <Card.Content>
+    <p>Card content goes here.</p>
+  </Card.Content>
+  <Card.Footer>
+    <Button>View Details</Button>
+  </Card.Footer>
+</Card>
+```
+
+### Render Props
+
+```typescript
+// List with render prop
+<List
+  items={data}
+  renderItem={(item) => (
+    <div key={item.id}>
+      <h3>{item.title}</h3>
+      <p>{item.description}</p>
+    </div>
+  )}
+/>
+```
+
+## Testing Components
+
+### Visual Testing with Chromatic
+
+```typescript
+// Storybook stories for visual testing
+export const VisualRegression: Story = {
+  args: {
+    variant: "primary",
+    children: "Primary Button",
+  },
+  parameters: {
+    chromatic: { disableSnapshot: false },
+  },
+};
+```
+
+### Accessibility Testing
+
+```typescript
+// Add accessibility tests
+import { a11y } from "@storybook/addon-a11y";
+
+export const Accessibility: Story = {
+  args: { children: "Button" },
+  parameters: {
+    a11y: {
+      config: {
+        rules: [
+          {
+            // Enable specific WCAG 2.1 AA rules
+            id: "button-name",
+            enabled: true,
+          },
+        ],
+      },
+    },
+  },
+};
+```
+
+## Best Practices
+
+### 1. Composition
+
+Prefer composition over configuration:
+
+```typescript
+// Good - composable
+<Dialog>
+  <Dialog.Trigger>Open Dialog</Dialog.Trigger>
+  <Dialog.Content>
+    <Dialog.Header>
+      <Dialog.Title>Dialog Title</Dialog.Title>
+    </Dialog.Header>
+    <Dialog.Body>
+      Dialog content
+    </Dialog.Body>
+  </Dialog.Content>
+</Dialog>
+
+// Avoid - too many props
+<Dialog
+  title="Dialog Title"
+  body="Dialog content"
+  trigger="Open Dialog"
+/>
+```
+
+### 2. Type Safety
+
+Use TypeScript for type safety:
+
+```typescript
+interface ButtonProps {
+  variant: "primary" | "secondary" | "outline" | "ghost";
+  size: "sm" | "md" | "lg";
+  children: React.ReactNode;
+  onClick?: () => void;
+}
+```
+
+### 3. Default Props
+
+Provide sensible defaults:
+
+```typescript
+const Button = ({
+  variant = 'default',
+  size = 'md',
+  children,
+  ...props
+}: ButtonProps) => {
+  return (
+    <button className={cn(buttonVariants({ variant, size }))} {...props}>
+      {children}
+    </button>
+  );
+};
+```
+
+## Related Documentation
+
+- [Component Changelog](./component-changelog)
+- [Storybook Documentation](https://storybook.js.org/docs)
+- [Accessibility Guidelines](../../tracks/track3/accessibility)

@@ -1,0 +1,490 @@
+# Rollback Runbook
+
+This runbook provides procedures for rolling back Athletic Academics Hub deployments.
+
+## When to Rollback
+
+Rollback is appropriate when:
+
+1. **Critical bugs** in production
+2. **Performance degradation** affecting users
+3. **Data corruption** or data loss
+4. **Security vulnerabilities** discovered
+5. **Integration failures** with external services
+6. **Error rates** exceed threshold (e.g., > 5% for 5 minutes)
+
+<Callout type="warning">
+  **Rollback Decision Criteria**
+
+If multiple of the following occur, rollback immediately:
+
+- Error rate > 10% for 2 minutes
+- Critical feature broken (e.g., authentication)
+- Database corruption detected
+- Security incident confirmed
+  </Callout>
+
+## Pre-Rollback Checklist
+
+Before initiating rollback:
+
+- [ ] Identify issue and impact
+- [ ] Notify stakeholders (Slack/Discord)
+- [ ] Verify rollback target (known good version)
+- [ ] Document current state (logs, metrics)
+- [ ] Prepare communication plan
+- [ ] Ensure team availability for support
+
+## Rollback Methods
+
+### Method 1: Vercel CLI (Fastest)
+
+**When to use**: Emergency rollback, time-sensitive situations
+
+```bash
+# 1. Login to Vercel
+vercel login
+
+# 2. List recent deployments
+vercel ls
+
+# 3. Rollback to specific deployment
+vercel rollback [deployment-url]
+
+# Example:
+vercel rollback https://athletic-academics-hub.vercel.app/deployments/abc123
+
+# 4. Confirm rollback
+# Vercel will ask for confirmation
+```
+
+### Method 2: Vercel Dashboard (Easiest)
+
+**When to use**: Non-emergency, GUI preferred
+
+1. **Navigate** to Vercel dashboard
+2. **Select** project: athletic-academics-hub
+3. **Go to** Deployments tab
+4. **Find** last successful deployment:
+   - Look for ✓ status
+   - Check deployment time
+   - Verify commit SHA
+5. **Click** "..." on deployment
+6. **Select** "Promote to Production"
+7. **Confirm** promotion
+8. **Wait** for deployment to complete
+
+### Method 3: Git Revert (Cleanest)
+
+**When to use**: Rollback from bad commit, team understands issue
+
+```bash
+# 1. Switch to main branch
+git checkout main
+
+# 2. Pull latest
+git pull origin main
+
+# 3. Find bad commit
+git log --oneline
+
+# 4. Revert bad commit
+git revert [commit-sha]
+
+# 5. Push to trigger deployment
+git push origin main
+```
+
+### Method 4: Git Reset to Previous Commit (Advanced)
+
+**When to use**: Need to undo multiple commits
+
+<Callout type="error">
+  **WARNING**: This rewrites history. Use only in emergencies with team
+  approval.
+</Callout>
+
+```bash
+# 1. Switch to main branch
+git checkout main
+
+# 2. Find target commit
+git log --oneline
+
+# 3. Reset to commit (soft reset keeps changes)
+git reset --soft [target-sha]
+
+# 4. Create new commit
+git commit -m "Rollback to [commit-sha]"
+
+# 5. Force push (carefully!)
+git push --force origin main
+```
+
+## Database Rollback
+
+### PostgreSQL Database
+
+**When to use**: Bad migration, data corruption
+
+```bash
+# 1. Restore from backup (via Vercel Postgres dashboard)
+# - Go to Vercel → Storage → Postgres
+# - Select database
+# - Click "Backups"
+# - Choose backup point
+# - Click "Restore"
+
+# 2. Or using psql
+psql -U aah_user -d aah
+
+# List available backups
+SELECT * FROM pg_backup_history;
+
+# Restore specific backup
+SELECT pg_restore('backup-2025-01-20-10:00');
+```
+
+### Prisma Rollback
+
+```bash
+# 1. Find previous migration
+cd packages/database
+ls -la prisma/migrations
+
+# 2. Rollback migration
+pnpm prisma migrate resolve --rolled-back [migration-name]
+
+# 3. If needed, manually apply previous schema
+pnpm db:push --force-reset
+
+# 4. Regenerate Prisma client
+pnpm db:generate
+```
+
+### Data Rollback Scenarios
+
+#### Scenario 1: Corrupted Data
+
+```sql
+-- 1. Identify corrupted records
+SELECT * FROM users WHERE email IS NULL;
+
+-- 2. Delete corrupted records
+DELETE FROM users WHERE email IS NULL;
+
+-- 3. Verify data integrity
+SELECT COUNT(*) FROM users;
+```
+
+#### Scenario 2: Wrong Migration Applied
+
+```bash
+# 1. Identify bad migration
+pnpm prisma migrate status
+
+# 2. Manually revert migration
+psql -U aah_user -d aah -f rollback-migration.sql
+
+# 3. Rollback Prisma migration record
+pnpm prisma migrate resolve --rolled-back bad_migration_name
+```
+
+## Multi-Zone Rollback
+
+Rolling back all zones simultaneously:
+
+```bash
+# 1. Rollback main app
+vercel --prod --scope=main-app rollback [deployment-url]
+
+# 2. Rollback student app
+vercel --prod --scope=student-app rollback [deployment-url]
+
+# 3. Rollback admin app
+vercel --prod --scope=admin-app rollback [deployment-url]
+
+# 4. Rollback documentation
+vercel --prod --scope=docs-app rollback [deployment-url]
+```
+
+## Verification After Rollback
+
+### Health Checks
+
+```bash
+# 1. Check main application
+curl https://athletic-academics-hub.com/api/health
+
+# 2. Check student portal
+curl https://student.athletic-academics-hub.com/api/health
+
+# 3. Check admin dashboard
+curl https://admin.athletic-academics-hub.com/api/health
+
+# Expected response:
+{
+  "status": "healthy",
+  "timestamp": "2025-01-20T10:00:00.000Z",
+  "version": "abc123"
+}
+```
+
+### Functional Verification
+
+Test critical features:
+
+- [ ] Users can login
+- [ ] Dashboard loads correctly
+- [ ] Data displays properly
+- [ ] API endpoints respond
+- [ ] No errors in console
+
+### Monitoring
+
+Monitor metrics for 15 minutes:
+
+```bash
+# Check Vercel dashboard
+# - Error rates should drop
+# - Response times should improve
+# - Traffic should normalize
+
+# Check Sentry
+# - Error count should decrease
+# - No new error types introduced
+```
+
+## Communication After Rollback
+
+### Internal Team
+
+**Slack/Discord message template**:
+
+```
+🚨 ROLLBACK INITIATED
+
+**Time**: [Timestamp UTC]
+**Initiated by**: [Name]
+**Reason**: [Brief description]
+**Target version**: [Commit SHA or deployment ID]
+**Estimated duration**: 2-5 minutes
+
+**Status**: In Progress...
+
+---
+Please monitor for issues and stand by for updates.
+```
+
+### External Stakeholders
+
+**Email/Slack template**:
+
+```
+Subject: [Resolved] System Issue - Athletic Academics Hub
+
+Dear [Stakeholders],
+
+We experienced a system issue starting at [time] UTC.
+We have rolled back to the previous stable version.
+
+**Impact**:
+- [X] Users were unable to login
+- [X] Performance was degraded
+- [ ] Data was affected
+
+**Current Status**: ✅ Resolved
+**Rollback Time**: [Timestamp UTC]
+**Resolution**: System is now stable
+
+We apologize for any inconvenience. Our team is investigating the root cause.
+
+Regards,
+[Athletic Academics Hub Team]
+```
+
+## Post-Rollback Actions
+
+### Immediate Actions (0-1 hour)
+
+1. **Verify system stability**
+
+   ```bash
+   # Check error rates
+   # Monitor response times
+   # Verify data integrity
+   ```
+
+2. **Document incident**
+   - Create incident ticket
+   - Log rollback details
+   - Record impact metrics
+
+3. **Notify all stakeholders**
+   - Team: Slack/Discord
+   - Users: Email/In-app notification
+   - Management: Summary email
+
+### Short-term Actions (1-24 hours)
+
+1. **Root cause analysis**
+
+   ```typescript
+   // Review logs
+   - Vercel deployment logs
+   - Sentry error reports
+   - Database query logs
+   ```
+
+2. **Fix identified issues**
+   - Create hotfix branch
+   - Implement fixes
+   - Test thoroughly
+
+3. **Prepare for redeployment**
+   - Update tests to catch issue
+   - Add monitoring for failure mode
+   - Update rollback runbook if needed
+
+### Long-term Actions (1-7 days)
+
+1. **Post-mortem review**
+   - What went wrong?
+   - Why wasn't it caught?
+   - How can we prevent?
+
+2. **Improve processes**
+   - Update deployment checklist
+   - Add automated tests
+   - Improve monitoring/alerts
+
+3. **Document learnings**
+   - Update runbooks
+   - Share with team
+   - Update ADRs if needed
+
+## Rollback Scenarios
+
+### Scenario 1: Database Migration Failed
+
+```bash
+# 1. Stop deployment
+vercel cancel [deployment-url]
+
+# 2. Restore database backup
+# Vercel Postgres dashboard → Backups → Restore
+
+# 3. Rollback migration
+pnpm prisma migrate resolve --rolled-back [bad-migration]
+
+# 4. Deploy previous version
+vercel rollback [previous-deployment-url]
+```
+
+### Scenario 2: Performance Degradation
+
+```bash
+# 1. Identify performance regression
+# New version: 2s response time
+# Old version: 200ms response time
+
+# 2. Rollback immediately
+vercel rollback [previous-deployment-url]
+
+# 3. Monitor metrics
+curl -w "@curl-format.txt" https://athletic-academics-hub.com/api/health
+
+# 4. Investigate cause
+# - Database queries
+# - Bundle size increase
+# - External API calls
+```
+
+### Scenario 3: Security Vulnerability
+
+```bash
+# 1. Rollback immediately
+vercel rollback [last-known-good-deployment]
+
+# 2. Disable vulnerable features
+# Update environment variables
+# Feature flags off
+
+# 3. Rotate secrets
+# - API keys
+# - Database credentials
+# - JWT secrets
+
+# 4. Notify security team
+# Create security incident ticket
+# Document timeline
+
+# 5. Fix and patch
+# Security review required before redeploy
+```
+
+## Rollback Metrics
+
+Track these metrics during rollback:
+
+```typescript
+// Time to rollback (target: < 5 minutes)
+const rollbackTime = Date.now() - rollbackStartTime;
+
+// Downtime duration
+const downtime = Date.now() - incidentStartTime;
+
+// User impact (based on traffic)
+const affectedUsers = calculateAffectedUsers(trafficDuringRollback);
+
+// Data loss (if any)
+const dataLossReport = generateDataLossReport();
+```
+
+## Prevention
+
+### Reduce Need for Rollbacks
+
+1. **Better testing**
+
+   ```bash
+   # Run full test suite before deploy
+   pnpm test
+
+   # E2E tests for critical paths
+   pnpm test:e2e
+
+   # Performance tests
+   pnpm test:performance
+   ```
+
+2. **Feature flags**
+
+   ```typescript
+   // Gradual rollout
+   const isNewFeatureEnabled = await getFeatureFlag("new-feature", {
+     rolloutPercentage: 10, // Start with 10% of users
+   });
+   ```
+
+3. **Canary deployments**
+   - Deploy to canary environment
+   - Gradually increase traffic
+   - Monitor metrics
+   - Rollback if issues detected
+
+4. **Blue-green deployments**
+   - Run both old and new versions
+   - Switch traffic after verification
+   - Instant rollback by switching back
+
+## Related Documentation
+
+- [Deployment Runbook](./runbook-deploy)
+- [Debugging Guide](./debugging-guide)
+- [Incident Response](./incident-response)
+
+<Callout type="info">
+  **Post-Retrospective**: Always conduct a retrospective after a rollback to
+  learn from the incident and prevent future occurrences.
+</Callout>

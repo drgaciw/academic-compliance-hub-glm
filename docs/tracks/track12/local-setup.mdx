@@ -1,0 +1,403 @@
+import Callout from "nextra/components/callout";
+
+# Local Development Setup
+
+This guide covers setting up a complete local development environment for Athletic Academics Hub.
+
+## Prerequisites
+
+Before starting, ensure you have the following installed:
+
+<Callout type="info">
+  **Required Software**
+
+- **Node.js**: >= 18.0.0 (recommend 20.x LTS)
+- **pnpm**: >= 8.0.0 (recommend 8.15.0)
+- **Git**: Latest version
+- **PostgreSQL**: >= 14 (or use Vercel Postgres)
+- **Docker**: Optional, for containerized services
+  </Callout>
+
+### Verify Versions
+
+```bash
+node --version    # Should be >= 18.0.0
+pnpm --version    # Should be >= 8.0.0
+git --version     # Any recent version
+```
+
+## Initial Setup
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/your-org/athletic-academics-hub.git
+cd athletic-academics-hub
+```
+
+### 2. Install pnpm (if needed)
+
+```bash
+npm install -g pnpm@8.15.0
+```
+
+### 3. Install Dependencies
+
+```bash
+pnpm install
+```
+
+This installs dependencies for:
+
+- Root package
+- All apps (main, student, admin)
+- All packages (auth, database, ui, etc.)
+- Documentation
+
+### 4. Configure Environment Variables
+
+Copy environment templates:
+
+```bash
+cp .env.example .env
+cp .env.development .env.local
+```
+
+Edit `.env.local` with your configuration:
+
+```bash
+# Required
+DATABASE_URL="postgresql://user:password@localhost:5432/aah"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
+CLERK_SECRET_KEY="sk_test_..."
+
+# Optional but recommended
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+NEXT_PUBLIC_DISCORD_URL="https://discord.gg/your-server"
+```
+
+### 5. Setup Database
+
+#### Option A: Local PostgreSQL
+
+Start PostgreSQL service:
+
+```bash
+# macOS (Homebrew)
+brew services start postgresql
+
+# Linux
+sudo systemctl start postgresql
+
+# Windows
+# PostgreSQL runs as a service
+```
+
+Create database:
+
+```sql
+CREATE DATABASE aah;
+CREATE USER aah_user WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE aah TO aah_user;
+```
+
+#### Option B: Docker PostgreSQL
+
+```bash
+docker run --name aah-postgres \
+  -e POSTGRES_USER=aah_user \
+  -e POSTGRES_PASSWORD=your_password \
+  -e POSTGRES_DB=aah \
+  -p 5432:5432 \
+  -d postgres:15
+```
+
+#### Option C: Vercel Postgres (Recommended)
+
+1. Go to Vercel project → Storage
+2. Create new Postgres database
+3. Copy connection URL to `.env.local`
+
+### 6. Initialize Database
+
+```bash
+# Generate Prisma client
+pnpm db:generate
+
+# Push schema to database
+pnpm db:push
+
+# Run migrations
+pnpm db:migrate
+```
+
+### 7. Seed Database (Optional)
+
+```bash
+cd packages/database
+pnpm db:seed
+```
+
+## Running Development Servers
+
+### Start All Services
+
+```bash
+pnpm dev
+```
+
+This starts:
+
+- Main app: http://localhost:3000
+- Student app: http://localhost:3001
+- Admin app: http://localhost:3002
+- tRPC server: http://localhost:3003
+
+### Start Specific Services
+
+```bash
+# Main app only
+pnpm dev:main
+
+# Student app only
+pnpm dev:student
+
+# Admin app only
+pnpm dev:admin
+
+# Documentation
+pnpm docs:dev    # http://localhost:3000/docs
+```
+
+## Development Tools Setup
+
+### VS Code Extensions
+
+Install these recommended extensions:
+
+- **ES7+ React/Redux/React-Native snippets** - Code snippets
+- **TypeScript Vue Plugin (Volar)** - TypeScript support
+- **Prettier** - Code formatting
+- **ESLint** - Linting
+- **Prisma** - Database schema highlighting
+- **Tailwind CSS IntelliSense** - Tailwind classes
+- **GitLens** - Git integration
+
+### VS Code Settings
+
+Create `.vscode/settings.json`:
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ]
+}
+```
+
+### Git Hooks Setup
+
+Husky is configured for pre-commit hooks:
+
+```bash
+# Hooks are automatically installed
+# Verify installation
+cat .husky/pre-commit
+```
+
+Pre-commit hooks run:
+
+- ESLint on staged files
+- Prettier formatting
+- Type checking
+
+## Common Development Tasks
+
+### Database Operations
+
+```bash
+# Open Prisma Studio (GUI)
+pnpm db:studio
+
+# Generate migration
+pnpm db:migrate
+
+# Reset database (DANGER: deletes all data)
+pnpm db:push --force-reset
+
+# Create new model
+cd packages/database
+# Edit prisma/schema.prisma
+pnpm db:generate
+pnpm db:push
+```
+
+### Testing
+
+```bash
+# Run all tests
+pnpm test
+
+# Unit tests only
+pnpm test:unit
+
+# E2E tests
+pnpm test:e2e
+
+# Watch mode
+pnpm test:watch
+
+# Coverage
+pnpm test:coverage
+```
+
+### Linting & Formatting
+
+```bash
+# Lint all files
+pnpm lint
+
+# Fix linting issues
+pnpm lint:fix
+
+# Format all files
+pnpm format
+
+# Type check
+pnpm type-check
+```
+
+### Building
+
+```bash
+# Build all packages and apps
+pnpm build
+
+# Build specific app
+pnpm build:main
+pnpm build:student
+pnpm build:admin
+
+# Build documentation
+pnpm docs:build
+```
+
+## Troubleshooting
+
+### Port Already in Use
+
+If you see "Port 3000 is already in use":
+
+```bash
+# Find process using port 3000
+lsof -i :3000  # macOS/Linux
+netstat -ano | findstr :3000  # Windows
+
+# Kill process
+kill -9 <PID>  # macOS/Linux
+taskkill /PID <PID> /F  # Windows
+```
+
+### Database Connection Issues
+
+If database connection fails:
+
+```bash
+# Verify PostgreSQL is running
+psql --version
+
+# Test connection
+psql -U aah_user -d aah
+
+# Check DATABASE_URL
+echo $DATABASE_URL
+```
+
+### Dependency Issues
+
+If you encounter dependency errors:
+
+```bash
+# Clear node_modules and reinstall
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
+
+# Clear Turborepo cache
+rm -rf .turbo
+
+# Rebuild all packages
+pnpm build
+```
+
+### TypeScript Errors
+
+If you see TypeScript errors:
+
+```bash
+# Regenerate types
+pnpm db:generate
+
+# Clear TypeScript cache
+rm -rf node_modules/.cache
+pnpm install
+```
+
+### Environment Variables Not Loading
+
+If environment variables aren't working:
+
+```bash
+# Verify .env.local exists
+ls -la .env.local
+
+# Restart dev server
+# Ctrl+C, then pnpm dev
+```
+
+## Project Structure Reference
+
+```
+athletic-academics-hub/
+├── apps/
+│   ├── main/          # Main web app (port 3000)
+│   ├── student/       # Student portal (port 3001)
+│   └── admin/         # Admin dashboard (port 3002)
+├── packages/
+│   ├── auth/          # Authentication package
+│   ├── database/      # Prisma & database
+│   ├── ui/            # Shared UI components
+│   └── ...           # Other shared packages
+├── docs/              # Documentation site
+├── services/          # Microservices
+├── e2e/              # E2E tests
+└── .env.local         # Local environment variables
+```
+
+## Getting Help
+
+If you encounter issues:
+
+1. Check [Troubleshooting FAQ](./troubleshooting-faq)
+2. Search [GitHub Issues](https://github.com/your-org/athletic-academics-hub/issues)
+3. Join our [Discord](https://discord.gg/your-server)
+4. Contact the team via email
+
+## Next Steps
+
+- Read the [Architecture Overview](./architecture-overview)
+- Try the [First Task Tutorial](./first-task-tutorial)
+- Explore the [Architecture Walkthrough](./architecture-walkthrough)
+
+<Callout type="success">
+  **You're Ready to Code!**
+
+Your local development environment is now set up. Start building and exploring the codebase.
+
+</Callout>
