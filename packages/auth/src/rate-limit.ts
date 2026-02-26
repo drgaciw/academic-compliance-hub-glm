@@ -16,6 +16,10 @@ const defaultLimits: Record<string, RateLimitConfig> = {
   default: { windowMs: 60000, maxRequests: 100 },
 };
 
+// WARNING: This in-memory store does NOT persist across serverless function
+// invocations (e.g., Vercel). Each cold start creates a fresh Map, so rate
+// limits are effectively per-instance, not global. For production, replace
+// with a shared store like Upstash Redis (see packages/api-utils/src/rate-limit.ts).
 const store = new Map<string, { count: number; resetTime: number }>();
 
 export function getRateLimitConfig(route: string): RateLimitConfig {
@@ -37,6 +41,12 @@ export function checkRateLimit(
   const record = store.get(key);
 
   if (!record || now > record.resetTime) {
+    // Clean up expired entries periodically to prevent memory leaks
+    if (store.size > 10000) {
+      for (const [k, v] of store) {
+        if (now > v.resetTime) store.delete(k);
+      }
+    }
     store.set(key, {
       count: 1,
       resetTime: now + config.windowMs,

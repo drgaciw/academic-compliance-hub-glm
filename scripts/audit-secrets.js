@@ -113,15 +113,15 @@ const SECRET_PATTERNS = [
 ];
 
 // Files and directories to exclude
+// NOTE: Do NOT exclude .env files — they are the most important files to scan.
+// The previous exclusion of /.env/ masked real credential leaks.
 const EXCLUDE_PATTERNS = [
   /node_modules/,
-  /.next/,
-  /dist/,
-  /build/,
-  /coverage/,
-  /\.git/,
-  /.env/,
-  /\.env\.example/,
+  /\.next\//,
+  /dist\//,
+  /build\//,
+  /coverage\//,
+  /\.git\//,
   /\.vscode/,
   /package-lock\.json/,
   /pnpm-lock\.yaml/,
@@ -171,6 +171,13 @@ class SecretScanner {
 
     // Check if file has included extension
     const ext = path.extname(filePath);
+    const basename = path.basename(filePath);
+
+    // Always scan .env files regardless of extension (.env, .env.development, etc.)
+    if (basename.startsWith(".env")) {
+      return true;
+    }
+
     return INCLUDE_EXTENSIONS.includes(ext);
   }
 

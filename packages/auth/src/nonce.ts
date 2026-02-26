@@ -1,20 +1,13 @@
 import { randomUUID } from "crypto";
 
-let cachedNonce: string | null = null;
-let nonceExpiry: number = 0;
-const NONCE_TTL = 1000 * 60 * 5;
+// Track the most recently generated nonce for validation within
+// the same request lifecycle. CSP nonces MUST be unique per request
+// to prevent attackers from predicting or reusing them.
+let lastNonce: string | null = null;
 
 export function generateNonce(): string {
-  const now = Date.now();
-
-  if (cachedNonce && now < nonceExpiry) {
-    return cachedNonce;
-  }
-
-  cachedNonce = randomUUID();
-  nonceExpiry = now + NONCE_TTL;
-
-  return cachedNonce;
+  lastNonce = randomUUID();
+  return lastNonce;
 }
 
 export function getCSPHeader(
@@ -59,10 +52,9 @@ export function getCSPHeader(
 }
 
 export function validateNonce(nonce: string): boolean {
-  return !!nonce && nonce === cachedNonce;
+  return !!nonce && nonce === lastNonce;
 }
 
 export function clearNonceCache(): void {
-  cachedNonce = null;
-  nonceExpiry = 0;
+  lastNonce = null;
 }
