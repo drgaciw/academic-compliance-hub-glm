@@ -41,10 +41,16 @@ export function checkRateLimit(
   const record = store.get(key);
 
   if (!record || now > record.resetTime) {
-    // Clean up expired entries periodically to prevent memory leaks
+    // Clean up expired entries periodically to prevent memory leaks.
+    // Cap iteration to 100 entries per pass to avoid CPU spikes under DoS.
     if (store.size > 10000) {
+      let cleaned = 0;
       for (const [k, v] of store) {
-        if (now > v.resetTime) store.delete(k);
+        if (cleaned >= 100) break;
+        if (now > v.resetTime) {
+          store.delete(k);
+          cleaned++;
+        }
       }
     }
     store.set(key, {
