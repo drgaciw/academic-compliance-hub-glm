@@ -235,3 +235,33 @@ The test class doesn't use any Mockito features (no `@Mock`, no `@InjectMocks`).
 ## Verdict
 
 **Request Changes.** The PR has a sound architectural direction but introduces several issues that could cause incorrect deal valuations in production (silent currency fallbacks, null-safety gaps, mutable shared state). The critical issues (#1–#4) should be addressed. The medium issues (#5–#7) should be discussed and resolved based on business requirements. The minor issues can be addressed as follow-ups.
+
+---
+
+## Additional Findings (Repository-Level Security Audit)
+
+During the review, a broader security audit of the repository uncovered issues beyond the PR itself:
+
+### 13. Leaked API key in `.env.example` (FIXED)
+**Severity:** Critical
+
+A real `TESTSPRITE_API_KEY` was committed in plaintext to `.env.example`. This has been redacted to `sk-xxx`, but **the original key remains in git history**. The key should be rotated immediately regardless of whether this repository has been shared.
+
+### 14. Environment files with credentials tracked by git (FIXED)
+**Severity:** Critical
+
+`.env.development`, `.env.staging`, and `.env.production` were being tracked by git. These have been:
+- Added to `.gitignore`
+- Removed from the git index via `git rm --cached`
+
+They contain placeholder-style credentials (e.g., `staging-user:staging-pass@staging-db.example.com`) but should never be committed as they set the pattern for developers to fill in real credentials locally.
+
+### 15. CSP nonce module (`packages/auth/src/nonce.ts`) is dead code
+**Severity:** Low
+
+The nonce module exports `generateNonce()`, `validateNonce()`, `getCSPHeader()`, and `clearNonceCache()`, but **none of these functions are used anywhere in the codebase**. The actual middleware in all three apps (`apps/admin/middleware.ts`, `apps/student/middleware.ts`, `apps/main/middleware.ts`) generates nonces directly via `crypto.randomUUID()` and builds CSP headers inline. Consider either integrating the module or removing it to avoid confusion.
+
+### 16. `secret-audit-report.json` was excluded from `.gitignore` (FIXED)
+**Severity:** Low
+
+The secret audit report output file has been added to `.gitignore` to prevent vulnerability details from being committed.
