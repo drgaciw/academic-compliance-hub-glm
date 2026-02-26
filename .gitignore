@@ -33,6 +33,11 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# Environment files with credentials (use .env.example as template)
+.env.development
+.env.staging
+.env.production
+
 # Vercel
 .vercel
 
@@ -56,6 +61,12 @@ Thumbs.db
 
 # Prisma
 packages/database/prisma/migrations/**/*_migration.sql
+
+# Java/Maven build artifacts
+target/
+
+# Security audit reports (contain vulnerability details)
+secret-audit-report.json
 
 *storybook.log
 storybook-static

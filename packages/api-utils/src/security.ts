@@ -54,17 +54,23 @@ export function isValidUrl(url: string): boolean {
 }
 
 /**
- * Generate a secure random token
+ * Generate a secure random token using rejection sampling
+ * to avoid modulo bias.
  */
 export function generateSecureToken(length: number = 32): string {
   const chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const charsLength = chars.length;
+  // Largest multiple of charsLength that fits in a Uint32 (avoids modulo bias)
+  const maxValid = Math.floor(0x100000000 / charsLength) * charsLength;
   let token = "";
 
   for (let i = 0; i < length; i++) {
-    const randomIndex =
-      crypto.getRandomValues(new Uint32Array(1))[0] % chars.length;
-    token += chars[randomIndex];
+    let randomValue: number;
+    do {
+      randomValue = crypto.getRandomValues(new Uint32Array(1))[0];
+    } while (randomValue >= maxValid);
+    token += chars[randomValue % charsLength];
   }
 
   return token;
