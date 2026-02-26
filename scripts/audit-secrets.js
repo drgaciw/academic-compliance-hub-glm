@@ -117,18 +117,18 @@ const SECRET_PATTERNS = [
 // The previous exclusion of /.env/ masked real credential leaks.
 const EXCLUDE_PATTERNS = [
   /node_modules/,
-  /\.next\//,
-  /dist\//,
-  /build\//,
-  /coverage\//,
-  /\.git\//,
+  /\.next[\\/]/,
+  /dist[\\/]/,
+  /build[\\/]/,
+  /coverage[\\/]/,
+  /\.git[\\/]/,
   /\.vscode/,
   /package-lock\.json/,
   /pnpm-lock\.yaml/,
   /yarn\.lock/,
   /\.turbo/,
   /test_reports/,
-  /secrets/, // If there's a secrets directory
+  /secrets/,
 ];
 
 // File extensions to scan

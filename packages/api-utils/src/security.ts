@@ -63,12 +63,13 @@ export function generateSecureToken(length: number = 32): string {
   const charsLength = chars.length;
   // Largest multiple of charsLength that fits in a Uint32 (avoids modulo bias)
   const maxValid = Math.floor(0x100000000 / charsLength) * charsLength;
+  const buf = new Uint32Array(1);
   let token = "";
 
   for (let i = 0; i < length; i++) {
     let randomValue: number;
     do {
-      randomValue = crypto.getRandomValues(new Uint32Array(1))[0];
+      randomValue = crypto.getRandomValues(buf)[0];
     } while (randomValue >= maxValid);
     token += chars[randomValue % charsLength];
   }

@@ -1,13 +1,27 @@
 import { randomUUID } from "crypto";
 
-// Track the most recently generated nonce for validation within
-// the same request lifecycle. CSP nonces MUST be unique per request
-// to prevent attackers from predicting or reusing them.
-let lastNonce: string | null = null;
+const NONCE_TTL_MS = 60_000;
+
+// Track active nonces in a Set with expiry timestamps so concurrent requests
+// each get their own nonce and don't overwrite each other's state.
+const activeNonces = new Map<string, number>();
 
 export function generateNonce(): string {
-  lastNonce = randomUUID();
-  return lastNonce;
+  const nonce = randomUUID();
+  const now = Date.now();
+  activeNonces.set(nonce, now + NONCE_TTL_MS);
+
+  // Lazily evict expired nonces (cap iteration to avoid CPU spikes)
+  let evicted = 0;
+  for (const [key, expiresAt] of activeNonces) {
+    if (evicted >= 50) break;
+    if (now > expiresAt) {
+      activeNonces.delete(key);
+      evicted++;
+    }
+  }
+
+  return nonce;
 }
 
 export function getCSPHeader(
@@ -52,9 +66,14 @@ export function getCSPHeader(
 }
 
 export function validateNonce(nonce: string): boolean {
-  return !!nonce && nonce === lastNonce;
+  if (!nonce) return false;
+  const expiresAt = activeNonces.get(nonce);
+  if (expiresAt === undefined) return false;
+  // Consume nonce on validation (single-use)
+  activeNonces.delete(nonce);
+  return Date.now() <= expiresAt;
 }
 
 export function clearNonceCache(): void {
-  lastNonce = null;
+  activeNonces.clear();
 }
