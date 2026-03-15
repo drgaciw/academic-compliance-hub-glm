@@ -11,6 +11,8 @@ import {
   Upload,
   Users,
   BarChart,
+  Shield,
+  Link2,
 } from "lucide-react";
 
 const inter = Inter({
@@ -57,6 +59,8 @@ const navItems = [
   { href: "/transcripts", label: "Transcripts", icon: <FileText /> },
   { href: "/upload", label: "Upload", icon: <Upload /> },
   { href: "/compliance", label: "Compliance", icon: <BarChart /> },
+  { href: "/admin/eligibility-engine", label: "Eligibility Engine", icon: <Shield /> },
+  { href: "/admin/integrations", label: "Integrations", icon: <Link2 /> },
   { href: "/users", label: "Users", icon: <Users /> },
 ];
 
