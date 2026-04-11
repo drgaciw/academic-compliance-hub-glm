@@ -12,6 +12,9 @@ import {
   CheckCircle,
   Bell,
   FileText as FileTextIcon,
+  Shield,
+  GraduationCap,
+  HelpCircle,
 } from "lucide-react";
 
 const inter = Inter({
@@ -58,8 +61,11 @@ const navItems = [
   { href: "/preliminary", label: "Preliminary", icon: <FileText /> },
   { href: "/upload", label: "Upload", icon: <Upload /> },
   { href: "/status", label: "Status", icon: <CheckCircle /> },
+  { href: "/eligibility", label: "Eligibility", icon: <Shield /> },
+  { href: "/advising", label: "Advising", icon: <GraduationCap /> },
   { href: "/transcripts", label: "Transcripts", icon: <FileTextIcon /> },
   { href: "/reports", label: "Reports", icon: <FileTextIcon /> },
+  { href: "/support", label: "Support", icon: <HelpCircle /> },
   { href: "/notifications", label: "Notifications", icon: <Bell /> },
 ];
 
